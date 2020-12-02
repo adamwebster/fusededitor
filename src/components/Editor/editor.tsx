@@ -9,6 +9,9 @@ const StyledEditor = styled.textarea`
   flex: 1 1;
   resize: none;
   border: solid 1px ${Colors.GREY[200]};
+  &:focus {
+    outline: none;
+  }
 `;
 
 interface Props {

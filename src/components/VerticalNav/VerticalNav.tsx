@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { Colors } from '../../styles/colors';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendar, faHome } from '@fortawesome/free-solid-svg-icons';
+import { faCalendar, faCog, faHome } from '@fortawesome/free-solid-svg-icons';
 import { ReactElement } from 'react';
 import Link from 'next/link';
 
@@ -21,6 +21,10 @@ const StyledLink = styled.a`
   align-items: center;
   display: flex;
 `;
+
+const StyledNavSpacer = styled.div`
+  flex: 1 1;
+`;
 interface VerticalNavProps {
   children: string | ReactElement;
 }
@@ -35,6 +39,12 @@ const VerticalNav = () => (
     <Link href="/calendar">
       <StyledLink>
         <FontAwesomeIcon icon={faCalendar} />
+      </StyledLink>
+    </Link>
+    <StyledNavSpacer />
+    <Link href="/calendar">
+      <StyledLink>
+        <FontAwesomeIcon icon={faCog} />
       </StyledLink>
     </Link>
   </StyledVerticalNav>

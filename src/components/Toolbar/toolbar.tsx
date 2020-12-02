@@ -11,11 +11,22 @@ const StyledToolbar = styled.div`
 
 const EditorTools = styled.div`
   flex: 1 1;
+  display: flex;
 `;
 
 const ToolbarButton = styled.button`
-  margin-right: 8px;
   text-transform: uppercase;
+  background-color: transparent;
+  border: none;
+  padding: 8px;
+  color: ${Colors.WHITE};
+  &:last-child {
+    cursor: pointer;
+  }
+`;
+
+const StyledToolbarSpacer = styled.div`
+  flex: 1 1;
 `;
 
 const Toolbar = () => (
@@ -24,6 +35,8 @@ const Toolbar = () => (
       <ToolbarButton>B</ToolbarButton>
       <ToolbarButton>I</ToolbarButton>
       <ToolbarButton>Code</ToolbarButton>
+      <StyledToolbarSpacer />
+      <ToolbarButton>Preview</ToolbarButton>
     </EditorTools>
     <div>
       <Button primary>Save</Button>
