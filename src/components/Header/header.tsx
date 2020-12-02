@@ -4,10 +4,12 @@ import { Colors } from '../../styles/colors';
 const StyledHeader = styled.header`
   width: 100%;
   padding: 8px 16px;
-  border-bottom: solid 1px ${Colors.GREY[250]};
+  background-color: ${Colors.PRIMARY};
   box-sizing: border-box;
+  color: ${Colors.WHITE};
   h1 {
     margin: 0;
+    font-weight: 200;
   }
 `;
 const Header = () => (

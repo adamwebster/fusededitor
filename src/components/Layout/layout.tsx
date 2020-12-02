@@ -2,10 +2,11 @@ import styled, { createGlobalStyle } from 'styled-components';
 import { Colors } from '../../styles/colors';
 import { Footer } from '../Footer';
 import { Header } from '../Header';
+import { VerticalNav } from '../VerticalNav';
 
 const GlobalStyles = createGlobalStyle`
   body{
-    font-family: "Helvetica", san-serif;
+    font-family: "Helvetica Neue", san-serif;
     font-size: 100%;
     padding: 0;
     margin: 0;
@@ -13,17 +14,38 @@ const GlobalStyles = createGlobalStyle`
   }
 `;
 
+const StyledContentWrapper = styled.div`
+  display: grid;
+  grid-template-columns: 50px 1fr;
+  grid-gap: 16px;
+  flex: 1 1;
+`;
+
 const StyledContent = styled.main`
   width: 100%;
-  padding: 16px;
   box-sizing: border-box;
+  padding-right: 16px;
+  padding-bottom: 16px;
+  display: flex;
+  flex-flow: column;
+`;
+
+const StyledWrapper = styled.div`
+  display: flex;
+  flex-flow: column;
+  height: 100vh;
 `;
 const Layout = ({ children }) => (
   <>
     <GlobalStyles />
-    <Header />
-    <StyledContent>{children}</StyledContent>
-    <Footer />
+    <StyledWrapper>
+      <Header />
+      <StyledContentWrapper>
+        <VerticalNav />
+        <StyledContent>{children}</StyledContent>
+      </StyledContentWrapper>
+      <Footer />
+    </StyledWrapper>
   </>
 );
 

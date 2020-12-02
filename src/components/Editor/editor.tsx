@@ -4,9 +4,9 @@ import { Toolbar } from '../Toolbar';
 
 const StyledEditor = styled.div`
   padding: 8px;
-  min-height: 300px;
   background-color: ${Colors.WHITE};
   box-sizing: border-box;
+  flex: 1 1;
 `;
 
 interface Props {
