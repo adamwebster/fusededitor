@@ -26,6 +26,7 @@ const StyledContent = styled.main`
   box-sizing: border-box;
   padding-right: 16px;
   padding-bottom: 16px;
+  padding-top: 16px;
   display: flex;
   flex-flow: column;
 `;

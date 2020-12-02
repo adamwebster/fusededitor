@@ -1,10 +1,12 @@
 import styled from 'styled-components';
+import { Colors } from '../../styles/colors';
 import { Button } from '../Button';
 
 const StyledToolbar = styled.div`
-  padding: 16px 0;
+  padding: 8px;
   display: flex;
   align-items: center;
+  background-color: ${Colors.GREY[500]};
 `;
 
 const EditorTools = styled.div`
@@ -24,7 +26,7 @@ const Toolbar = () => (
       <ToolbarButton>Code</ToolbarButton>
     </EditorTools>
     <div>
-      <Button>Save</Button>
+      <Button primary>Save</Button>
     </div>
   </StyledToolbar>
 );
