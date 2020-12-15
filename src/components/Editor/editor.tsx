@@ -2,15 +2,28 @@ import styled from 'styled-components';
 import { Colors } from '../../styles/colors';
 import { Toolbar } from '../Toolbar';
 
-const StyledEditor = styled.textarea`
+const StyledEditorWrapper = styled.div`
+  display: flex;
+  flex-flow: column;
+`;
+const StyledEditor = styled.div`
   padding: 8px;
-  background-color: ${Colors.WHITE};
+  background-color: ${Colors.GREY[600]};
   box-sizing: border-box;
   flex: 1 1;
   resize: none;
-  border: solid 1px ${Colors.GREY[200]};
+  color: ${Colors.GREY[50]};
   &:focus {
     outline: none;
+  }
+`;
+
+const StyledDocumentHeader = styled.div`
+  padding: 16px;
+  h2{
+    margin: 0;
+    font-weight: 100;
+    color: ${Colors.PRIMARY};
   }
 `;
 
@@ -20,8 +33,13 @@ interface Props {
 
 const Editor = ({ content }: Props) => (
   <>
-    <Toolbar />
-    <StyledEditor>{content}</StyledEditor>
+    <StyledEditorWrapper>
+      {/* <Toolbar /> */}
+      <StyledDocumentHeader>
+        <h2>Document Name</h2>
+      </StyledDocumentHeader>
+      <StyledEditor contentEditable>{content}</StyledEditor>
+    </StyledEditorWrapper>
   </>
 );
 

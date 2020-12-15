@@ -10,25 +10,23 @@ const GlobalStyles = createGlobalStyle`
     font-size: 100%;
     padding: 0;
     margin: 0;
-    background-color: ${Colors.GREY[50]};
+    color: ${Colors.GREY[50]};
+    background-color: ${Colors.GREY[550]};
   }
 `;
 
 const StyledContentWrapper = styled.div`
   display: grid;
   grid-template-columns: 50px 1fr;
-  grid-gap: 16px;
+  grid-gap: 0;
   flex: 1 1;
 `;
 
 const StyledContent = styled.main`
   width: 100%;
   box-sizing: border-box;
-  padding-right: 16px;
-  padding-bottom: 16px;
-  padding-top: 16px;
-  display: flex;
-  flex-flow: column;
+  display: grid;
+  grid-template-columns: 1fr 300px;
 `;
 
 const StyledWrapper = styled.div`
