@@ -1,4 +1,4 @@
-import { ReactElement } from 'react';
+import { ButtonHTMLAttributes, ReactElement } from 'react';
 import styled, { css } from 'styled-components';
 import { Colors } from '../../styles/colors';
 import { darken } from 'polished';
@@ -20,7 +20,7 @@ const StyledButton = styled.button`
   }
 `;
 
-interface Props {
+interface Props extends ButtonHTMLAttributes<HTMLButtonElement>{
   children: string | ReactElement;
   primary?: boolean;
 }

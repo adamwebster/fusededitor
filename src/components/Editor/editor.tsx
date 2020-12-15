@@ -11,7 +11,7 @@ const StyledEditorWrapper = styled.div`
   flex-flow: column;
 `;
 const StyledEditor = styled.div`
-  padding:8px 16px;
+  padding: 8px 16px;
   background-color: ${Colors.GREY[600]};
   box-sizing: border-box;
   flex: 1 1;
@@ -46,54 +46,103 @@ interface Props {}
 const Editor = ({}: Props) => {
   const [title, setTitle] = useState('Document Name');
   const [contentItems, setContentItems] = useState([]);
-  const [editorStructure, setDocumentStructure] = useState([
-    { type: 'heading', content: 'Heading', element: 'h1' },
+  const [documentStructure, setDocumentStructure] = useState([
+    { id: 'heading1', type: 'heading', content: 'Heading', element: 'h1' },
   ]);
   const editor = useRef();
   const addBlock = (blockType: string) => {
-    const copyOfEditorStructure = editorStructure.slice();
+    const copyOfDocumentStructure = [...documentStructure];
     switch (blockType) {
       case 'heading':
-        copyOfEditorStructure.push({
-          type: 'heading',
-          content: 'Heading',
-          element: 'h1',
-        });
+        const headingElements = copyOfDocumentStructure.filter(
+          item => item.type === 'heading'
+        );
+        const itemExist = headingElements.find(
+          item => item.id === 'heading' + (headingElements.length + 1)
+        );
+        if (!itemExist) {
+          copyOfDocumentStructure.push({
+            id: 'heading' + (headingElements.length + 1),
+            type: 'heading',
+            content: 'Heading',
+            element: 'h1',
+          });
+        }
         break;
       case 'paragraph':
-        copyOfEditorStructure.push({
-          type: 'paragraph',
-          content: 'Paragraph',
-          element: 'p',
-        });
+      case 'markdown':
+        const paragraphItems = copyOfDocumentStructure.filter(
+          item => item.type === 'paragraph'
+        );
+        const paragraphItemExist = paragraphItems.find(
+          item => item.id === 'paragraph' + (paragraphItems.length + 1)
+        );
+        if (!paragraphItemExist) {
+          copyOfDocumentStructure.push({
+            id: 'paragraph' + (paragraphItems.length + 1),
+            type: 'paragraph',
+            content: blockType === 'markdown' ? 'Markdown' : 'Paragraph',
+            element: 'p',
+          });
+        }
     }
-    setDocumentStructure(copyOfEditorStructure);
+    setDocumentStructure(copyOfDocumentStructure);
+    copyOfDocumentStructure.map((item, index) =>
+      generateItems(item, index, copyOfDocumentStructure)
+    );
   };
 
-  const generateItems = (item: any, index: number) => {
-    console.log(item);
-    const copyOfContentItems = contentItems.slice();
-    switch (item.type) {
-      case 'heading':
-        copyOfContentItems.push(
-          <HeadingBlock key={`item_${index}`} as={item.element}>
-            {item.content}
-          </HeadingBlock>
-        );
-        break;
-      case 'paragraph':
-        copyOfContentItems.push(
-          <ParagraphBlock key={`item_${index}`} as={item.element}>
-            {item.content}
-          </ParagraphBlock>
-        );
+  const updateItem = (id: string, e: any, documentStructureItems) => {
+    const copyOfDocumentStructure = [...documentStructureItems];
+    const itemToUpdate = copyOfDocumentStructure.find(item => item.id === id);
+    if (itemToUpdate) {
+      itemToUpdate.content = e.target.innerHTML;
+    }
+    setDocumentStructure(copyOfDocumentStructure);
+  };
+
+  const generateItems = (item: any, index: number, documentStructureItems) => {
+    const copyOfContentItems = [...contentItems];
+    const indexOf = copyOfContentItems.some(
+      returnedItem => returnedItem.props.id === item.id
+    );
+    if (!indexOf) {
+      switch (item.type) {
+        case 'heading':
+          copyOfContentItems.push(
+            <HeadingBlock
+              id={item.id}
+              key={`item_${index}`}
+              as={item.element}
+              onKeyUp={e => updateItem(item.id, e, documentStructureItems)}
+            >
+              {item.content}
+            </HeadingBlock>
+          );
+
+          break;
+        case 'paragraph':
+        case 'markdown':
+          copyOfContentItems.push(
+            <ParagraphBlock
+              id={item.id}
+              key={`item_${index}`}
+              as={item.element}
+              onKeyUp={e => updateItem(item.id, e, documentStructureItems)}
+            >
+              {item.content}
+            </ParagraphBlock>
+          );
+      }
     }
     setContentItems(copyOfContentItems);
   };
 
   useEffect(() => {
-    editorStructure.map((item, index) => generateItems(item, index));
-  }, [editorStructure]);
+    documentStructure.map((item, index) =>
+      generateItems(item, index, documentStructure)
+    );
+  }, []);
 
   return (
     <>
@@ -106,7 +155,9 @@ const Editor = ({}: Props) => {
               onChange={e => setTitle(e.target.value)}
             />
           </h2>
-          <Button primary>Save</Button>
+          <Button primary onClick={() => console.log(documentStructure)}>
+            Save
+          </Button>
         </StyledDocumentHeader>
         <StyledEditor ref={editor}>
           {contentItems.map(item => {
@@ -118,6 +169,7 @@ const Editor = ({}: Props) => {
         <h3>Blocks</h3>
         <div onClick={() => addBlock('heading')}>Heading</div>
         <div onClick={() => addBlock('paragraph')}>Paragraph</div>
+        <div onClick={() => addBlock('markdown')}>Markdown</div>
         <h3>Document Settings</h3>
         <h3>Attachments</h3>
       </Panel>
