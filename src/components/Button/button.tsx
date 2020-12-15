@@ -7,7 +7,7 @@ const StyledButton = styled.button`
     primary ? 'none' : `solid 1px ${Colors.PRIMARY}`};
   background-color: ${({ primary }) =>
     primary ? Colors.PRIMARY : 'transparent'};
-  border-radius: 8px;
+  border-radius: 2px;
   padding: 8px 16px;
   color: ${({ primary }) => (primary ? Colors.WHITE : Colors.PRIMARY)};
   text-transform: uppercase;
