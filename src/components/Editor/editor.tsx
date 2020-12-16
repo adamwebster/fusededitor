@@ -88,7 +88,7 @@ const Editor = ({}: Props) => {
     }
     setDocumentStructure(copyOfDocumentStructure);
     copyOfDocumentStructure.map((item, index) =>
-      generateItems(item, index, copyOfDocumentStructure)
+      generateItems(copyOfDocumentStructure)
     );
   };
 
@@ -101,47 +101,67 @@ const Editor = ({}: Props) => {
     setDocumentStructure(copyOfDocumentStructure);
   };
 
-  const generateItems = (item: any, index: number, documentStructureItems) => {
+  const generateItems = documentStructureItems => {
     const copyOfContentItems = [...contentItems];
-    const indexOf = copyOfContentItems.some(
-      returnedItem => returnedItem.props.id === item.id
-    );
-    if (!indexOf) {
-      switch (item.type) {
-        case 'heading':
-          copyOfContentItems.push(
-            <HeadingBlock
-              id={item.id}
-              key={`item_${index}`}
-              as={item.element}
-              onKeyUp={e => updateItem(item.id, e, documentStructureItems)}
-            >
-              {item.content}
-            </HeadingBlock>
-          );
+    documentStructureItems.map((item, index) => {
+      // console.log(documentStructureItems, copyOfContentItems);
+      console.log(contentItems);
+      const indexOf = copyOfContentItems.some(
+        returnedItem => returnedItem.props.id === item.id
+      );
+      console.log(indexOf, item);
+      if (!indexOf) {
+        switch (item.type) {
+          case 'heading':
+            copyOfContentItems.push(
+              <HeadingBlock
+                id={item.id}
+                key={`item_${index}`}
+                as={item.element}
+                onKeyUp={e => updateItem(item.id, e, documentStructureItems)}
+              >
+                {item.content}
+              </HeadingBlock>
+            );
 
-          break;
-        case 'paragraph':
-        case 'markdown':
-          copyOfContentItems.push(
-            <ParagraphBlock
-              id={item.id}
-              key={`item_${index}`}
-              as={item.element}
-              onKeyUp={e => updateItem(item.id, e, documentStructureItems)}
-            >
-              {item.content}
-            </ParagraphBlock>
-          );
+            break;
+          case 'paragraph':
+          case 'markdown':
+            copyOfContentItems.push(
+              <ParagraphBlock
+                id={item.id}
+                key={`item_${index}`}
+                as={item.element}
+                onKeyUp={e => updateItem(item.id, e, documentStructureItems)}
+              >
+                {item.content}
+              </ParagraphBlock>
+            );
+        }
       }
-    }
+      console.log(copyOfContentItems);
+    });
     setContentItems(copyOfContentItems);
   };
 
-  useEffect(() => {
-    documentStructure.map((item, index) =>
-      generateItems(item, index, documentStructure)
+  const saveDocument = () => {
+    localStorage.setItem(
+      'documentStructure',
+      JSON.stringify(documentStructure)
     );
+  };
+
+  useEffect(() => {
+    const localStorageContent = JSON.parse(
+      localStorage.getItem('documentStructure')
+    );
+    if (localStorageContent) {
+      console.log(1, localStorageContent);
+      generateItems(localStorageContent);
+    } else {
+      console.log(2);
+      generateItems(documentStructure);
+    }
   }, []);
 
   return (
@@ -155,11 +175,12 @@ const Editor = ({}: Props) => {
               onChange={e => setTitle(e.target.value)}
             />
           </h2>
-          <Button primary onClick={() => console.log(documentStructure)}>
+          <Button primary onClick={() => saveDocument()}>
             Save
           </Button>
         </StyledDocumentHeader>
         <StyledEditor ref={editor}>
+          {console.log(contentItems)}
           {contentItems.map(item => {
             return item;
           })}
