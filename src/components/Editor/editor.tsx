@@ -1,3 +1,4 @@
+import { type } from 'os';
 import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { Colors } from '../../styles/colors';
@@ -101,15 +102,41 @@ const Editor = ({}: Props) => {
     setDocumentStructure(copyOfDocumentStructure);
   };
 
+  const removeItem = (id, documentStructureItems) => {
+    let copyOfDocumentStructure = [...documentStructureItems];
+    copyOfDocumentStructure = copyOfDocumentStructure.filter(
+      item => item.id !== id
+    );
+    setDocumentStructure(copyOfDocumentStructure);
+    generateItems(copyOfDocumentStructure);
+  };
+
+  const moveItem = (id, direction, documentStructureItems) => {
+    console.log(id, direction);
+    let copyOfDocumentStructure = [...documentStructureItems];
+    const itemToMove = copyOfDocumentStructure.find(item => item.id === id);
+    const indexOfItemToMove = copyOfDocumentStructure.findIndex(
+      item => item.id === id
+    );
+    copyOfDocumentStructure = copyOfDocumentStructure.filter(
+      item => item.id !== id
+    );
+    console.log(copyOfDocumentStructure);
+    if (direction === 'up') {
+      copyOfDocumentStructure.splice(indexOfItemToMove - 1, 0, itemToMove);
+    } else if (direction === 'down') {
+      copyOfDocumentStructure.splice(indexOfItemToMove + 1, 0, itemToMove);
+    }
+    setDocumentStructure(copyOfDocumentStructure);
+    generateItems(copyOfDocumentStructure);
+  };
+
   const generateItems = documentStructureItems => {
     const copyOfContentItems = [...contentItems];
     documentStructureItems.map((item, index) => {
-      // console.log(documentStructureItems, copyOfContentItems);
-      console.log(contentItems);
       const indexOf = copyOfContentItems.some(
         returnedItem => returnedItem.props.id === item.id
       );
-      console.log(indexOf, item);
       if (!indexOf) {
         switch (item.type) {
           case 'heading':
@@ -133,13 +160,19 @@ const Editor = ({}: Props) => {
                 key={`item_${index}`}
                 as={item.element}
                 onKeyUp={e => updateItem(item.id, e, documentStructureItems)}
+                onMoveBlockDownClick={e =>
+                  moveItem(item.id, 'down', documentStructureItems)
+                }
+                onMoveBlockUpClick={e =>
+                  moveItem(item.id, 'up', documentStructureItems)
+                }
+                onRemoveClick={e => removeItem(item.id, documentStructureItems)}
               >
                 {item.content}
               </ParagraphBlock>
             );
         }
       }
-      console.log(copyOfContentItems);
     });
     setContentItems(copyOfContentItems);
   };
@@ -156,10 +189,8 @@ const Editor = ({}: Props) => {
       localStorage.getItem('documentStructure')
     );
     if (localStorageContent) {
-      console.log(1, localStorageContent);
       generateItems(localStorageContent);
     } else {
-      console.log(2);
       generateItems(documentStructure);
     }
   }, []);
@@ -180,7 +211,6 @@ const Editor = ({}: Props) => {
           </Button>
         </StyledDocumentHeader>
         <StyledEditor ref={editor}>
-          {console.log(contentItems)}
           {contentItems.map(item => {
             return item;
           })}
