@@ -112,7 +112,6 @@ const Editor = ({}: Props) => {
   };
 
   const moveItem = (id, direction, documentStructureItems) => {
-    console.log(id, direction);
     let copyOfDocumentStructure = [...documentStructureItems];
     const itemToMove = copyOfDocumentStructure.find(item => item.id === id);
     const indexOfItemToMove = copyOfDocumentStructure.findIndex(
@@ -121,7 +120,6 @@ const Editor = ({}: Props) => {
     copyOfDocumentStructure = copyOfDocumentStructure.filter(
       item => item.id !== id
     );
-    console.log(copyOfDocumentStructure);
     if (direction === 'up') {
       copyOfDocumentStructure.splice(indexOfItemToMove - 1, 0, itemToMove);
     } else if (direction === 'down') {
