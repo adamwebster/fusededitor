@@ -10,6 +10,7 @@ interface Props extends HTMLAttributes<HTMLParagraphElement> {
   onRemoveClick: (e) => void;
   onMoveBlockUpClick?: (e) => void;
   onMoveBlockDownClick?: (e) => void;
+  onKeyDown?: (e) => void;
 }
 
 const ParagraphBlock = ({
@@ -17,14 +18,18 @@ const ParagraphBlock = ({
   onRemoveClick,
   onMoveBlockUpClick,
   onMoveBlockDownClick,
+  onKeyDown,
   ...rest
 }: Props) => {
   const [showPopper, setShowPopper] = useState(false);
   const [referenceElement, setReferenceElement] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
 
-  const handleKeyDown = () => {
+  const handleKeyDown = (e) => {
     setShowPopper(false);
+    if(onKeyDown){
+      onKeyDown(e);
+    }
   };
 
   useEffect(() => {
@@ -42,7 +47,7 @@ const ParagraphBlock = ({
         ref={setReferenceElement}
         onFocus={() => setShowPopper(true)}
         onClick={() => setShowPopper(true)}
-        onKeyDown={() => handleKeyDown()}
+        onKeyDown={(e) => handleKeyDown(e)}
         onBlur={() =>
           setTimeout(() => {
             if (showPopper) {

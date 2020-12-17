@@ -50,8 +50,10 @@ const Editor = ({}: Props) => {
     { id: 'heading1', type: 'heading', content: 'Heading', element: 'h1' },
   ]);
   const editor = useRef();
-  const addBlock = (blockType: string) => {
-    const copyOfDocumentStructure = [...documentStructure];
+
+  const addBlock = (blockType: string, documentStructureItems) => {
+    const copyOfDocumentStructure = [...documentStructureItems];
+    console.log(copyOfDocumentStructure, blockType);
     switch (blockType) {
       case 'heading':
         const headingElements = copyOfDocumentStructure.filter(
@@ -128,6 +130,20 @@ const Editor = ({}: Props) => {
     generateItems(copyOfDocumentStructure);
   };
 
+  const handleBlockKeyDown = (e, documentStructureItems) => {
+    console.log(documentStructureItems);
+    const { keyCode } = e;
+    switch (keyCode) {
+      case 13:
+        // Enter key
+        if (!e.shiftKey) {
+          e.preventDefault();
+          addBlock('paragraph', documentStructureItems);
+        }
+        break;
+    }
+  };
+
   const generateItems = documentStructureItems => {
     const copyOfContentItems = [...contentItems];
     documentStructureItems.map((item, index) => {
@@ -164,6 +180,7 @@ const Editor = ({}: Props) => {
                   moveItem(item.id, 'up', documentStructureItems)
                 }
                 onRemoveClick={e => removeItem(item.id, documentStructureItems)}
+                onKeyDown={e => handleBlockKeyDown(e, documentStructureItems)}
               >
                 {item.content}
               </ParagraphBlock>
@@ -215,9 +232,15 @@ const Editor = ({}: Props) => {
       </StyledEditorWrapper>
       <Panel>
         <h3>Blocks</h3>
-        <div onClick={() => addBlock('heading')}>Heading</div>
-        <div onClick={() => addBlock('paragraph')}>Paragraph</div>
-        <div onClick={() => addBlock('markdown')}>Markdown</div>
+        <div onClick={() => addBlock('heading', documentStructure)}>
+          Heading
+        </div>
+        <div onClick={() => addBlock('paragraph', documentStructure)}>
+          Paragraph
+        </div>
+        <div onClick={() => addBlock('markdown', documentStructure)}>
+          Markdown
+        </div>
         <h3>Document Settings</h3>
         <h3>Attachments</h3>
       </Panel>
