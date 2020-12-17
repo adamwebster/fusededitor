@@ -1,4 +1,3 @@
-import { type } from 'os';
 import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { Colors } from '../../styles/colors';
