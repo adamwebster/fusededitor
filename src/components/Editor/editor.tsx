@@ -55,9 +55,12 @@ const Editor = ({}: Props) => {
   const addBlock = (blockType: string, documentStructureItems) => {
     const copyOfDocumentStructure = [...documentStructureItems];
     const activeItem = copyOfDocumentStructure.find(item => item.id === activeId);
-    const indexOfActiveItem = copyOfDocumentStructure.findIndex(
+    let indexOfActiveItem = copyOfDocumentStructure.findIndex(
       item => item.id === activeId
     );
+    if(indexOfActiveItem === -1){
+      indexOfActiveItem = copyOfDocumentStructure.length;
+    }
     console.log(activeItem, indexOfActiveItem)
     switch (blockType) {
       case 'heading':
@@ -68,7 +71,7 @@ const Editor = ({}: Props) => {
           item => item.id === 'heading' + (headingElements.length + 1)
         );
         if (!itemExist) {
-          copyOfDocumentStructure.splice(indexOfActiveItem - 1, 0, {
+          copyOfDocumentStructure.splice(indexOfActiveItem + 1, 0, {
             id: 'heading' + (headingElements.length + 1),
             type: 'heading',
             content: 'Heading',
@@ -85,7 +88,7 @@ const Editor = ({}: Props) => {
           item => item.id === 'paragraph' + (paragraphItems.length + 1)
         );
         if (!paragraphItemExist) {
-          copyOfDocumentStructure.splice(indexOfActiveItem - 1, 0, {
+          copyOfDocumentStructure.splice(indexOfActiveItem + 1, 0, {
             id: 'paragraph' + (paragraphItems.length + 1),
             type: 'paragraph',
             content: blockType === 'markdown' ? '' : '',
@@ -188,7 +191,7 @@ const Editor = ({}: Props) => {
             break;
           case 'paragraph':
           case 'markdown':
-            copyOfContentItems.splice(indexOfActiveItem, 0,
+            copyOfContentItems.splice(indexOfActiveItem + 1, 0,
               <ParagraphBlock
                 ref={setBlockRef}
                 id={item.id}
