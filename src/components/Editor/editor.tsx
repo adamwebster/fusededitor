@@ -46,9 +46,7 @@ interface Props {}
 const Editor = ({}: Props) => {
   const [title, setTitle] = useState('Document Name');
   const [contentItems, setContentItems] = useState([]);
-  const [documentStructure, setDocumentStructure] = useState([
-    { id: 'heading1', type: 'heading', content: 'Heading', element: 'h1' },
-  ]);
+  const [documentStructure, setDocumentStructure] = useState([]);
   const editor = useRef();
 
   const addBlock = (blockType: string, documentStructureItems) => {
@@ -213,6 +211,7 @@ const Editor = ({}: Props) => {
     );
     if (localStorageContent) {
       generateItems(localStorageContent);
+      setDocumentStructure(localStorageContent)
     } else {
       generateItems(documentStructure);
     }
