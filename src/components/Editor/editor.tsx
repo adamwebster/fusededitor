@@ -47,6 +47,8 @@ const Editor = ({}: Props) => {
   const [title, setTitle] = useState('Document Name');
   const [contentItems, setContentItems] = useState([]);
   const [documentStructure, setDocumentStructure] = useState([]);
+  const [autoFocus, setAutoFocus] = useState(false)
+  const [blockRef, setBlockRef] = useState(null);
   const editor = useRef();
 
   const addBlock = (blockType: string, documentStructureItems) => {
@@ -81,14 +83,15 @@ const Editor = ({}: Props) => {
           copyOfDocumentStructure.push({
             id: 'paragraph' + (paragraphItems.length + 1),
             type: 'paragraph',
-            content: blockType === 'markdown' ? 'Markdown' : 'Paragraph',
+            content: blockType === 'markdown' ? '' : '',
             element: 'p',
           });
         }
     }
     setDocumentStructure(copyOfDocumentStructure);
+    setAutoFocus(true);
     copyOfDocumentStructure.map((item, index) =>
-      generateItems(copyOfDocumentStructure)
+      generateItems(copyOfDocumentStructure, true)
     );
   };
 
@@ -125,7 +128,7 @@ const Editor = ({}: Props) => {
       copyOfDocumentStructure.splice(indexOfItemToMove + 1, 0, itemToMove);
     }
     setDocumentStructure(copyOfDocumentStructure);
-    generateItems(copyOfDocumentStructure);
+    generateItems(copyOfDocumentStructure, true);
   };
 
   const handleBlockKeyDown = (e, documentStructureItems) => {
@@ -142,7 +145,7 @@ const Editor = ({}: Props) => {
     }
   };
 
-  const generateItems = documentStructureItems => {
+  const generateItems = (documentStructureItems, setFocus = false) => {
     const copyOfContentItems = [...contentItems];
     documentStructureItems.map((item, index) => {
       const indexOf = copyOfContentItems.some(
@@ -153,6 +156,7 @@ const Editor = ({}: Props) => {
           case 'heading':
             copyOfContentItems.push(
               <HeadingBlock
+                ref={setBlockRef}
                 id={item.id}
                 key={`item_${index}`}
                 as={item.element}
@@ -165,7 +169,6 @@ const Editor = ({}: Props) => {
                 }
                 onRemoveClick={e => removeItem(item.id, documentStructureItems)}
                 onKeyDown={e => handleBlockKeyDown(e, documentStructureItems)}
-
               >
                 {item.content}
               </HeadingBlock>
@@ -176,6 +179,7 @@ const Editor = ({}: Props) => {
           case 'markdown':
             copyOfContentItems.push(
               <ParagraphBlock
+                ref={setBlockRef}
                 id={item.id}
                 key={`item_${index}`}
                 as={item.element}
@@ -211,11 +215,17 @@ const Editor = ({}: Props) => {
     );
     if (localStorageContent) {
       generateItems(localStorageContent);
-      setDocumentStructure(localStorageContent)
+      setDocumentStructure(localStorageContent);
     } else {
       generateItems(documentStructure);
     }
   }, []);
+
+  useEffect(() => {
+      if (blockRef && autoFocus) {
+        blockRef.focus();
+      }
+  },[blockRef])
 
   return (
     <>
