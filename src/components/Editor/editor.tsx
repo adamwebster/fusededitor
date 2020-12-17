@@ -159,6 +159,15 @@ const Editor = ({}: Props) => {
                 key={`item_${index}`}
                 as={item.element}
                 onKeyUp={e => updateItem(item.id, e, documentStructureItems)}
+                onMoveBlockDownClick={e =>
+                  moveItem(item.id, 'down', documentStructureItems)
+                }
+                onMoveBlockUpClick={e =>
+                  moveItem(item.id, 'up', documentStructureItems)
+                }
+                onRemoveClick={e => removeItem(item.id, documentStructureItems)}
+                onKeyDown={e => handleBlockKeyDown(e, documentStructureItems)}
+
               >
                 {item.content}
               </HeadingBlock>
