@@ -16,6 +16,8 @@ interface Props extends HTMLAttributes<HTMLParagraphElement> {
   onMoveBlockUpClick?: (e) => void;
   onMoveBlockDownClick?: (e) => void;
   onKeyDown?: (e) => void;
+  onClick?: (e) => void;
+  onFocus?: (e) => void
 }
 
 const ParagraphBlock = forwardRef(
@@ -26,6 +28,8 @@ const ParagraphBlock = forwardRef(
       onMoveBlockUpClick,
       onMoveBlockDownClick,
       onKeyDown,
+      onClick,
+      onFocus,
       ...rest
     }: Props,
     ref
@@ -55,8 +59,8 @@ const ParagraphBlock = forwardRef(
           contentEditable="true"
           ref={ref}
           data-ph="Start typing"
-          onFocus={() => setShowPopper(true)}
-          onClick={() => setShowPopper(true)}
+          onFocus={(e) => { onFocus && onFocus(e); setShowPopper(true)}}
+          onClick={(e) => { onClick && onClick(e); setShowPopper(true)}}
           onKeyDown={e => handleKeyDown(e)}
           onBlur={() =>
             setTimeout(() => {

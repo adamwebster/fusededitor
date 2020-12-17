@@ -49,11 +49,16 @@ const Editor = ({}: Props) => {
   const [documentStructure, setDocumentStructure] = useState([]);
   const [autoFocus, setAutoFocus] = useState(false)
   const [blockRef, setBlockRef] = useState(null);
+  const [activeId, setActiveId] = useState();
   const editor = useRef();
 
   const addBlock = (blockType: string, documentStructureItems) => {
     const copyOfDocumentStructure = [...documentStructureItems];
-    console.log(copyOfDocumentStructure, blockType);
+    const activeItem = copyOfDocumentStructure.find(item => item.id === activeId);
+    const indexOfActiveItem = copyOfDocumentStructure.findIndex(
+      item => item.id === activeId
+    );
+    console.log(activeItem, indexOfActiveItem)
     switch (blockType) {
       case 'heading':
         const headingElements = copyOfDocumentStructure.filter(
@@ -63,7 +68,7 @@ const Editor = ({}: Props) => {
           item => item.id === 'heading' + (headingElements.length + 1)
         );
         if (!itemExist) {
-          copyOfDocumentStructure.push({
+          copyOfDocumentStructure.splice(indexOfActiveItem - 1, 0, {
             id: 'heading' + (headingElements.length + 1),
             type: 'heading',
             content: 'Heading',
@@ -80,7 +85,7 @@ const Editor = ({}: Props) => {
           item => item.id === 'paragraph' + (paragraphItems.length + 1)
         );
         if (!paragraphItemExist) {
-          copyOfDocumentStructure.push({
+          copyOfDocumentStructure.splice(indexOfActiveItem - 1, 0, {
             id: 'paragraph' + (paragraphItems.length + 1),
             type: 'paragraph',
             content: blockType === 'markdown' ? '' : '',
@@ -151,10 +156,16 @@ const Editor = ({}: Props) => {
       const indexOf = copyOfContentItems.some(
         returnedItem => returnedItem.props.id === item.id
       );
+      
+      const activeItem = documentStructureItems.find(item => item.id === activeId);
+      const indexOfActiveItem = documentStructureItems.findIndex(
+        item => item.id === activeId
+      );
+
       if (!indexOf) {
         switch (item.type) {
           case 'heading':
-            copyOfContentItems.push(
+            copyOfContentItems.splice(indexOfActiveItem, 0,
               <HeadingBlock
                 ref={setBlockRef}
                 id={item.id}
@@ -177,12 +188,13 @@ const Editor = ({}: Props) => {
             break;
           case 'paragraph':
           case 'markdown':
-            copyOfContentItems.push(
+            copyOfContentItems.splice(indexOfActiveItem, 0,
               <ParagraphBlock
                 ref={setBlockRef}
                 id={item.id}
                 key={`item_${index}`}
                 as={item.element}
+                onFocus={(e) => setActiveId(item.id)}
                 onKeyUp={e => updateItem(item.id, e, documentStructureItems)}
                 onMoveBlockDownClick={e =>
                   moveItem(item.id, 'down', documentStructureItems)
@@ -231,6 +243,7 @@ const Editor = ({}: Props) => {
     <>
       <StyledEditorWrapper>
         {/* <Toolbar /> */}
+        {activeId}
         <StyledDocumentHeader>
           <h2>
             <StyledDocumentTitle
