@@ -12,21 +12,27 @@ const StyledHeadingBlock = styled.h1`
 `;
 
 interface Props extends HTMLAttributes<HTMLHeadingElement> {
+  as: string,
   children: string;
   onRemoveClick: (e) => void;
   onMoveBlockUpClick?: (e) => void;
   onMoveBlockDownClick?: (e) => void;
   onKeyDown?: (e) => void;
+  changeElement?: (newElement) => void;
+  item: any;
 }
 
 const HeadingBlock = forwardRef(
   (
     {
+      as,
       children,
       onRemoveClick,
       onMoveBlockUpClick,
       onMoveBlockDownClick,
       onKeyDown,
+      changeElement,
+      item,
       ...rest
     }: Props,
     ref
@@ -34,7 +40,7 @@ const HeadingBlock = forwardRef(
     const [showPopper, setShowPopper] = useState(false);
     const [referenceElement, setReferenceElement] = useState(null);
     const [isMounted, setIsMounted] = useState(false);
-    const [headingType, setHeadingType] = useState('h1');
+    const [headingType, setHeadingType] = useState(as);
     const handleKeyDown = e => {
       setShowPopper(false);
       if (onKeyDown) {
@@ -44,6 +50,7 @@ const HeadingBlock = forwardRef(
 
     const changeHeadingType = () => {
         setHeadingType('h2');
+        changeElement('h2');
     }
     
     useEffect(() => {

@@ -155,6 +155,13 @@ const Editor = ({}: Props) => {
     );
   };
 
+  const changeElement = (index, element ) => {
+    const copyOfDocumentStructure = [...documentStructure];
+    console.log(copyOfDocumentStructure[index]);
+    copyOfDocumentStructure[index].element = element;
+    setDocumentStructure(copyOfDocumentStructure);
+  }
+
   useEffect(() => {
     const localStorageContent = JSON.parse(
       localStorage.getItem('documentStructure')
@@ -187,14 +194,17 @@ const Editor = ({}: Props) => {
           </Button>
         </StyledDocumentHeader>
         <StyledEditor ref={editor}>
-          {documentStructure.map(item => {
+          {documentStructure.map((item, index) => {
             switch (item.type) {
               case 'heading':
                 return (
                   <HeadingBlock
                     ref={setBlockRef}
                     id={item.id}
+                    item={item}
+                    as={item.element}
                     key={`item_${item.id}`}
+                    changeElement={(newElement) => changeElement(index, newElement)}
                     onFocus={e => { setActiveElement(e.target); setActiveId(item.id)}}
                     onMoveBlockDownClick={e =>
                       moveItem(item.id, 'down', e)
