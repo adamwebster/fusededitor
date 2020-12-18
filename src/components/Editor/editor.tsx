@@ -99,7 +99,7 @@ const Editor = ({}: Props) => {
     setDocumentStructure(copyOfDocumentStructure);
     setAutoFocus(true);
     copyOfDocumentStructure.map((item, index) =>
-      generateItems(copyOfDocumentStructure, true, indexOfActiveItem)
+      generateItems(copyOfDocumentStructure, true, activeId)
     );
   };
 
@@ -153,7 +153,7 @@ const Editor = ({}: Props) => {
     }
   };
 
-  const generateItems = (documentStructureItems, setFocus = false, a = -1) => {
+  const generateItems = (documentStructureItems, setFocus = false, a = 0) => {
     const copyOfContentItems = [...contentItems];
     console.log(a)
     documentStructureItems.map((item, index) => {
@@ -162,7 +162,10 @@ const Editor = ({}: Props) => {
       );
       
       const activeItem = documentStructureItems.find(item => item.id === activeId);
-      let indexOfActiveItem = a;
+      let indexOfActiveItem = documentStructureItems.findIndex(
+        item => item.id === activeId
+      );
+
       if(indexOfActiveItem === -1){
         indexOfActiveItem = documentStructureItems.length;
       }
@@ -239,7 +242,7 @@ const Editor = ({}: Props) => {
 
   useEffect(() => {
       if (blockRef && autoFocus) {
-      blockRef.focus();
+     //   blockRef.focus();
       }
   },[blockRef])
 
