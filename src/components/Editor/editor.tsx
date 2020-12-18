@@ -161,18 +161,21 @@ const Editor = ({}: Props) => {
       );
       
       const activeItem = documentStructureItems.find(item => item.id === activeId);
-      const indexOfActiveItem = documentStructureItems.findIndex(
+      let indexOfActiveItem = documentStructureItems.findIndex(
         item => item.id === activeId
       );
 
+      if(indexOfActiveItem === -1){
+        indexOfActiveItem = documentStructureItems.length;
+      }
       if (!indexOf) {
         switch (item.type) {
           case 'heading':
-            copyOfContentItems.splice(indexOfActiveItem, 0,
+            copyOfContentItems.splice(indexOfActiveItem + 1, 0,
               <HeadingBlock
                 ref={setBlockRef}
                 id={item.id}
-                key={`item_${index}`}
+                key={`item_${item.id}`}
                 as={item.element}
                 onKeyUp={e => updateItem(item.id, e, documentStructureItems)}
                 onMoveBlockDownClick={e =>
@@ -195,7 +198,7 @@ const Editor = ({}: Props) => {
               <ParagraphBlock
                 ref={setBlockRef}
                 id={item.id}
-                key={`item_${index}`}
+                key={`item_${item.id}`}
                 as={item.element}
                 onFocus={(e) => setActiveId(item.id)}
                 onKeyUp={e => updateItem(item.id, e, documentStructureItems)}
@@ -238,7 +241,7 @@ const Editor = ({}: Props) => {
 
   useEffect(() => {
       if (blockRef && autoFocus) {
-        blockRef.focus();
+     //   blockRef.focus();
       }
   },[blockRef])
 
