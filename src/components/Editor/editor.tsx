@@ -48,12 +48,12 @@ const Editor = ({}: Props) => {
   const [documentStructure, setDocumentStructure] = useState([]);
   const [autoFocus, setAutoFocus] = useState(false);
   const [blockRef, setBlockRef] = useState(null);
-  const [activeElement, setActiveElement] = useState();
+  const [activeElement, setActiveElement] = useState(null);
   const [activeId, setActiveId] = useState();
   const editor = useRef();
 
-  const addBlock = (blockType: string, documentStructureItems) => {
-    const copyOfDocumentStructure = [...documentStructureItems];
+  const addBlock = (blockType: string) => {
+    const copyOfDocumentStructure = [...documentStructure];
     const activeItem = copyOfDocumentStructure.find(
       item => item.id === activeId
     );
@@ -109,16 +109,16 @@ const Editor = ({}: Props) => {
     }
   };
 
-  const removeItem = (id, documentStructureItems) => {
-    let copyOfDocumentStructure = [...documentStructureItems];
+  const removeItem = (id) => {
+    let copyOfDocumentStructure = [...documentStructure];
     copyOfDocumentStructure = copyOfDocumentStructure.filter(
       item => item.id !== id
     );
     setDocumentStructure(copyOfDocumentStructure);
   };
 
-  const moveItem = (id, direction, documentStructureItems,e) => {
-    let copyOfDocumentStructure = [...documentStructureItems];
+  const moveItem = (id, direction,e) => {
+    let copyOfDocumentStructure = [...documentStructure];
     const itemToMove = copyOfDocumentStructure.find(item => item.id === id);
     const indexOfItemToMove = copyOfDocumentStructure.findIndex(
       item => item.id === id
@@ -135,15 +135,14 @@ const Editor = ({}: Props) => {
     if(activeElement) activeElement.focus();
   };
 
-  const handleBlockKeyDown = (e, documentStructureItems) => {
-    console.log(documentStructureItems);
+  const handleBlockKeyDown = (e) => {
     const { keyCode } = e;
     switch (keyCode) {
       case 13:
         // Enter key
         if (!e.shiftKey) {
           e.preventDefault();
-          addBlock('paragraph', documentStructureItems);
+          addBlock('paragraph');
         }
         break;
     }
@@ -199,14 +198,14 @@ const Editor = ({}: Props) => {
                     as={item.element}
                     onFocus={e => { setActiveElement(e.target); setActiveId(item.id)}}
                     onMoveBlockDownClick={e =>
-                      moveItem(item.id, 'down', documentStructure, e)
+                      moveItem(item.id, 'down', e)
                     }
                     onMoveBlockUpClick={e =>
-                      moveItem(item.id, 'up', documentStructure, e)
+                      moveItem(item.id, 'up',e)
                     }
-                    onRemoveClick={e => removeItem(item.id, documentStructure)}
+                    onRemoveClick={e => removeItem(item.id)}
                     onKeyUp={e => updateItem(item.id, e)}
-                    onKeyDown={e => handleBlockKeyDown(e, documentStructure)}
+                    onKeyDown={e => handleBlockKeyDown(e)}
                   >
                     {item.content}
                   </HeadingBlock>
@@ -221,14 +220,14 @@ const Editor = ({}: Props) => {
                     as={item.element}
                     onFocus={e => { setActiveElement(e.target); setActiveId(item.id)}}
                     onMoveBlockDownClick={e =>
-                      moveItem(item.id, 'down', documentStructure, e)
+                      moveItem(item.id, 'down', e)
                     }
                     onMoveBlockUpClick={e =>
-                      moveItem(item.id, 'up', documentStructure, e)
+                      moveItem(item.id, 'up', e)
                     }
-                    onRemoveClick={e => removeItem(item.id, documentStructure)}
+                    onRemoveClick={e => removeItem(item.id)}
                     onKeyUp={e => updateItem(item.id, e)}
-                    onKeyDown={e => handleBlockKeyDown(e, documentStructure)}
+                    onKeyDown={e => handleBlockKeyDown(e)}
                   >
                     {item.content}
                   </ParagraphBlock>
@@ -239,13 +238,13 @@ const Editor = ({}: Props) => {
       </StyledEditorWrapper>
       <Panel>
         <h3>Blocks</h3>
-        <div onClick={() => addBlock('heading', documentStructure)}>
+        <div onClick={() => addBlock('heading')}>
           Heading
         </div>
-        <div onClick={() => addBlock('paragraph', documentStructure)}>
+        <div onClick={() => addBlock('paragraph')}>
           Paragraph
         </div>
-        <div onClick={() => addBlock('markdown', documentStructure)}>
+        <div onClick={() => addBlock('markdown')}>
           Markdown
         </div>
         <h3>Document Settings</h3>
