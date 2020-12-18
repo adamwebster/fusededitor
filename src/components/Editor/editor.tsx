@@ -45,23 +45,25 @@ interface Props {}
 
 const Editor = ({}: Props) => {
   const [title, setTitle] = useState('Document Name');
-  const [contentItems, setContentItems] = useState([]);
   const [documentStructure, setDocumentStructure] = useState([]);
-  const [autoFocus, setAutoFocus] = useState(false)
+  const [autoFocus, setAutoFocus] = useState(false);
   const [blockRef, setBlockRef] = useState(null);
+  const [activeElement, setActiveElement] = useState();
   const [activeId, setActiveId] = useState();
   const editor = useRef();
 
   const addBlock = (blockType: string, documentStructureItems) => {
     const copyOfDocumentStructure = [...documentStructureItems];
-    const activeItem = copyOfDocumentStructure.find(item => item.id === activeId);
+    const activeItem = copyOfDocumentStructure.find(
+      item => item.id === activeId
+    );
     let indexOfActiveItem = copyOfDocumentStructure.findIndex(
       item => item.id === activeId
     );
-    if(indexOfActiveItem === -1){
+    if (indexOfActiveItem === -1) {
       indexOfActiveItem = copyOfDocumentStructure.length;
     }
-    console.log(activeItem, indexOfActiveItem)
+    console.log(activeItem, indexOfActiveItem);
     switch (blockType) {
       case 'heading':
         const headingElements = copyOfDocumentStructure.filter(
@@ -98,18 +100,13 @@ const Editor = ({}: Props) => {
     }
     setDocumentStructure(copyOfDocumentStructure);
     setAutoFocus(true);
-    copyOfDocumentStructure.map((item, index) =>
-      generateItems(copyOfDocumentStructure, true, activeId)
-    );
   };
 
-  const updateItem = (id: string, e: any, documentStructureItems) => {
-    const copyOfDocumentStructure = [...documentStructureItems];
-    const itemToUpdate = copyOfDocumentStructure.find(item => item.id === id);
+  const updateItem = (id: string, e: any) => {
+    const itemToUpdate = documentStructure.find(item => item.id === id);
     if (itemToUpdate) {
       itemToUpdate.content = e.target.innerHTML;
     }
-    setDocumentStructure(copyOfDocumentStructure);
   };
 
   const removeItem = (id, documentStructureItems) => {
@@ -118,10 +115,9 @@ const Editor = ({}: Props) => {
       item => item.id !== id
     );
     setDocumentStructure(copyOfDocumentStructure);
-    generateItems(copyOfDocumentStructure);
   };
 
-  const moveItem = (id, direction, documentStructureItems) => {
+  const moveItem = (id, direction, documentStructureItems,e) => {
     let copyOfDocumentStructure = [...documentStructureItems];
     const itemToMove = copyOfDocumentStructure.find(item => item.id === id);
     const indexOfItemToMove = copyOfDocumentStructure.findIndex(
@@ -136,7 +132,7 @@ const Editor = ({}: Props) => {
       copyOfDocumentStructure.splice(indexOfItemToMove + 1, 0, itemToMove);
     }
     setDocumentStructure(copyOfDocumentStructure);
-    generateItems(copyOfDocumentStructure, true);
+    if(activeElement) activeElement.focus();
   };
 
   const handleBlockKeyDown = (e, documentStructureItems) => {
@@ -153,74 +149,6 @@ const Editor = ({}: Props) => {
     }
   };
 
-  const generateItems = (documentStructureItems, setFocus = false, a = 0) => {
-    const copyOfContentItems = [...contentItems];
-    console.log(a)
-    documentStructureItems.map((item, index) => {
-      const indexOf = copyOfContentItems.some(
-        returnedItem => returnedItem.props.id === item.id
-      );
-      
-      const activeItem = documentStructureItems.find(item => item.id === activeId);
-      let indexOfActiveItem = documentStructureItems.findIndex(
-        item => item.id === activeId
-      );
-
-      if(indexOfActiveItem === -1){
-        indexOfActiveItem = documentStructureItems.length;
-      }
-      if (!indexOf) {
-        switch (item.type) {
-          case 'heading':
-            copyOfContentItems.splice(indexOfActiveItem + 1, 0,
-              <HeadingBlock
-                ref={setBlockRef}
-                id={item.id}
-                key={`item_${item.id}`}
-                as={item.element}
-                onKeyUp={e => updateItem(item.id, e, documentStructureItems)}
-                onMoveBlockDownClick={e =>
-                  moveItem(item.id, 'down', documentStructureItems)
-                }
-                onMoveBlockUpClick={e =>
-                  moveItem(item.id, 'up', documentStructureItems)
-                }
-                onRemoveClick={e => removeItem(item.id, documentStructureItems)}
-                onKeyDown={e => handleBlockKeyDown(e, documentStructureItems)}
-              >
-                {item.content}
-              </HeadingBlock>
-            );
-
-            break;
-          case 'paragraph':
-          case 'markdown':
-            copyOfContentItems.splice(indexOfActiveItem - 1, 0,
-              <ParagraphBlock
-                ref={setBlockRef}
-                id={item.id}
-                key={`item_${item.id}`}
-                as={item.element}
-                onFocus={(e) => setActiveId(item.id)}
-                onKeyUp={e => updateItem(item.id, e, documentStructureItems)}
-                onMoveBlockDownClick={e =>
-                  moveItem(item.id, 'down', documentStructureItems)
-                }
-                onMoveBlockUpClick={e =>
-                  moveItem(item.id, 'up', documentStructureItems)
-                }
-                onRemoveClick={e => removeItem(item.id, documentStructureItems)}
-                onKeyDown={e => handleBlockKeyDown(e, documentStructureItems)}
-              >
-                {item.content}
-              </ParagraphBlock>
-            );
-        }
-      }
-    });
-    setContentItems(copyOfContentItems);
-  };
-
   const saveDocument = () => {
     localStorage.setItem(
       'documentStructure',
@@ -233,24 +161,21 @@ const Editor = ({}: Props) => {
       localStorage.getItem('documentStructure')
     );
     if (localStorageContent) {
-      generateItems(localStorageContent);
       setDocumentStructure(localStorageContent);
     } else {
-      generateItems(documentStructure);
     }
   }, []);
 
   useEffect(() => {
-      if (blockRef && autoFocus) {
-     //   blockRef.focus();
-      }
-  },[blockRef])
+    if (blockRef && autoFocus) {
+      blockRef.focus();
+    }
+  }, [blockRef]);
 
   return (
     <>
       <StyledEditorWrapper>
         {/* <Toolbar /> */}
-        {activeId}
         <StyledDocumentHeader>
           <h2>
             <StyledDocumentTitle
@@ -263,8 +188,52 @@ const Editor = ({}: Props) => {
           </Button>
         </StyledDocumentHeader>
         <StyledEditor ref={editor}>
-          {contentItems.map(item => {
-            return item;
+          {documentStructure.map(item => {
+            switch (item.type) {
+              case 'heading':
+                return (
+                  <HeadingBlock
+                    ref={setBlockRef}
+                    id={item.id}
+                    key={`item_${item.id}`}
+                    as={item.element}
+                    onFocus={e => { setActiveElement(e.target); setActiveId(item.id)}}
+                    onMoveBlockDownClick={e =>
+                      moveItem(item.id, 'down', documentStructure, e)
+                    }
+                    onMoveBlockUpClick={e =>
+                      moveItem(item.id, 'up', documentStructure, e)
+                    }
+                    onRemoveClick={e => removeItem(item.id, documentStructure)}
+                    onKeyUp={e => updateItem(item.id, e)}
+                    onKeyDown={e => handleBlockKeyDown(e, documentStructure)}
+                  >
+                    {item.content}
+                  </HeadingBlock>
+                );
+              case 'paragraph':
+              case 'markdown':
+                return (
+                  <ParagraphBlock
+                    ref={setBlockRef}
+                    id={item.id}
+                    key={`item_${item.id}`}
+                    as={item.element}
+                    onFocus={e => { setActiveElement(e.target); setActiveId(item.id)}}
+                    onMoveBlockDownClick={e =>
+                      moveItem(item.id, 'down', documentStructure, e)
+                    }
+                    onMoveBlockUpClick={e =>
+                      moveItem(item.id, 'up', documentStructure, e)
+                    }
+                    onRemoveClick={e => removeItem(item.id, documentStructure)}
+                    onKeyUp={e => updateItem(item.id, e)}
+                    onKeyDown={e => handleBlockKeyDown(e, documentStructure)}
+                  >
+                    {item.content}
+                  </ParagraphBlock>
+                );
+            }
           })}
         </StyledEditor>
       </StyledEditorWrapper>
