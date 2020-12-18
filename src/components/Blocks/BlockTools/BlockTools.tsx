@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { ReactNode, useState, Children } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowDown,
@@ -29,9 +29,10 @@ interface Props {
     onMoveBlockUpClick?: (e) => void;
     onMoveBlockDownClick?: (e) => void;
     referenceElement: any,
+    children?: ReactNode,
   }
 
-const BlockTools = ({referenceElement, onMoveBlockUpClick, onMoveBlockDownClick, onRemoveClick}: Props) => {
+const BlockTools = ({referenceElement, onMoveBlockUpClick, onMoveBlockDownClick, onRemoveClick, children}: Props) => {
     const [popperElement, setPopperElement] = useState(null);
     const [arrowElement, setArrowElement] = useState(null);
 
@@ -49,6 +50,9 @@ const BlockTools = ({referenceElement, onMoveBlockUpClick, onMoveBlockDownClick,
       style={styles.popper}
       {...attributes.popper}
     >
+      {Children.map(children, (child:any) => {
+        return <StyledToolButton {...child.props}>{child}</StyledToolButton>
+      })}
       <Tippy content="Move block up">
         <StyledToolButton
           onClick={e => {

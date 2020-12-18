@@ -195,7 +195,6 @@ const Editor = ({}: Props) => {
                     ref={setBlockRef}
                     id={item.id}
                     key={`item_${item.id}`}
-                    as={item.element}
                     onFocus={e => { setActiveElement(e.target); setActiveId(item.id)}}
                     onMoveBlockDownClick={e =>
                       moveItem(item.id, 'down', e)

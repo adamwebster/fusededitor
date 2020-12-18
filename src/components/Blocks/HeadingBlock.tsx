@@ -1,3 +1,5 @@
+import { faHeading } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { HTMLAttributes, useState, useEffect, forwardRef } from 'react';
 import styled from 'styled-components';
 import { BlockTools } from './BlockTools';
@@ -10,7 +12,6 @@ const StyledHeadingBlock = styled.h1`
 `;
 
 interface Props extends HTMLAttributes<HTMLHeadingElement> {
-  as: string;
   children: string;
   onRemoveClick: (e) => void;
   onMoveBlockUpClick?: (e) => void;
@@ -33,7 +34,7 @@ const HeadingBlock = forwardRef(
     const [showPopper, setShowPopper] = useState(false);
     const [referenceElement, setReferenceElement] = useState(null);
     const [isMounted, setIsMounted] = useState(false);
-
+    const [headingType, setHeadingType] = useState('h1');
     const handleKeyDown = e => {
       setShowPopper(false);
       if (onKeyDown) {
@@ -41,6 +42,10 @@ const HeadingBlock = forwardRef(
       }
     };
 
+    const changeHeadingType = () => {
+        setHeadingType('h2');
+    }
+    
     useEffect(() => {
       setIsMounted(true);
       return () => {
@@ -52,6 +57,7 @@ const HeadingBlock = forwardRef(
       <div ref={setReferenceElement}>
         <StyledHeadingBlock
           ref={ref}
+          as={headingType}
           suppressContentEditableWarning
           contentEditable="true"
           data-ph="Start typing"
@@ -79,7 +85,9 @@ const HeadingBlock = forwardRef(
             onRemoveClick={onRemoveClick}
             onMoveBlockUpClick={onMoveBlockUpClick}
             onMoveBlockDownClick={onMoveBlockDownClick}
-          />
+          >
+            <FontAwesomeIcon onClick={() => changeHeadingType()} icon={faHeading} />
+          </BlockTools>
         )}
       </div>
     );
