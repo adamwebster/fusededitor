@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { Colors } from '../../styles/colors';
 import { HeadingBlock, ParagraphBlock } from '../Blocks';
+import MarkdownBlock from '../Blocks/MarkdownBlock';
 import { Button } from '../Button';
 import { Panel } from '../Panel';
 import { Toolbar } from '../Toolbar';
@@ -50,6 +51,7 @@ const Editor = ({}: Props) => {
   const [blockRef, setBlockRef] = useState(null);
   const [activeElement, setActiveElement] = useState(null);
   const [activeId, setActiveId] = useState();
+  const [createNewParagraphOnReturn, setCreateNewParagraphOnReturn] = useState(false);
   const editor = useRef();
 
   const addBlock = (blockType: string) => {
@@ -82,7 +84,6 @@ const Editor = ({}: Props) => {
         }
         break;
       case 'paragraph':
-      case 'markdown':
         const paragraphItems = copyOfDocumentStructure.filter(
           item => item.type === 'paragraph'
         );
@@ -93,8 +94,24 @@ const Editor = ({}: Props) => {
           copyOfDocumentStructure.splice(indexOfActiveItem + 1, 0, {
             id: 'paragraph' + (paragraphItems.length + 1),
             type: 'paragraph',
-            content: blockType === 'markdown' ? '' : '',
+            content: '',
             element: 'p',
+          });
+        }
+        break;
+      case 'markdown':
+        const markdownItems = copyOfDocumentStructure.filter(
+          item => item.type === 'markdown'
+        );
+        const markdownItemExist = markdownItems.find(
+          item => item.id === 'markdown' + (markdownItems.length + 1)
+        );
+        if (!markdownItemExist) {
+          copyOfDocumentStructure.splice(indexOfActiveItem + 1, 0, {
+            id: 'markdown' + (markdownItems.length + 1),
+            type: 'markdown',
+            content: '',
+            element: 'textarea',
           });
         }
     }
@@ -105,11 +122,11 @@ const Editor = ({}: Props) => {
   const updateItem = (id: string, e: any) => {
     const itemToUpdate = documentStructure.find(item => item.id === id);
     if (itemToUpdate) {
-      itemToUpdate.content = e.target.innerHTML;
+      itemToUpdate.content = e.target.value || e.target.innerHTML;
     }
   };
 
-  const removeItem = (id) => {
+  const removeItem = id => {
     let copyOfDocumentStructure = [...documentStructure];
     copyOfDocumentStructure = copyOfDocumentStructure.filter(
       item => item.id !== id
@@ -117,7 +134,7 @@ const Editor = ({}: Props) => {
     setDocumentStructure(copyOfDocumentStructure);
   };
 
-  const moveItem = (id, direction,e) => {
+  const moveItem = (id, direction, e) => {
     let copyOfDocumentStructure = [...documentStructure];
     const itemToMove = copyOfDocumentStructure.find(item => item.id === id);
     const indexOfItemToMove = copyOfDocumentStructure.findIndex(
@@ -132,15 +149,15 @@ const Editor = ({}: Props) => {
       copyOfDocumentStructure.splice(indexOfItemToMove + 1, 0, itemToMove);
     }
     setDocumentStructure(copyOfDocumentStructure);
-    if(activeElement) activeElement.focus();
+    if (activeElement) activeElement.focus();
   };
 
-  const handleBlockKeyDown = (e) => {
+  const handleBlockKeyDown = e => {
     const { keyCode } = e;
     switch (keyCode) {
       case 13:
         // Enter key
-        if (!e.shiftKey) {
+        if (!e.shiftKey && createNewParagraphOnReturn) {
           e.preventDefault();
           addBlock('paragraph');
         }
@@ -155,12 +172,12 @@ const Editor = ({}: Props) => {
     );
   };
 
-  const changeElement = (index, element ) => {
+  const changeElement = (index, element) => {
     const copyOfDocumentStructure = [...documentStructure];
     console.log(copyOfDocumentStructure[index]);
     copyOfDocumentStructure[index].element = element;
     setDocumentStructure(copyOfDocumentStructure);
-  }
+  };
 
   useEffect(() => {
     const localStorageContent = JSON.parse(
@@ -204,14 +221,15 @@ const Editor = ({}: Props) => {
                     item={item}
                     as={item.element}
                     key={`item_${item.id}`}
-                    changeElement={(newElement) => changeElement(index, newElement)}
-                    onFocus={e => { setActiveElement(e.target); setActiveId(item.id)}}
-                    onMoveBlockDownClick={e =>
-                      moveItem(item.id, 'down', e)
+                    changeElement={newElement =>
+                      changeElement(index, newElement)
                     }
-                    onMoveBlockUpClick={e =>
-                      moveItem(item.id, 'up',e)
-                    }
+                    onFocus={e => {
+                      setActiveElement(e.target);
+                      setActiveId(item.id);
+                    }}
+                    onMoveBlockDownClick={e => moveItem(item.id, 'down', e)}
+                    onMoveBlockUpClick={e => moveItem(item.id, 'up', e)}
                     onRemoveClick={e => removeItem(item.id)}
                     onKeyUp={e => updateItem(item.id, e)}
                     onKeyDown={e => handleBlockKeyDown(e)}
@@ -220,20 +238,18 @@ const Editor = ({}: Props) => {
                   </HeadingBlock>
                 );
               case 'paragraph':
-              case 'markdown':
                 return (
                   <ParagraphBlock
                     ref={setBlockRef}
                     id={item.id}
                     key={`item_${item.id}`}
                     as={item.element}
-                    onFocus={e => { setActiveElement(e.target); setActiveId(item.id)}}
-                    onMoveBlockDownClick={e =>
-                      moveItem(item.id, 'down', e)
-                    }
-                    onMoveBlockUpClick={e =>
-                      moveItem(item.id, 'up', e)
-                    }
+                    onFocus={e => {
+                      setActiveElement(e.target);
+                      setActiveId(item.id);
+                    }}
+                    onMoveBlockDownClick={e => moveItem(item.id, 'down', e)}
+                    onMoveBlockUpClick={e => moveItem(item.id, 'up', e)}
                     onRemoveClick={e => removeItem(item.id)}
                     onKeyUp={e => updateItem(item.id, e)}
                     onKeyDown={e => handleBlockKeyDown(e)}
@@ -241,22 +257,40 @@ const Editor = ({}: Props) => {
                     {item.content}
                   </ParagraphBlock>
                 );
+              case 'markdown':
+                return (
+                  <MarkdownBlock
+                    ref={setBlockRef}
+                    id={item.id}
+                    key={`item_${item.id}`}
+                    as={item.element}
+                    onFocus={e => {
+                      setActiveElement(e.target);
+                      setActiveId(item.id);
+                    }}
+                    onMoveBlockDownClick={e => moveItem(item.id, 'down', e)}
+                    onMoveBlockUpClick={e => moveItem(item.id, 'up', e)}
+                    onRemoveClick={e => removeItem(item.id)}
+                    onKeyUp={e => updateItem(item.id, e)}
+                    onKeyDown={e => handleBlockKeyDown(e)}
+                  >
+                    {item.content}
+                  </MarkdownBlock>
+                );
             }
           })}
         </StyledEditor>
       </StyledEditorWrapper>
       <Panel>
         <h3>Blocks</h3>
-        <div onClick={() => addBlock('heading')}>
-          Heading
-        </div>
-        <div onClick={() => addBlock('paragraph')}>
-          Paragraph
-        </div>
-        <div onClick={() => addBlock('markdown')}>
-          Markdown
-        </div>
+        <div onClick={() => addBlock('heading')}>Heading</div>
+        <div onClick={() => addBlock('paragraph')}>Paragraph</div>
+        <div onClick={() => addBlock('markdown')}>Markdown</div>
         <h3>Document Settings</h3>
+        <label>
+          Create new paragraph block on return
+          <input type="checkbox"  checked={createNewParagraphOnReturn} onChange={(e) => setCreateNewParagraphOnReturn(e.target.checked)} />
+        </label>
         <h3>Attachments</h3>
       </Panel>
     </>
