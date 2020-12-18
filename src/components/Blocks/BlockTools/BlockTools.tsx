@@ -22,6 +22,7 @@ const StyledToolButton = styled.button`
   background-color: transparent;
   border: none;
   color: inherit;
+  font-weight: bold;
 `;
 
 interface Props {
