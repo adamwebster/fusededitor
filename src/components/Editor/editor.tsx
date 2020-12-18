@@ -99,7 +99,7 @@ const Editor = ({}: Props) => {
     setDocumentStructure(copyOfDocumentStructure);
     setAutoFocus(true);
     copyOfDocumentStructure.map((item, index) =>
-      generateItems(copyOfDocumentStructure, true)
+      generateItems(copyOfDocumentStructure, true, indexOfActiveItem)
     );
   };
 
@@ -153,18 +153,16 @@ const Editor = ({}: Props) => {
     }
   };
 
-  const generateItems = (documentStructureItems, setFocus = false) => {
+  const generateItems = (documentStructureItems, setFocus = false, a = -1) => {
     const copyOfContentItems = [...contentItems];
+    console.log(a)
     documentStructureItems.map((item, index) => {
       const indexOf = copyOfContentItems.some(
         returnedItem => returnedItem.props.id === item.id
       );
       
       const activeItem = documentStructureItems.find(item => item.id === activeId);
-      let indexOfActiveItem = documentStructureItems.findIndex(
-        item => item.id === activeId
-      );
-
+      let indexOfActiveItem = a;
       if(indexOfActiveItem === -1){
         indexOfActiveItem = documentStructureItems.length;
       }
@@ -194,7 +192,7 @@ const Editor = ({}: Props) => {
             break;
           case 'paragraph':
           case 'markdown':
-            copyOfContentItems.splice(indexOfActiveItem + 1, 0,
+            copyOfContentItems.splice(indexOfActiveItem - 1, 0,
               <ParagraphBlock
                 ref={setBlockRef}
                 id={item.id}
@@ -241,7 +239,7 @@ const Editor = ({}: Props) => {
 
   useEffect(() => {
       if (blockRef && autoFocus) {
-     //   blockRef.focus();
+      blockRef.focus();
       }
   },[blockRef])
 
