@@ -13,6 +13,9 @@ const GlobalStyles = createGlobalStyle`
     color: ${Colors.GREY[50]};
     background-color: ${Colors.GREY[550]};
   }
+  a{
+    color: ${Colors.PRIMARY};
+  }
 `;
 
 const StyledContentWrapper = styled.div`
@@ -26,8 +29,7 @@ const StyledContentWrapper = styled.div`
 const StyledContent = styled.main`
   width: 100%;
   box-sizing: border-box;
-  display: grid;
-  grid-template-columns: 1fr 300px;
+  display: flex;
   overflow: hidden;
 `;
 

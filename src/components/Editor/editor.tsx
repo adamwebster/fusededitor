@@ -8,15 +8,22 @@ import { HeadingBlock, ParagraphBlock } from '../Blocks';
 import MarkdownBlock from '../Blocks/MarkdownBlock';
 import { Button } from '../Button';
 import { Panel } from '../Panel';
-import { Toolbar } from '../Toolbar';
 import Tippy from '@tippyjs/react';
 import { Toggle } from '../Toggle';
 
 const StyledEditorWrapper = styled.div`
-  display: flex;
+  display: grid;
   flex-flow: column;
   overflow: hidden;
+  grid-template-columns: 1fr 300px;
+  flex: 1 1;
 `;
+
+const StyledDocument = styled.div`
+  display: flex;
+  flex: 1 1;
+  flex-flow: column;
+`
 const StyledEditor = styled.div`
   padding: 8px 16px;
   background-color: ${Colors.GREY[600]};
@@ -239,7 +246,7 @@ const Editor = ({}: Props) => {
   return (
     <>
       <StyledEditorWrapper>
-        {/* <Toolbar /> */}
+        <StyledDocument>
         <StyledDocumentHeader>
           <StyledDocumentTitle
             value={document.document.title}
@@ -324,8 +331,8 @@ const Editor = ({}: Props) => {
             }
           })}
         </StyledEditor>
-      </StyledEditorWrapper>
-      <Panel>
+        </StyledDocument>
+        <Panel>
         <h3>Blocks</h3>
         <StyledBlockGrid>
           <Tippy content="Heading Block">
@@ -361,6 +368,8 @@ const Editor = ({}: Props) => {
 
         <h3>Attachments</h3>
       </Panel>
+      </StyledEditorWrapper>
+     
     </>
   );
 };

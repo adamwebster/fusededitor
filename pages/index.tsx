@@ -1,13 +1,8 @@
-import { Editor } from '../src/components/Editor';
-import { Layout } from '../src/components/Layout';
-import { Panel } from '../src/components/Panel';
+import Link from "next/link";
+import { Layout } from "../src/components/Layout";
 
-export default function Home() {
-  return (
-    <Layout>
-      <Editor
-        content={[{ type: 'heading', content: 'Heading', element: 'h3' }]}
-      />
-    </Layout>
-  );
-}
+const Index = () => {
+  return <Layout><Link href="/editor"><a>Editor</a></Link></Layout>;
+};
+
+export default Index;
