@@ -36,13 +36,8 @@ const VerticalNav = () => (
         <FontAwesomeIcon icon={faFileAlt} />
       </StyledLink>
     </Link>
-    <Link href="/calendar">
-      <StyledLink>
-        <FontAwesomeIcon icon={faCalendar} />
-      </StyledLink>
-    </Link>
     <StyledNavSpacer />
-    <Link href="/calendar">
+    <Link href="/settings">
       <StyledLink>
         <FontAwesomeIcon icon={faCog} />
       </StyledLink>
