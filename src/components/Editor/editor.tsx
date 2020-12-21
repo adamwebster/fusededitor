@@ -46,6 +46,8 @@ const StyledDocumentTitle = styled.input`
   font-size: inherit;
   border: none;
   font-weight: 100;
+  font-size: 1.5rem;
+  flex: 1 1;
   -webkit-appearance: none;
 `;
 
@@ -69,18 +71,19 @@ interface Props {}
 
 const Editor = ({}: Props) => {
   const [title, setTitle] = useState('Document Name');
-  const [documentStructure, setDocumentStructure] = useState([]);
+  const [documentStructure, setDocumentStructure] = useState({
+    document: { title: 'Document Name' },
+    documentLayout: [],
+    settings: {createNewParagraphOnReturn: false},
+  });
   const [autoFocus, setAutoFocus] = useState(false);
   const [blockRef, setBlockRef] = useState(null);
   const [activeElement, setActiveElement] = useState(null);
   const [activeId, setActiveId] = useState();
-  const [createNewParagraphOnReturn, setCreateNewParagraphOnReturn] = useState(
-    false
-  );
   const editor = useRef();
 
   const addBlock = (blockType: string) => {
-    const copyOfDocumentStructure = [...documentStructure];
+    const copyOfDocumentStructure = [...documentStructure.documentLayout];
     const activeItem = copyOfDocumentStructure.find(
       item => item.id === activeId
     );
@@ -140,27 +143,35 @@ const Editor = ({}: Props) => {
           });
         }
     }
-    setDocumentStructure(copyOfDocumentStructure);
+    setDocumentStructure({
+      ...documentStructure,
+      documentLayout: copyOfDocumentStructure,
+    });
     setAutoFocus(true);
   };
 
   const updateItem = (id: string, e: any) => {
-    const itemToUpdate = documentStructure.find(item => item.id === id);
+    const itemToUpdate = documentStructure.documentLayout.find(
+      item => item.id === id
+    );
     if (itemToUpdate) {
       itemToUpdate.content = e.target.value || e.target.innerHTML;
     }
   };
 
   const removeItem = id => {
-    let copyOfDocumentStructure = [...documentStructure];
+    let copyOfDocumentStructure = [...documentStructure.documentLayout];
     copyOfDocumentStructure = copyOfDocumentStructure.filter(
       item => item.id !== id
     );
-    setDocumentStructure(copyOfDocumentStructure);
+    setDocumentStructure({
+      ...documentStructure,
+      documentLayout: copyOfDocumentStructure,
+    });
   };
 
   const moveItem = (id, direction, e) => {
-    let copyOfDocumentStructure = [...documentStructure];
+    let copyOfDocumentStructure = [...documentStructure.documentLayout];
     const itemToMove = copyOfDocumentStructure.find(item => item.id === id);
     const indexOfItemToMove = copyOfDocumentStructure.findIndex(
       item => item.id === id
@@ -173,7 +184,10 @@ const Editor = ({}: Props) => {
     } else if (direction === 'down') {
       copyOfDocumentStructure.splice(indexOfItemToMove + 1, 0, itemToMove);
     }
-    setDocumentStructure(copyOfDocumentStructure);
+    setDocumentStructure({
+      ...documentStructure,
+      documentLayout: copyOfDocumentStructure,
+    });
     if (activeElement) activeElement.focus();
   };
 
@@ -182,7 +196,7 @@ const Editor = ({}: Props) => {
     switch (keyCode) {
       case 13:
         // Enter key
-        if (!e.shiftKey && createNewParagraphOnReturn) {
+        if (!e.shiftKey && documentStructure.settings.createNewParagraphOnReturn) {
           e.preventDefault();
           addBlock('paragraph');
         }
@@ -198,10 +212,13 @@ const Editor = ({}: Props) => {
   };
 
   const changeElement = (index, element) => {
-    const copyOfDocumentStructure = [...documentStructure];
+    const copyOfDocumentStructure = [...documentStructure.documentLayout];
     console.log(copyOfDocumentStructure[index]);
     copyOfDocumentStructure[index].element = element;
-    setDocumentStructure(copyOfDocumentStructure);
+    setDocumentStructure({
+      ...documentStructure,
+      documentLayout: copyOfDocumentStructure,
+    });
   };
 
   useEffect(() => {
@@ -225,18 +242,21 @@ const Editor = ({}: Props) => {
       <StyledEditorWrapper>
         {/* <Toolbar /> */}
         <StyledDocumentHeader>
-          <h2>
-            <StyledDocumentTitle
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-            />
-          </h2>
+          <StyledDocumentTitle
+            value={documentStructure.document.title}
+            onChange={e =>
+              setDocumentStructure({
+                ...documentStructure,
+                document: { title: e.target.value },
+              })
+            }
+          />
           <Button primary onClick={() => saveDocument()}>
             Save
           </Button>
         </StyledDocumentHeader>
         <StyledEditor ref={editor}>
-          {documentStructure.map((item, index) => {
+          {documentStructure.documentLayout.map((item, index) => {
             switch (item.type) {
               case 'heading':
                 return (
@@ -328,15 +348,15 @@ const Editor = ({}: Props) => {
         <h3>Document Settings</h3>
         <label
           onClick={() =>
-            setCreateNewParagraphOnReturn(!createNewParagraphOnReturn)
+            setDocumentStructure({...documentStructure, settings: { createNewParagraphOnReturn: !documentStructure.settings.createNewParagraphOnReturn}})
           }
         >
           Create new paragraph block on return
         </label>
         <Toggle
-          checked={createNewParagraphOnReturn}
+          checked={documentStructure.settings.createNewParagraphOnReturn}
           onClick={() =>
-            setCreateNewParagraphOnReturn(!createNewParagraphOnReturn)
+            setDocumentStructure({...documentStructure, settings: { createNewParagraphOnReturn: !documentStructure.settings.createNewParagraphOnReturn}})
           }
         />
 
