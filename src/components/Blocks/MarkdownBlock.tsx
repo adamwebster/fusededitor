@@ -1,4 +1,3 @@
-import { size } from 'polished';
 import { forwardRef, HTMLAttributes, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { Colors } from '../../styles/colors';
@@ -7,16 +6,20 @@ import ReactMarkdown from 'react-markdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBold, faItalic } from '@fortawesome/free-solid-svg-icons';
 
+const StyledMDWrapper = styled.div`
+  max-height: calc(100% - 50px);
+`;
 const StyledMarkdownBlock = styled.textarea`
   resize: vertical;
   width: 100%;
   background-color: transparent;
   border: solid 1px ${Colors.GREY[500]};
   padding: 16px;
-  box-sizing:border-box;
+  box-sizing: border-box;
   color: inherit;
   font-family: inherit;
   font-size: 1rem;
+  max-height: 100%;
   :empty:before {
     content: attr(data-ph);
     opacity: 0.5;
@@ -49,7 +52,7 @@ const StyledMarkdownPreview = styled(ReactMarkdown)`
   background-color: transparent;
   border: solid 1px ${Colors.GREY[500]};
   padding: 16px;
-  box-sizing:border-box;
+  box-sizing: border-box;
   color: inherit;
   font-family: inherit;
   font-size: 1rem;
@@ -85,7 +88,9 @@ const MarkdownBlock = forwardRef(
     const [isMounted, setIsMounted] = useState(false);
     const [content, setContent] = useState(children);
     const [preview, setPreview] = useState(false);
-    const textareaRef = useRef(ref);
+    const textareaRef = useRef<HTMLTextAreaElement>(
+      (ref as unknown) as HTMLTextAreaElement
+    );
     const handleKeyDown = e => {
       setShowPopper(false);
       if (onKeyDown) {
@@ -113,18 +118,51 @@ const MarkdownBlock = forwardRef(
       setContent(e.target.value);
     };
 
+    const wrapText = (openTag, closeTag) => {
+      var textarea = textareaRef.current;
+      var len = textarea.value.length;
+      var start = textarea.selectionStart;
+      var end = textarea.selectionEnd;
+      var sel = textarea.value.substring(start, end);
+      var replace = openTag + sel + closeTag;
+      textarea.value =
+        textarea.value.substring(0, start) +
+        replace +
+        textarea.value.substring(end, len);
+      setContent(textarea.value);
+      textarea.focus();
+      textarea.setSelectionRange(end + openTag.length, end + openTag.length);
+    };
     useEffect(() => {
       sizeTextArea();
     }, [preview]);
 
     return (
-      <div ref={setReferenceElement}>
+      <StyledMDWrapper ref={setReferenceElement}>
         <StyledMarkdownToolbar>
-          <StyledMDToolButton onClick={() => setPreview(!preview)}>
+          <StyledMDToolButton onClick={() => wrapText('**', '**')}>
             <FontAwesomeIcon icon={faBold} />
           </StyledMDToolButton>
-          <StyledMDToolButton onClick={() => setPreview(!preview)}>
+          <StyledMDToolButton onClick={() => wrapText('*', '*')}>
             <FontAwesomeIcon icon={faItalic} />
+          </StyledMDToolButton>
+          <StyledMDToolButton onClick={() => wrapText('# ', '')}>
+            H1
+          </StyledMDToolButton>
+          <StyledMDToolButton onClick={() => wrapText('## ', '')}>
+            H2
+          </StyledMDToolButton>
+          <StyledMDToolButton onClick={() => wrapText('### ', '')}>
+            H3
+          </StyledMDToolButton>
+          <StyledMDToolButton onClick={() => wrapText('#### ', '')}>
+            H4
+          </StyledMDToolButton>
+          <StyledMDToolButton onClick={() => wrapText('##### ', '')}>
+            H5
+          </StyledMDToolButton>
+          <StyledMDToolButton onClick={() => wrapText('###### ', '')}>
+            H6
           </StyledMDToolButton>
           <StyledMDToolButton onClick={() => setPreview(!preview)}>
             Preview
@@ -167,7 +205,7 @@ const MarkdownBlock = forwardRef(
             onMoveBlockDownClick={onMoveBlockDownClick}
           />
         )}
-      </div>
+      </StyledMDWrapper>
     );
   }
 );

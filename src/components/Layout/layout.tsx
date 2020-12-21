@@ -20,6 +20,7 @@ const StyledContentWrapper = styled.div`
   grid-template-columns: 50px 1fr;
   grid-gap: 0;
   flex: 1 1;
+  overflow: hidden;
 `;
 
 const StyledContent = styled.main`
@@ -27,6 +28,7 @@ const StyledContent = styled.main`
   box-sizing: border-box;
   display: grid;
   grid-template-columns: 1fr 300px;
+  overflow: hidden;
 `;
 
 const StyledWrapper = styled.div`

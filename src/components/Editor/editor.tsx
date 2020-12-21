@@ -1,3 +1,6 @@
+import { faHeading, faParagraph } from '@fortawesome/free-solid-svg-icons';
+import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { Colors } from '../../styles/colors';
@@ -6,10 +9,13 @@ import MarkdownBlock from '../Blocks/MarkdownBlock';
 import { Button } from '../Button';
 import { Panel } from '../Panel';
 import { Toolbar } from '../Toolbar';
+import Tippy from '@tippyjs/react';
+import { Toggle } from '../Toggle';
 
 const StyledEditorWrapper = styled.div`
   display: flex;
   flex-flow: column;
+  overflow: hidden;
 `;
 const StyledEditor = styled.div`
   padding: 8px 16px;
@@ -18,6 +24,7 @@ const StyledEditor = styled.div`
   flex: 1 1;
   resize: none;
   color: ${Colors.GREY[50]};
+  overflow: auto;
   &:focus {
     outline: none;
   }
@@ -42,6 +49,22 @@ const StyledDocumentTitle = styled.input`
   -webkit-appearance: none;
 `;
 
+const StyledBlockGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: 32px;
+  grid-gap: 16px;
+  button {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    background-color: transparent;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+  }
+`;
+
 interface Props {}
 
 const Editor = ({}: Props) => {
@@ -51,7 +74,9 @@ const Editor = ({}: Props) => {
   const [blockRef, setBlockRef] = useState(null);
   const [activeElement, setActiveElement] = useState(null);
   const [activeId, setActiveId] = useState();
-  const [createNewParagraphOnReturn, setCreateNewParagraphOnReturn] = useState(false);
+  const [createNewParagraphOnReturn, setCreateNewParagraphOnReturn] = useState(
+    false
+  );
   const editor = useRef();
 
   const addBlock = (blockType: string) => {
@@ -283,14 +308,38 @@ const Editor = ({}: Props) => {
       </StyledEditorWrapper>
       <Panel>
         <h3>Blocks</h3>
-        <div onClick={() => addBlock('heading')}>Heading</div>
-        <div onClick={() => addBlock('paragraph')}>Paragraph</div>
-        <div onClick={() => addBlock('markdown')}>Markdown</div>
+        <StyledBlockGrid>
+          <Tippy content="Heading Block">
+            <button onClick={() => addBlock('heading')}>
+              <FontAwesomeIcon icon={faHeading} />
+            </button>
+          </Tippy>
+          <Tippy content="Paragraph Block">
+            <button onClick={() => addBlock('paragraph')}>
+              <FontAwesomeIcon icon={faParagraph} />
+            </button>
+          </Tippy>
+          <Tippy content="Markdown Block">
+            <button onClick={() => addBlock('markdown')}>
+              <FontAwesomeIcon icon={faMarkdown} />
+            </button>
+          </Tippy>
+        </StyledBlockGrid>
         <h3>Document Settings</h3>
-        <label>
+        <label
+          onClick={() =>
+            setCreateNewParagraphOnReturn(!createNewParagraphOnReturn)
+          }
+        >
           Create new paragraph block on return
-          <input type="checkbox"  checked={createNewParagraphOnReturn} onChange={(e) => setCreateNewParagraphOnReturn(e.target.checked)} />
         </label>
+        <Toggle
+          checked={createNewParagraphOnReturn}
+          onClick={() =>
+            setCreateNewParagraphOnReturn(!createNewParagraphOnReturn)
+          }
+        />
+
         <h3>Attachments</h3>
       </Panel>
     </>
