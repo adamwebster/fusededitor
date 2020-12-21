@@ -70,8 +70,7 @@ const StyledBlockGrid = styled.div`
 interface Props {}
 
 const Editor = ({}: Props) => {
-  const [title, setTitle] = useState('Document Name');
-  const [documentStructure, setDocumentStructure] = useState({
+  const [document, setDocument] = useState({
     document: { title: 'Document Name' },
     documentLayout: [],
     settings: {createNewParagraphOnReturn: false},
@@ -83,27 +82,27 @@ const Editor = ({}: Props) => {
   const editor = useRef();
 
   const addBlock = (blockType: string) => {
-    const copyOfDocumentStructure = [...documentStructure.documentLayout];
-    const activeItem = copyOfDocumentStructure.find(
+    const copyOfdocument = [...document.documentLayout];
+    const activeItem = copyOfdocument.find(
       item => item.id === activeId
     );
-    let indexOfActiveItem = copyOfDocumentStructure.findIndex(
+    let indexOfActiveItem = copyOfdocument.findIndex(
       item => item.id === activeId
     );
     if (indexOfActiveItem === -1) {
-      indexOfActiveItem = copyOfDocumentStructure.length;
+      indexOfActiveItem = copyOfdocument.length;
     }
     console.log(activeItem, indexOfActiveItem);
     switch (blockType) {
       case 'heading':
-        const headingElements = copyOfDocumentStructure.filter(
+        const headingElements = copyOfdocument.filter(
           item => item.type === 'heading'
         );
         const itemExist = headingElements.find(
           item => item.id === 'heading' + (headingElements.length + 1)
         );
         if (!itemExist) {
-          copyOfDocumentStructure.splice(indexOfActiveItem + 1, 0, {
+          copyOfdocument.splice(indexOfActiveItem + 1, 0, {
             id: 'heading' + (headingElements.length + 1),
             type: 'heading',
             content: 'Heading',
@@ -112,14 +111,14 @@ const Editor = ({}: Props) => {
         }
         break;
       case 'paragraph':
-        const paragraphItems = copyOfDocumentStructure.filter(
+        const paragraphItems = copyOfdocument.filter(
           item => item.type === 'paragraph'
         );
         const paragraphItemExist = paragraphItems.find(
           item => item.id === 'paragraph' + (paragraphItems.length + 1)
         );
         if (!paragraphItemExist) {
-          copyOfDocumentStructure.splice(indexOfActiveItem + 1, 0, {
+          copyOfdocument.splice(indexOfActiveItem + 1, 0, {
             id: 'paragraph' + (paragraphItems.length + 1),
             type: 'paragraph',
             content: '',
@@ -128,14 +127,14 @@ const Editor = ({}: Props) => {
         }
         break;
       case 'markdown':
-        const markdownItems = copyOfDocumentStructure.filter(
+        const markdownItems = copyOfdocument.filter(
           item => item.type === 'markdown'
         );
         const markdownItemExist = markdownItems.find(
           item => item.id === 'markdown' + (markdownItems.length + 1)
         );
         if (!markdownItemExist) {
-          copyOfDocumentStructure.splice(indexOfActiveItem + 1, 0, {
+          copyOfdocument.splice(indexOfActiveItem + 1, 0, {
             id: 'markdown' + (markdownItems.length + 1),
             type: 'markdown',
             content: '',
@@ -143,15 +142,15 @@ const Editor = ({}: Props) => {
           });
         }
     }
-    setDocumentStructure({
-      ...documentStructure,
-      documentLayout: copyOfDocumentStructure,
+    setDocument({
+      ...document,
+      documentLayout: copyOfdocument,
     });
     setAutoFocus(true);
   };
 
   const updateItem = (id: string, e: any) => {
-    const itemToUpdate = documentStructure.documentLayout.find(
+    const itemToUpdate = document.documentLayout.find(
       item => item.id === id
     );
     if (itemToUpdate) {
@@ -160,33 +159,33 @@ const Editor = ({}: Props) => {
   };
 
   const removeItem = id => {
-    let copyOfDocumentStructure = [...documentStructure.documentLayout];
-    copyOfDocumentStructure = copyOfDocumentStructure.filter(
+    let copyOfdocument = [...document.documentLayout];
+    copyOfdocument = copyOfdocument.filter(
       item => item.id !== id
     );
-    setDocumentStructure({
-      ...documentStructure,
-      documentLayout: copyOfDocumentStructure,
+    setDocument({
+      ...document,
+      documentLayout: copyOfdocument,
     });
   };
 
   const moveItem = (id, direction, e) => {
-    let copyOfDocumentStructure = [...documentStructure.documentLayout];
-    const itemToMove = copyOfDocumentStructure.find(item => item.id === id);
-    const indexOfItemToMove = copyOfDocumentStructure.findIndex(
+    let copyOfdocument = [...document.documentLayout];
+    const itemToMove = copyOfdocument.find(item => item.id === id);
+    const indexOfItemToMove = copyOfdocument.findIndex(
       item => item.id === id
     );
-    copyOfDocumentStructure = copyOfDocumentStructure.filter(
+    copyOfdocument = copyOfdocument.filter(
       item => item.id !== id
     );
     if (direction === 'up') {
-      copyOfDocumentStructure.splice(indexOfItemToMove - 1, 0, itemToMove);
+      copyOfdocument.splice(indexOfItemToMove - 1, 0, itemToMove);
     } else if (direction === 'down') {
-      copyOfDocumentStructure.splice(indexOfItemToMove + 1, 0, itemToMove);
+      copyOfdocument.splice(indexOfItemToMove + 1, 0, itemToMove);
     }
-    setDocumentStructure({
-      ...documentStructure,
-      documentLayout: copyOfDocumentStructure,
+    setDocument({
+      ...document,
+      documentLayout: copyOfdocument,
     });
     if (activeElement) activeElement.focus();
   };
@@ -196,7 +195,7 @@ const Editor = ({}: Props) => {
     switch (keyCode) {
       case 13:
         // Enter key
-        if (!e.shiftKey && documentStructure.settings.createNewParagraphOnReturn) {
+        if (!e.shiftKey && document.settings.createNewParagraphOnReturn) {
           e.preventDefault();
           addBlock('paragraph');
         }
@@ -206,27 +205,27 @@ const Editor = ({}: Props) => {
 
   const saveDocument = () => {
     localStorage.setItem(
-      'documentStructure',
-      JSON.stringify(documentStructure)
+      'document',
+      JSON.stringify(document)
     );
   };
 
   const changeElement = (index, element) => {
-    const copyOfDocumentStructure = [...documentStructure.documentLayout];
-    console.log(copyOfDocumentStructure[index]);
-    copyOfDocumentStructure[index].element = element;
-    setDocumentStructure({
-      ...documentStructure,
-      documentLayout: copyOfDocumentStructure,
+    const copyOfdocument = [...document.documentLayout];
+    console.log(copyOfdocument[index]);
+    copyOfdocument[index].element = element;
+    setDocument({
+      ...document,
+      documentLayout: copyOfdocument,
     });
   };
 
   useEffect(() => {
     const localStorageContent = JSON.parse(
-      localStorage.getItem('documentStructure')
+      localStorage.getItem('document')
     );
     if (localStorageContent) {
-      setDocumentStructure(localStorageContent);
+      setDocument(localStorageContent);
     } else {
     }
   }, []);
@@ -243,10 +242,10 @@ const Editor = ({}: Props) => {
         {/* <Toolbar /> */}
         <StyledDocumentHeader>
           <StyledDocumentTitle
-            value={documentStructure.document.title}
+            value={document.document.title}
             onChange={e =>
-              setDocumentStructure({
-                ...documentStructure,
+              setDocument({
+                ...document,
                 document: { title: e.target.value },
               })
             }
@@ -256,7 +255,7 @@ const Editor = ({}: Props) => {
           </Button>
         </StyledDocumentHeader>
         <StyledEditor ref={editor}>
-          {documentStructure.documentLayout.map((item, index) => {
+          {document.documentLayout.map((item, index) => {
             switch (item.type) {
               case 'heading':
                 return (
@@ -348,15 +347,15 @@ const Editor = ({}: Props) => {
         <h3>Document Settings</h3>
         <label
           onClick={() =>
-            setDocumentStructure({...documentStructure, settings: { createNewParagraphOnReturn: !documentStructure.settings.createNewParagraphOnReturn}})
+            setDocument({...document, settings: { createNewParagraphOnReturn: !document.settings.createNewParagraphOnReturn}})
           }
         >
           Create new paragraph block on return
         </label>
         <Toggle
-          checked={documentStructure.settings.createNewParagraphOnReturn}
+          checked={document.settings.createNewParagraphOnReturn}
           onClick={() =>
-            setDocumentStructure({...documentStructure, settings: { createNewParagraphOnReturn: !documentStructure.settings.createNewParagraphOnReturn}})
+            setDocument({...document, settings: { createNewParagraphOnReturn: !document.settings.createNewParagraphOnReturn}})
           }
         />
 
