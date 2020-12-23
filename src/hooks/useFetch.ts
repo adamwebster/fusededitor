@@ -1,5 +1,5 @@
-export const useFetch = async (url, body) => {
-  const response = await fetch(url, {
+export const useFetch = async (path, body) => {
+  const response = await fetch(process.env.NEXT_PUBLIC_API_BASE_URL + path, {
     method: 'POST',
     mode: 'cors',
     credentials: 'include',

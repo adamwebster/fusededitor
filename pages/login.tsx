@@ -41,7 +41,7 @@ const Login = () => {
 
   const SignIn = e => {
     e.preventDefault();
-    useFetch('http://localhost:1984/fe/signUserIn', {
+    useFetch('signUserIn', {
       username: username,
       password: password,
     }).then(resp => {

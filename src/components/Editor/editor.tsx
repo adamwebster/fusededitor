@@ -1,4 +1,8 @@
-import { faHeading, faParagraph } from '@fortawesome/free-solid-svg-icons';
+import {
+  faHeading,
+  faParagraph,
+  faSpinner,
+} from '@fortawesome/free-solid-svg-icons';
 import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useRef, useState } from 'react';
@@ -89,6 +93,7 @@ const Editor = ({ documentJSON }: Props) => {
   const [activeElement, setActiveElement] = useState(null);
   const [activeId, setActiveId] = useState();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [saving, setSaving] = useState(false);
   const editor = useRef();
   const router = useRouter();
 
@@ -204,13 +209,16 @@ const Editor = ({ documentJSON }: Props) => {
   };
 
   const saveDocument = () => {
-    useFetch('http://localhost:1984/fe/updateDocument', {
+    setSaving(true);
+    useFetch('updateDocument', {
       document,
+    }).then(resp => {
+      setSaving(false);
     });
   };
 
   const deleteDocument = () => {
-    useFetch('http://localhost:1984/fe/deleteDocument', {
+    useFetch('deleteDocument', {
       document,
     });
     setShowDeleteModal(false);
@@ -272,8 +280,8 @@ const Editor = ({ documentJSON }: Props) => {
                 })
               }
             />
-            <Button primary onClick={() => saveDocument()}>
-              Save
+            <Button primary disabled={saving} onClick={() => saveDocument()}>
+              {saving ? <FontAwesomeIcon icon={faSpinner} spin /> : 'Save'}
             </Button>
             <Button onClick={() => setShowDeleteModal(true)}>Delete</Button>
           </StyledDocumentHeader>

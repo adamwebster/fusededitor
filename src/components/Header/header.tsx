@@ -44,7 +44,7 @@ const Header = () => {
   const { user } = useAuth();
   const router = useRouter();
   const logout = () => {
-    useFetch('http://localhost:1984/fe/logout/', {}).then(resp => {
+    useFetch('logout', {}).then(resp => {
       router.push('/login');
     });
   };

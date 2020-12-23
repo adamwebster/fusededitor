@@ -109,14 +109,14 @@ const Index = () => {
   const [selectedView, setSelectedView] = useState('grid');
   const router = useRouter();
   const getDocuments = () => {
-    useFetch('http://localhost:1984/fe/getDocuments', {}).then(resp => {
+    useFetch('getDocuments', {}).then(resp => {
       setDocuments(resp);
     });
   };
 
   const createDocument = () => {
     console.log('create');
-    useFetch('http://localhost:1984/fe/createDocument', {
+    useFetch('createDocument', {
       documentTitle,
     }).then(resp => {
       router.push(`/editor/${resp.id}`);

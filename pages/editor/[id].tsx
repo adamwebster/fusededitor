@@ -12,7 +12,7 @@ const EditorPage = () => {
   const [status, setStatus] = useState('');
   const [statusMessage, setStatusMessage] = useState('');
   const getDocument = () => {
-    useFetch('http://localhost:1984/fe/getDocument', {
+    useFetch('getDocument', {
       id,
     }).then(resp => {
       if (resp.status) {

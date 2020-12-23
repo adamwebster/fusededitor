@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   const checkedIfLoggedIn = () => {
-    useFetch('http://localhost:1984/fe/checkifloggedin', {}).then(resp => {
+    useFetch('checkifloggedin', {}).then(resp => {
       setLoggedIn(resp.loggedin);
       if (resp.loggedin) {
         console.log(resp);
