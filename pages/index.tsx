@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Layout } from '../src/components/Layout';
+import { ProtectedRoute } from '../src/components/ProtectedRoute/ProtectedRoute';
 import { useFetch } from '../src/hooks/useFetch';
 
 const Index = () => {
@@ -17,7 +18,7 @@ const Index = () => {
     <Layout>
       {documents.map(document => {
         return (
-          <Link href={`/editor/${document._id}`}>
+          <Link key={document._id} href={`/editor/${document._id}`}>
             <a>{document.title}</a>
           </Link>
         );
@@ -26,4 +27,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default ProtectedRoute(Index);

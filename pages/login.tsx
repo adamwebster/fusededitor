@@ -10,7 +10,6 @@ const Login = () => {
       username: username,
       password: password,
     }).then(resp => {
-      console.log(resp);
       if (resp.loggedin) {
         window.location.href = resp.redirectURL;
       }

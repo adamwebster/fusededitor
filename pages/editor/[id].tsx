@@ -9,18 +9,33 @@ const EditorPage = () => {
   const router = useRouter();
   const { id } = router.query;
   const [document, setDocument] = useState();
+  const [status, setStatus] = useState('');
+  const [statusMessage, setStatusMessage] = useState('');
   const getDocument = () => {
     useFetch('http://localhost:1984/fe/getDocument', {
       id,
     }).then(resp => {
-      setDocument(resp[0]);
+      if (resp.status) {
+        setStatus(resp.status);
+        setStatusMessage(resp.message);
+      } else {
+        setDocument(resp);
+      }
     });
   };
 
   useEffect(() => {
     getDocument();
   }, []);
-  return <Layout>{document && <Editor documentJSON={document} />}</Layout>;
+  return (
+    <Layout>
+      {status ? (
+        <>{statusMessage}</>
+      ) : (
+        document && <Editor documentJSON={document} />
+      )}
+    </Layout>
+  );
 };
 
 export default ProtectedRoute(EditorPage);

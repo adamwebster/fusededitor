@@ -5,8 +5,6 @@ export const ProtectedRoute = Component =>
   function Comp(props) {
     const { loggedIn, loading } = useAuth();
     const router = useRouter();
-
-    console.log(loggedIn, loading);
     if (!loggedIn) {
       if (loading) {
         return <>Loading</>;

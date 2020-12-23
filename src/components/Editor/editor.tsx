@@ -96,7 +96,6 @@ const Editor = ({ documentJSON }: Props) => {
     if (indexOfActiveItem === -1) {
       indexOfActiveItem = copyOfdocument.length;
     }
-    console.log(activeItem, indexOfActiveItem);
     switch (blockType) {
       case 'heading':
         const headingElements = copyOfdocument.filter(
@@ -208,7 +207,6 @@ const Editor = ({ documentJSON }: Props) => {
 
   const changeElement = (index, element) => {
     const copyOfdocument = [...document.documentLayout];
-    console.log(copyOfdocument[index]);
     copyOfdocument[index].element = element;
     setDocument({
       ...document,
@@ -235,7 +233,6 @@ const Editor = ({ documentJSON }: Props) => {
     <>
       <StyledEditorWrapper>
         <StyledDocument>
-          {console.log('document 2', document)}
           <StyledDocumentHeader>
             <StyledDocumentTitle
               value={document.title}

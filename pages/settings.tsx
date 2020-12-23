@@ -1,21 +1,24 @@
 import styled from 'styled-components';
-import { Layout } from "../src/components/Layout";
+import { Layout } from '../src/components/Layout';
+import { ProtectedRoute } from '../src/components/ProtectedRoute/ProtectedRoute';
 import { Colors } from '../src/styles/colors';
 
 const StyledSettingsPage = styled.div`
-    margin: 16px;
-    padding: 16px;
-    box-sizing:border-box;
-    width: 100%;
-    background-color: ${Colors.GREY[500]};
-    display:flex;
-`
+  margin: 16px;
+  padding: 16px;
+  box-sizing: border-box;
+  width: 100%;
+  background-color: ${Colors.GREY[500]};
+  display: flex;
+`;
 const Settings = () => {
-  return <Layout>
+  return (
+    <Layout>
       <StyledSettingsPage>
-          <h1>Settings</h1>
+        <h1>Settings</h1>
       </StyledSettingsPage>
-  </Layout>;
+    </Layout>
+  );
 };
 
-export default Settings;
+export default ProtectedRoute(Settings);

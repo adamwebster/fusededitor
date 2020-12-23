@@ -15,7 +15,6 @@ export const AuthProvider = ({ children }) => {
 
   const checkedIfLoggedIn = () => {
     useFetch('http://localhost:1984/fe/checkifloggedin', {}).then(resp => {
-      console.log(resp);
       setLoggedIn(resp.loggedin);
       if (resp.loggedin) {
         setUser({ username: resp.username, isAdmin: resp.isAdmin });
