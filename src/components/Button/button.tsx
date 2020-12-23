@@ -19,9 +19,13 @@ const StyledButton = styled.button`
       primary ? darken(0.1, Colors.PRIMARY) : Colors.PRIMARY};
     color: ${Colors.WHITE};
   }
+
+  + button {
+    margin-left: 8px;
+  }
 `;
 
-interface Props extends ButtonHTMLAttributes<HTMLButtonElement>{
+interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: string | ReactElement;
   primary?: boolean;
 }

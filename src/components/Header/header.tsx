@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { useAuth } from '../../context/authenticaton';
 import { Colors } from '../../styles/colors';
 
 const StyledHeader = styled.header`
@@ -7,7 +8,7 @@ const StyledHeader = styled.header`
   background-color: ${Colors.GREY[500]};
   box-sizing: border-box;
   color: ${Colors.WHITE};
-  display:flex;
+  display: flex;
   align-items: center;
   h1 {
     margin: 0;
@@ -23,23 +24,25 @@ const StyledUserInfo = styled.div`
   justify-content: flex-end;
   align-items: center;
   flex: 1 1;
-
-`
+`;
 const StyledAvatar = styled.div`
   width: 32px;
   height: 32px;
   border-radius: 50%;
   background-color: ${Colors.GREY[300]};
   margin-right: 10px;
-`
-const Header = () => (
-  <StyledHeader>
-    <h1>Fused Editor</h1>
-    <StyledUserInfo>
-      <StyledAvatar />
-      Welcome, John Doe
-    </StyledUserInfo>
-  </StyledHeader>
-);
+`;
+const Header = () => {
+  const { user } = useAuth();
+  return (
+    <StyledHeader>
+      <h1>Fused Editor</h1>
+      <StyledUserInfo>
+        <StyledAvatar />
+        Welcome, {user.firstName}
+      </StyledUserInfo>
+    </StyledHeader>
+  );
+};
 
 export default Header;

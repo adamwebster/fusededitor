@@ -9,6 +9,7 @@ import { TextInput } from '../src/components/TextInput';
 import { Colors } from '../src/styles/colors';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAlignLeft } from '@fortawesome/free-solid-svg-icons';
+import { useRouter } from 'next/router';
 const StyledInnerPage = styled(InnerPage)`
   flex-flow: column;
 `;
@@ -31,7 +32,6 @@ const StyledDocumentGrid = styled.div`
 `;
 
 const StyledDocument = styled.div`
-
   background-color: ${Colors.GREY[450]};
   border: solid 1px ${Colors.GREY[400]};
   padding: 16px;
@@ -40,41 +40,42 @@ const StyledDocument = styled.div`
   display: flex;
   flex-flow: column;
   align-items: center;
-  span{
-      background-color: ${Colors.GREY[350]};
-      text-align: center;
-      padding: 8px;
-      border-radius: 5px;
-      width: 100%;
-      display:block;
+  span {
+    background-color: ${Colors.GREY[350]};
+    text-align: center;
+    padding: 8px;
+    border-radius: 5px;
+    width: 100%;
+    display: block;
   }
 `;
 
 const StyledDocumentLink = styled.a`
-    text-decoration:none;
-    cursor: pointer;
-    color: ${Colors.GREY[200]};
-    &:hover{
-        opacity: 0.5;
-    }
-`
+  text-decoration: none;
+  cursor: pointer;
+  color: ${Colors.GREY[200]};
+  &:hover {
+    opacity: 0.5;
+  }
+`;
 const StyledTextInput = styled(TextInput)`
   margin-right: 8px;
 `;
 
 const StyledDocumentIconWrapper = styled.div`
-    flex: 1 1;
-    display:flex;
-    justify-content: center;
-    align-items: flex-start;
-    margin-top: 16px;
-    svg{
-        color: ${Colors.GREY[500]};
-    }
-`
+  flex: 1 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin-top: 16px;
+  svg {
+    color: ${Colors.GREY[500]};
+  }
+`;
 const Index = () => {
   const [documents, setDocuments] = useState([]);
   const [documentTitle, setDocumentTitle] = useState('');
+  const router = useRouter();
   const getDocuments = () => {
     useFetch('http://localhost:1984/fe/getDocuments', {}).then(resp => {
       setDocuments(resp);
@@ -86,7 +87,7 @@ const Index = () => {
     useFetch('http://localhost:1984/fe/createDocument', {
       documentTitle,
     }).then(resp => {
-      console.log(resp);
+      router.push(`/editor/${resp.id}`);
     });
   };
   useEffect(() => {
@@ -111,12 +112,16 @@ const Index = () => {
         <StyledDocumentGrid>
           {documents.map(document => {
             return (
-              <Link key={document._id} href={`/editor/${document._id}`} passHref>
+              <Link
+                key={document._id}
+                href={`/editor/${document._id}`}
+                passHref
+              >
                 <StyledDocumentLink>
                   <StyledDocument>
-                      <StyledDocumentIconWrapper>
-                  <FontAwesomeIcon size="8x" icon={faAlignLeft} />
-                  </StyledDocumentIconWrapper>
+                    <StyledDocumentIconWrapper>
+                      <FontAwesomeIcon size="8x" icon={faAlignLeft} />
+                    </StyledDocumentIconWrapper>
                     <span>{document.title}</span>
                   </StyledDocument>
                 </StyledDocumentLink>

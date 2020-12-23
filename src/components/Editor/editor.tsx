@@ -11,6 +11,8 @@ import { Panel } from '../Panel';
 import Tippy from '@tippyjs/react';
 import { Toggle } from '../Toggle';
 import { useFetch } from '../../hooks/useFetch';
+import { Modal } from '../Modal';
+import { useRouter } from 'next/router';
 
 const StyledEditorWrapper = styled.div`
   display: grid;
@@ -23,6 +25,7 @@ const StyledEditorWrapper = styled.div`
 const StyledDocument = styled.div`
   display: flex;
   flex: 1 1;
+  overflow: hidden;
   flex-flow: column;
 `;
 const StyledEditor = styled.div`
@@ -85,7 +88,9 @@ const Editor = ({ documentJSON }: Props) => {
   const [blockRef, setBlockRef] = useState(null);
   const [activeElement, setActiveElement] = useState(null);
   const [activeId, setActiveId] = useState();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const editor = useRef();
+  const router = useRouter();
 
   const addBlock = (blockType: string) => {
     const copyOfdocument = [...document.documentLayout];
@@ -202,7 +207,14 @@ const Editor = ({ documentJSON }: Props) => {
     useFetch('http://localhost:1984/fe/updateDocument', {
       document,
     });
-    // localStorage.setItem('document', JSON.stringify(document));
+  };
+
+  const deleteDocument = () => {
+    useFetch('http://localhost:1984/fe/deleteDocument', {
+      document,
+    });
+    setShowDeleteModal(false);
+    router.push('/');
   };
 
   const changeElement = (index, element) => {
@@ -231,6 +243,23 @@ const Editor = ({ documentJSON }: Props) => {
 
   return (
     <>
+      <Modal
+        onCloseClick={() => setShowDeleteModal(false)}
+        show={showDeleteModal}
+      >
+        <Modal.Header>
+          <h1>Delete {document.title}</h1>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you would like to delete {document.title}?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button>Cancel</Button>
+          <Button primary onClick={() => deleteDocument()}>
+            Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
       <StyledEditorWrapper>
         <StyledDocument>
           <StyledDocumentHeader>
@@ -246,6 +275,7 @@ const Editor = ({ documentJSON }: Props) => {
             <Button primary onClick={() => saveDocument()}>
               Save
             </Button>
+            <Button onClick={() => setShowDeleteModal(true)}>Delete</Button>
           </StyledDocumentHeader>
           <StyledEditor ref={editor}>
             {document.documentLayout.map((item, index) => {

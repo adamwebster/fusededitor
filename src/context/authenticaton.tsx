@@ -2,7 +2,16 @@ import { createContext, useState, useContext, useEffect } from 'react';
 import Router, { useRouter } from 'next/router';
 import { useFetch } from '../hooks/useFetch';
 
-const AuthContext = createContext({
+interface Props {
+  loggedIn: boolean;
+  user: {
+    username?: string;
+    firstName?: string;
+    lastName?: string;
+  };
+  loading: boolean;
+}
+const AuthContext = createContext<Props>({
   loggedIn: false,
   user: {},
   loading: true,
@@ -17,7 +26,13 @@ export const AuthProvider = ({ children }) => {
     useFetch('http://localhost:1984/fe/checkifloggedin', {}).then(resp => {
       setLoggedIn(resp.loggedin);
       if (resp.loggedin) {
-        setUser({ username: resp.username, isAdmin: resp.isAdmin });
+        console.log(resp);
+        setUser({
+          username: resp.username,
+          firstName: resp.firstName,
+          lastName: resp.lastName,
+          isAdmin: resp.isAdmin,
+        });
       }
       setLoading(false);
     });
