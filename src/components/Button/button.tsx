@@ -9,6 +9,7 @@ const StyledButton = styled.button`
     primary ? Colors.PRIMARY : 'transparent'};
   border-radius: 2px;
   padding: 8px 16px;
+  height: 40px;
   color: ${({ primary }) => (primary ? Colors.WHITE : Colors.PRIMARY)};
   text-transform: uppercase;
   cursor: pointer;
