@@ -8,7 +8,7 @@ import { Button } from '../src/components/Button';
 import { TextInput } from '../src/components/TextInput';
 import { Colors } from '../src/styles/colors';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAlignLeft } from '@fortawesome/free-solid-svg-icons';
+import { faAlignLeft, faList, faTh } from '@fortawesome/free-solid-svg-icons';
 import { useRouter } from 'next/router';
 const StyledInnerPage = styled(InnerPage)`
   flex-flow: column;
@@ -29,6 +29,25 @@ const StyledDocumentGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   grid-gap: 16px;
+`;
+
+const StyledDocumentList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  li {
+    border-bottom: solid 1px ${Colors.GREY[400]};
+    a {
+      display: block;
+      padding: 16px 8px;
+      width: 100%;
+      box-sizing: border-box;
+      text-decoration: none;
+      &:hover {
+        background-color: ${Colors.GREY[450]};
+      }
+    }
+  }
 `;
 
 const StyledDocument = styled.div`
@@ -72,9 +91,22 @@ const StyledDocumentIconWrapper = styled.div`
     color: ${Colors.GREY[500]};
   }
 `;
+
+const StyledListControls = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 16px;
+  padding: 0 16px;
+`;
+
+const StyledDocumentViewControl = styled(FontAwesomeIcon)`
+  color: ${({ active }) => (active ? Colors.PRIMARY : 'inherit')};
+`;
+
 const Index = () => {
   const [documents, setDocuments] = useState([]);
   const [documentTitle, setDocumentTitle] = useState('');
+  const [selectedView, setSelectedView] = useState('grid');
   const router = useRouter();
   const getDocuments = () => {
     useFetch('http://localhost:1984/fe/getDocuments', {}).then(resp => {
@@ -98,6 +130,18 @@ const Index = () => {
       <StyledInnerPage>
         <StyledPageHeader>
           <h1>Documents</h1>
+          <StyledListControls>
+            <StyledDocumentViewControl
+              onClick={() => setSelectedView('grid')}
+              active={selectedView === 'grid'}
+              icon={faTh}
+            />
+            <StyledDocumentViewControl
+              onClick={() => setSelectedView('list')}
+              active={selectedView === 'list'}
+              icon={faList}
+            />
+          </StyledListControls>
           <StyledActionsWrapper>
             <StyledTextInput
               placeholder="Document Name"
@@ -109,26 +153,46 @@ const Index = () => {
             </Button>
           </StyledActionsWrapper>
         </StyledPageHeader>
-        <StyledDocumentGrid>
-          {documents.map(document => {
-            return (
-              <Link
-                key={document._id}
-                href={`/editor/${document._id}`}
-                passHref
-              >
-                <StyledDocumentLink>
-                  <StyledDocument>
-                    <StyledDocumentIconWrapper>
-                      <FontAwesomeIcon size="8x" icon={faAlignLeft} />
-                    </StyledDocumentIconWrapper>
-                    <span>{document.title}</span>
-                  </StyledDocument>
-                </StyledDocumentLink>
-              </Link>
-            );
-          })}
-        </StyledDocumentGrid>
+        {selectedView === 'list' && (
+          <StyledDocumentList>
+            {documents.map(document => {
+              return (
+                <li>
+                  <Link
+                    key={document._id}
+                    href={`/editor/${document._id}`}
+                    passHref
+                  >
+                    <a>{document.title}</a>
+                  </Link>
+                </li>
+              );
+            })}
+          </StyledDocumentList>
+        )}
+
+        {selectedView === 'grid' && (
+          <StyledDocumentGrid>
+            {documents.map(document => {
+              return (
+                <Link
+                  key={document._id}
+                  href={`/editor/${document._id}`}
+                  passHref
+                >
+                  <StyledDocumentLink>
+                    <StyledDocument>
+                      <StyledDocumentIconWrapper>
+                        <FontAwesomeIcon size="8x" icon={faAlignLeft} />
+                      </StyledDocumentIconWrapper>
+                      <span>{document.title}</span>
+                    </StyledDocument>
+                  </StyledDocumentLink>
+                </Link>
+              );
+            })}
+          </StyledDocumentGrid>
+        )}
       </StyledInnerPage>
     </Layout>
   );

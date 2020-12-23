@@ -248,13 +248,13 @@ const Editor = ({ documentJSON }: Props) => {
         show={showDeleteModal}
       >
         <Modal.Header>
-          <h1>Delete {document.title}</h1>
+          <h2>Delete</h2>
         </Modal.Header>
         <Modal.Body>
-          Are you sure you would like to delete {document.title}?
+          Are you sure you would like to delete '{document.title}'?
         </Modal.Body>
         <Modal.Footer>
-          <Button>Cancel</Button>
+          <Button onClick={() => setShowDeleteModal(false)}>Cancel</Button>
           <Button primary onClick={() => deleteDocument()}>
             Delete
           </Button>

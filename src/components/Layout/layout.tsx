@@ -4,7 +4,7 @@ import { Footer } from '../Footer';
 import { Header } from '../Header';
 import { VerticalNav } from '../VerticalNav';
 
-const GlobalStyles = createGlobalStyle`
+export const GlobalStyles = createGlobalStyle`
   body{
     font-family: "Helvetica Neue", san-serif;
     font-size: 100%;

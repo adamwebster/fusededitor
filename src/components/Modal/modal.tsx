@@ -18,7 +18,7 @@ const StyledOverlay = styled.div`
 `;
 
 const StyledModal = styled.div`
-  width: 800px;
+  width: 500px;
   display: flex;
   background-color: ${Colors.GREY[500]};
   max-height: 300px;

@@ -1,6 +1,9 @@
+import { useRouter } from 'next/router';
 import styled from 'styled-components';
 import { useAuth } from '../../context/authenticaton';
+import { useFetch } from '../../hooks/useFetch';
 import { Colors } from '../../styles/colors';
+import { Button } from '../Button';
 
 const StyledHeader = styled.header`
   width: 100%;
@@ -32,14 +35,26 @@ const StyledAvatar = styled.div`
   background-color: ${Colors.GREY[300]};
   margin-right: 10px;
 `;
+
+const StyledLogoutButton = styled(Button)`
+  margin-left: 16px;
+`;
+
 const Header = () => {
   const { user } = useAuth();
+  const router = useRouter();
+  const logout = () => {
+    useFetch('http://localhost:1984/fe/logout/', {}).then(resp => {
+      router.push('/login');
+    });
+  };
   return (
     <StyledHeader>
       <h1>Fused Editor</h1>
       <StyledUserInfo>
         <StyledAvatar />
         Welcome, {user.firstName}
+        <StyledLogoutButton onClick={() => logout()}>Logout</StyledLogoutButton>
       </StyledUserInfo>
     </StyledHeader>
   );
