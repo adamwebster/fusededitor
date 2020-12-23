@@ -1,4 +1,4 @@
-import { ReactElement } from 'react';
+import { ButtonHTMLAttributes, ReactElement } from 'react';
 import styled, { css } from 'styled-components';
 import { Colors } from '../../styles/colors';
 import { darken } from 'polished';
@@ -7,8 +7,9 @@ const StyledButton = styled.button`
     primary ? 'none' : `solid 1px ${Colors.PRIMARY}`};
   background-color: ${({ primary }) =>
     primary ? Colors.PRIMARY : 'transparent'};
-  border-radius: 8px;
+  border-radius: 2px;
   padding: 8px 16px;
+  height: 40px;
   color: ${({ primary }) => (primary ? Colors.WHITE : Colors.PRIMARY)};
   text-transform: uppercase;
   cursor: pointer;
@@ -18,9 +19,13 @@ const StyledButton = styled.button`
       primary ? darken(0.1, Colors.PRIMARY) : Colors.PRIMARY};
     color: ${Colors.WHITE};
   }
+
+  + button {
+    margin-left: 8px;
+  }
 `;
 
-interface Props {
+interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: string | ReactElement;
   primary?: boolean;
 }

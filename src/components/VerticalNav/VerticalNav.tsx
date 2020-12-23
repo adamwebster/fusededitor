@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { Colors } from '../../styles/colors';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendar, faCog, faHome } from '@fortawesome/free-solid-svg-icons';
+import { faCalendar, faCog, faFileAlt, faHome } from '@fortawesome/free-solid-svg-icons';
 import { ReactElement } from 'react';
 import Link from 'next/link';
 
@@ -33,16 +33,11 @@ const VerticalNav = () => (
   <StyledVerticalNav>
     <Link href="/">
       <StyledLink>
-        <FontAwesomeIcon icon={faHome} />
-      </StyledLink>
-    </Link>
-    <Link href="/calendar">
-      <StyledLink>
-        <FontAwesomeIcon icon={faCalendar} />
+        <FontAwesomeIcon icon={faFileAlt} />
       </StyledLink>
     </Link>
     <StyledNavSpacer />
-    <Link href="/calendar">
+    <Link href="/settings">
       <StyledLink>
         <FontAwesomeIcon icon={faCog} />
       </StyledLink>

@@ -4,31 +4,33 @@ import { Footer } from '../Footer';
 import { Header } from '../Header';
 import { VerticalNav } from '../VerticalNav';
 
-const GlobalStyles = createGlobalStyle`
+export const GlobalStyles = createGlobalStyle`
   body{
     font-family: "Helvetica Neue", san-serif;
     font-size: 100%;
     padding: 0;
     margin: 0;
-    background-color: ${Colors.GREY[50]};
+    color: ${Colors.GREY[50]};
+    background-color: ${Colors.GREY[550]};
+  }
+  a{
+    color: ${Colors.PRIMARY};
   }
 `;
 
 const StyledContentWrapper = styled.div`
   display: grid;
   grid-template-columns: 50px 1fr;
-  grid-gap: 16px;
+  grid-gap: 0;
   flex: 1 1;
+  overflow: hidden;
 `;
 
 const StyledContent = styled.main`
   width: 100%;
   box-sizing: border-box;
-  padding-right: 16px;
-  padding-bottom: 16px;
-  padding-top: 16px;
   display: flex;
-  flex-flow: column;
+  overflow: hidden;
 `;
 
 const StyledWrapper = styled.div`

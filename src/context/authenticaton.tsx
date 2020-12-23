@@ -1,0 +1,51 @@
+import { createContext, useState, useContext, useEffect } from 'react';
+import Router, { useRouter } from 'next/router';
+import { useFetch } from '../hooks/useFetch';
+
+interface Props {
+  loggedIn: boolean;
+  user: {
+    username?: string;
+    firstName?: string;
+    lastName?: string;
+  };
+  loading: boolean;
+}
+const AuthContext = createContext<Props>({
+  loggedIn: false,
+  user: {},
+  loading: true,
+});
+
+export const AuthProvider = ({ children }) => {
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [user, setUser] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  const checkedIfLoggedIn = () => {
+    useFetch('checkifloggedin', {}).then(resp => {
+      setLoggedIn(resp.loggedin);
+      if (resp.loggedin) {
+        console.log(resp);
+        setUser({
+          username: resp.username,
+          firstName: resp.firstName,
+          lastName: resp.lastName,
+          isAdmin: resp.isAdmin,
+        });
+      }
+      setLoading(false);
+    });
+  };
+
+  useEffect(() => {
+    checkedIfLoggedIn();
+  }, []);
+  return (
+    <AuthContext.Provider value={{ loggedIn, loading, user }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => useContext(AuthContext);
