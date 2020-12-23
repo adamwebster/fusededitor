@@ -1,5 +1,6 @@
 import { useRouter } from 'next/router';
 import { useAuth } from '../../context/authenticaton';
+import { GlobalStyles } from '../Layout/layout';
 
 export const ProtectedRoute = Component =>
   function Comp(props) {
@@ -7,10 +8,21 @@ export const ProtectedRoute = Component =>
     const router = useRouter();
     if (!loggedIn) {
       if (loading) {
-        return <>Loading</>;
+        return (
+          <>
+            <GlobalStyles />
+          </>
+        );
       } else {
         router.push('/login');
       }
     }
-    return <Component />;
+    if (loggedIn) {
+      return <Component />;
+    }
+    return (
+      <>
+        <GlobalStyles />
+      </>
+    );
   };
