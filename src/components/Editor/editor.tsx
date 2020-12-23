@@ -10,6 +10,7 @@ import { Button } from '../Button';
 import { Panel } from '../Panel';
 import Tippy from '@tippyjs/react';
 import { Toggle } from '../Toggle';
+import { useFetch } from '../../hooks/useFetch';
 
 const StyledEditorWrapper = styled.div`
   display: grid;
@@ -23,7 +24,7 @@ const StyledDocument = styled.div`
   display: flex;
   flex: 1 1;
   flex-flow: column;
-`
+`;
 const StyledEditor = styled.div`
   padding: 8px 16px;
   background-color: ${Colors.GREY[600]};
@@ -74,14 +75,12 @@ const StyledBlockGrid = styled.div`
   }
 `;
 
-interface Props {}
+interface Props {
+  documentJSON: any;
+}
 
-const Editor = ({}: Props) => {
-  const [document, setDocument] = useState({
-    document: { title: 'Document Name' },
-    documentLayout: [],
-    settings: {createNewParagraphOnReturn: false},
-  });
+const Editor = ({ documentJSON }: Props) => {
+  const [document, setDocument] = useState(documentJSON);
   const [autoFocus, setAutoFocus] = useState(false);
   const [blockRef, setBlockRef] = useState(null);
   const [activeElement, setActiveElement] = useState(null);
@@ -90,9 +89,7 @@ const Editor = ({}: Props) => {
 
   const addBlock = (blockType: string) => {
     const copyOfdocument = [...document.documentLayout];
-    const activeItem = copyOfdocument.find(
-      item => item.id === activeId
-    );
+    const activeItem = copyOfdocument.find(item => item.id === activeId);
     let indexOfActiveItem = copyOfdocument.findIndex(
       item => item.id === activeId
     );
@@ -157,9 +154,7 @@ const Editor = ({}: Props) => {
   };
 
   const updateItem = (id: string, e: any) => {
-    const itemToUpdate = document.documentLayout.find(
-      item => item.id === id
-    );
+    const itemToUpdate = document.documentLayout.find(item => item.id === id);
     if (itemToUpdate) {
       itemToUpdate.content = e.target.value || e.target.innerHTML;
     }
@@ -167,9 +162,7 @@ const Editor = ({}: Props) => {
 
   const removeItem = id => {
     let copyOfdocument = [...document.documentLayout];
-    copyOfdocument = copyOfdocument.filter(
-      item => item.id !== id
-    );
+    copyOfdocument = copyOfdocument.filter(item => item.id !== id);
     setDocument({
       ...document,
       documentLayout: copyOfdocument,
@@ -179,12 +172,8 @@ const Editor = ({}: Props) => {
   const moveItem = (id, direction, e) => {
     let copyOfdocument = [...document.documentLayout];
     const itemToMove = copyOfdocument.find(item => item.id === id);
-    const indexOfItemToMove = copyOfdocument.findIndex(
-      item => item.id === id
-    );
-    copyOfdocument = copyOfdocument.filter(
-      item => item.id !== id
-    );
+    const indexOfItemToMove = copyOfdocument.findIndex(item => item.id === id);
+    copyOfdocument = copyOfdocument.filter(item => item.id !== id);
     if (direction === 'up') {
       copyOfdocument.splice(indexOfItemToMove - 1, 0, itemToMove);
     } else if (direction === 'down') {
@@ -211,10 +200,10 @@ const Editor = ({}: Props) => {
   };
 
   const saveDocument = () => {
-    localStorage.setItem(
-      'document',
-      JSON.stringify(document)
-    );
+    useFetch('http://localhost:1984/fe/updateDocument', {
+      document,
+    });
+    // localStorage.setItem('document', JSON.stringify(document));
   };
 
   const changeElement = (index, element) => {
@@ -228,14 +217,13 @@ const Editor = ({}: Props) => {
   };
 
   useEffect(() => {
-    const localStorageContent = JSON.parse(
-      localStorage.getItem('document')
-    );
-    if (localStorageContent) {
-      setDocument(localStorageContent);
-    } else {
-    }
-  }, []);
+    // const localStorageContent = JSON.parse(localStorage.getItem('document'));
+    // if (localStorageContent) {
+    //   setDocument(localStorageContent);
+    // } else {
+    // }
+    setDocument(documentJSON);
+  }, [documentJSON]);
 
   useEffect(() => {
     if (blockRef && autoFocus) {
@@ -247,129 +235,141 @@ const Editor = ({}: Props) => {
     <>
       <StyledEditorWrapper>
         <StyledDocument>
-        <StyledDocumentHeader>
-          <StyledDocumentTitle
-            value={document.document.title}
-            onChange={e =>
+          {console.log('document 2', document)}
+          <StyledDocumentHeader>
+            <StyledDocumentTitle
+              value={document.title}
+              onChange={e =>
+                setDocument({
+                  ...document,
+                  title: e.target.value,
+                })
+              }
+            />
+            <Button primary onClick={() => saveDocument()}>
+              Save
+            </Button>
+          </StyledDocumentHeader>
+          <StyledEditor ref={editor}>
+            {document.documentLayout.map((item, index) => {
+              switch (item.type) {
+                case 'heading':
+                  return (
+                    <HeadingBlock
+                      ref={setBlockRef}
+                      id={item.id}
+                      item={item}
+                      as={item.element}
+                      key={`item_${item.id}`}
+                      changeElement={newElement =>
+                        changeElement(index, newElement)
+                      }
+                      onFocus={e => {
+                        setActiveElement(e.target);
+                        setActiveId(item.id);
+                      }}
+                      onMoveBlockDownClick={e => moveItem(item.id, 'down', e)}
+                      onMoveBlockUpClick={e => moveItem(item.id, 'up', e)}
+                      onRemoveClick={e => removeItem(item.id)}
+                      onKeyUp={e => updateItem(item.id, e)}
+                      onKeyDown={e => handleBlockKeyDown(e)}
+                    >
+                      {item.content}
+                    </HeadingBlock>
+                  );
+                case 'paragraph':
+                  return (
+                    <ParagraphBlock
+                      ref={setBlockRef}
+                      id={item.id}
+                      key={`item_${item.id}`}
+                      as={item.element}
+                      onFocus={e => {
+                        setActiveElement(e.target);
+                        setActiveId(item.id);
+                      }}
+                      onMoveBlockDownClick={e => moveItem(item.id, 'down', e)}
+                      onMoveBlockUpClick={e => moveItem(item.id, 'up', e)}
+                      onRemoveClick={e => removeItem(item.id)}
+                      onKeyUp={e => updateItem(item.id, e)}
+                      onKeyDown={e => handleBlockKeyDown(e)}
+                    >
+                      {item.content}
+                    </ParagraphBlock>
+                  );
+                case 'markdown':
+                  return (
+                    <MarkdownBlock
+                      ref={setBlockRef}
+                      id={item.id}
+                      key={`item_${item.id}`}
+                      as={item.element}
+                      onFocus={e => {
+                        setActiveElement(e.target);
+                        setActiveId(item.id);
+                      }}
+                      onMoveBlockDownClick={e => moveItem(item.id, 'down', e)}
+                      onMoveBlockUpClick={e => moveItem(item.id, 'up', e)}
+                      onRemoveClick={e => removeItem(item.id)}
+                      onKeyUp={e => updateItem(item.id, e)}
+                      onKeyDown={e => handleBlockKeyDown(e)}
+                    >
+                      {item.content}
+                    </MarkdownBlock>
+                  );
+              }
+            })}
+          </StyledEditor>
+        </StyledDocument>
+        <Panel>
+          <h3>Blocks</h3>
+          <StyledBlockGrid>
+            <Tippy content="Heading Block">
+              <button onClick={() => addBlock('heading')}>
+                <FontAwesomeIcon icon={faHeading} />
+              </button>
+            </Tippy>
+            <Tippy content="Paragraph Block">
+              <button onClick={() => addBlock('paragraph')}>
+                <FontAwesomeIcon icon={faParagraph} />
+              </button>
+            </Tippy>
+            <Tippy content="Markdown Block">
+              <button onClick={() => addBlock('markdown')}>
+                <FontAwesomeIcon icon={faMarkdown} />
+              </button>
+            </Tippy>
+          </StyledBlockGrid>
+          <h3>Document Settings</h3>
+          <label
+            onClick={() =>
               setDocument({
                 ...document,
-                document: { title: e.target.value },
+                settings: {
+                  createNewParagraphOnReturn: !document.settings
+                    .createNewParagraphOnReturn,
+                },
+              })
+            }
+          >
+            Create new paragraph block on return
+          </label>
+          <Toggle
+            checked={document.settings.createNewParagraphOnReturn}
+            onClick={() =>
+              setDocument({
+                ...document,
+                settings: {
+                  createNewParagraphOnReturn: !document.settings
+                    .createNewParagraphOnReturn,
+                },
               })
             }
           />
-          <Button primary onClick={() => saveDocument()}>
-            Save
-          </Button>
-        </StyledDocumentHeader>
-        <StyledEditor ref={editor}>
-          {document.documentLayout.map((item, index) => {
-            switch (item.type) {
-              case 'heading':
-                return (
-                  <HeadingBlock
-                    ref={setBlockRef}
-                    id={item.id}
-                    item={item}
-                    as={item.element}
-                    key={`item_${item.id}`}
-                    changeElement={newElement =>
-                      changeElement(index, newElement)
-                    }
-                    onFocus={e => {
-                      setActiveElement(e.target);
-                      setActiveId(item.id);
-                    }}
-                    onMoveBlockDownClick={e => moveItem(item.id, 'down', e)}
-                    onMoveBlockUpClick={e => moveItem(item.id, 'up', e)}
-                    onRemoveClick={e => removeItem(item.id)}
-                    onKeyUp={e => updateItem(item.id, e)}
-                    onKeyDown={e => handleBlockKeyDown(e)}
-                  >
-                    {item.content}
-                  </HeadingBlock>
-                );
-              case 'paragraph':
-                return (
-                  <ParagraphBlock
-                    ref={setBlockRef}
-                    id={item.id}
-                    key={`item_${item.id}`}
-                    as={item.element}
-                    onFocus={e => {
-                      setActiveElement(e.target);
-                      setActiveId(item.id);
-                    }}
-                    onMoveBlockDownClick={e => moveItem(item.id, 'down', e)}
-                    onMoveBlockUpClick={e => moveItem(item.id, 'up', e)}
-                    onRemoveClick={e => removeItem(item.id)}
-                    onKeyUp={e => updateItem(item.id, e)}
-                    onKeyDown={e => handleBlockKeyDown(e)}
-                  >
-                    {item.content}
-                  </ParagraphBlock>
-                );
-              case 'markdown':
-                return (
-                  <MarkdownBlock
-                    ref={setBlockRef}
-                    id={item.id}
-                    key={`item_${item.id}`}
-                    as={item.element}
-                    onFocus={e => {
-                      setActiveElement(e.target);
-                      setActiveId(item.id);
-                    }}
-                    onMoveBlockDownClick={e => moveItem(item.id, 'down', e)}
-                    onMoveBlockUpClick={e => moveItem(item.id, 'up', e)}
-                    onRemoveClick={e => removeItem(item.id)}
-                    onKeyUp={e => updateItem(item.id, e)}
-                    onKeyDown={e => handleBlockKeyDown(e)}
-                  >
-                    {item.content}
-                  </MarkdownBlock>
-                );
-            }
-          })}
-        </StyledEditor>
-        </StyledDocument>
-        <Panel>
-        <h3>Blocks</h3>
-        <StyledBlockGrid>
-          <Tippy content="Heading Block">
-            <button onClick={() => addBlock('heading')}>
-              <FontAwesomeIcon icon={faHeading} />
-            </button>
-          </Tippy>
-          <Tippy content="Paragraph Block">
-            <button onClick={() => addBlock('paragraph')}>
-              <FontAwesomeIcon icon={faParagraph} />
-            </button>
-          </Tippy>
-          <Tippy content="Markdown Block">
-            <button onClick={() => addBlock('markdown')}>
-              <FontAwesomeIcon icon={faMarkdown} />
-            </button>
-          </Tippy>
-        </StyledBlockGrid>
-        <h3>Document Settings</h3>
-        <label
-          onClick={() =>
-            setDocument({...document, settings: { createNewParagraphOnReturn: !document.settings.createNewParagraphOnReturn}})
-          }
-        >
-          Create new paragraph block on return
-        </label>
-        <Toggle
-          checked={document.settings.createNewParagraphOnReturn}
-          onClick={() =>
-            setDocument({...document, settings: { createNewParagraphOnReturn: !document.settings.createNewParagraphOnReturn}})
-          }
-        />
 
-        <h3>Attachments</h3>
-      </Panel>
+          <h3>Attachments</h3>
+        </Panel>
       </StyledEditorWrapper>
-     
     </>
   );
 };
