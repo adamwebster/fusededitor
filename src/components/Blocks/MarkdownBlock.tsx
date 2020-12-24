@@ -4,7 +4,12 @@ import { Colors } from '../../styles/colors';
 import { BlockTools } from './BlockTools';
 import ReactMarkdown from 'react-markdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBold, faItalic } from '@fortawesome/free-solid-svg-icons';
+import {
+  faBold,
+  faCode,
+  faItalic,
+  faLink,
+} from '@fortawesome/free-solid-svg-icons';
 
 const StyledMDWrapper = styled.div`
   max-height: calc(100% - 50px);
@@ -67,6 +72,7 @@ interface Props extends HTMLAttributes<HTMLParagraphElement> {
   onKeyDown?: (e) => void;
   onClick?: (e) => void;
   onFocus?: (e) => void;
+  onChange?: (e) => void;
 }
 
 const MarkdownBlock = forwardRef(
@@ -79,6 +85,7 @@ const MarkdownBlock = forwardRef(
       onKeyDown,
       onClick,
       onFocus,
+      onChange,
       ...rest
     }: Props,
     ref
@@ -116,26 +123,63 @@ const MarkdownBlock = forwardRef(
     const handleChange = e => {
       sizeTextArea();
       setContent(e.target.value);
+      if (onChange) {
+        onChange(e);
+      }
     };
 
     const wrapText = (openTag, closeTag) => {
-      var textarea = textareaRef.current;
-      var len = textarea.value.length;
-      var start = textarea.selectionStart;
-      var end = textarea.selectionEnd;
-      var sel = textarea.value.substring(start, end);
-      var replace = openTag + sel + closeTag;
-      textarea.value =
+      const textarea = textareaRef.current;
+      const len = textarea.value.length;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const sel = textarea.value.substring(start, end);
+      const replace = openTag + sel + closeTag;
+      const value =
         textarea.value.substring(0, start) +
         replace +
         textarea.value.substring(end, len);
       setContent(textarea.value);
+
+      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+        window.HTMLTextAreaElement.prototype,
+        'value'
+      ).set;
+      nativeInputValueSetter.call(textarea, value);
+
+      const ev2 = new Event('input', { bubbles: true });
+      textarea.dispatchEvent(ev2);
+
       textarea.focus();
       textarea.setSelectionRange(end + openTag.length, end + openTag.length);
     };
     useEffect(() => {
       sizeTextArea();
     }, [preview]);
+
+    const handleWindowKeydown = e => {
+      const { keyCode, metaKey, ctrlKey } = e;
+      switch (keyCode) {
+        case 66:
+          if (metaKey || ctrlKey) {
+            wrapText('**', '**');
+          }
+          break;
+        case 73:
+          if (metaKey || ctrlKey) {
+            wrapText('*', '*');
+          }
+      }
+    };
+
+    useEffect(() => {
+      if (process.browser) {
+        window.addEventListener('keydown', handleWindowKeydown);
+      }
+      return () => {
+        window.removeEventListener('keydown', handleWindowKeydown);
+      };
+    }, []);
 
     return (
       <StyledMDWrapper ref={setReferenceElement}>
@@ -145,6 +189,14 @@ const MarkdownBlock = forwardRef(
           </StyledMDToolButton>
           <StyledMDToolButton onClick={() => wrapText('*', '*')}>
             <FontAwesomeIcon icon={faItalic} />
+          </StyledMDToolButton>
+          <StyledMDToolButton
+            onClick={() => wrapText('[', '](http://url.com)')}
+          >
+            <FontAwesomeIcon icon={faLink} />
+          </StyledMDToolButton>
+          <StyledMDToolButton onClick={() => wrapText('`', '`')}>
+            <FontAwesomeIcon icon={faCode} />
           </StyledMDToolButton>
           <StyledMDToolButton onClick={() => wrapText('# ', '')}>
             H1
@@ -165,7 +217,7 @@ const MarkdownBlock = forwardRef(
             H6
           </StyledMDToolButton>
           <StyledMDToolButton onClick={() => setPreview(!preview)}>
-            Preview
+            {preview ? 'Edit' : 'Preview'}
           </StyledMDToolButton>
         </StyledMarkdownToolbar>
         {!preview ? (

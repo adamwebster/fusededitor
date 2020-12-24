@@ -18,4 +18,8 @@ export const Colors = {
   WHITE: '#FFFFFF',
   BLACK: '#000000',
   PRIMARY: 'tomato',
+  INFO: '#4788ff',
+  DANGER: '#ff3a3a',
+  SUCCESS: '#8db36b',
+  WARNING: '#ffa02b',
 };

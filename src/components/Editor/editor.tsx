@@ -17,6 +17,8 @@ import { Toggle } from '../Toggle';
 import { useFetch } from '../../hooks/useFetch';
 import { Modal } from '../Modal';
 import { useRouter } from 'next/router';
+import { SEO } from '../SEO';
+import { useToast } from '../Toast/ToastProvider';
 
 const StyledEditorWrapper = styled.div`
   display: grid;
@@ -96,7 +98,7 @@ const Editor = ({ documentJSON }: Props) => {
   const [saving, setSaving] = useState(false);
   const editor = useRef();
   const router = useRouter();
-
+  const toast = useToast();
   const addBlock = (blockType: string) => {
     const copyOfdocument = [...document.documentLayout];
     const activeItem = copyOfdocument.find(item => item.id === activeId);
@@ -214,6 +216,7 @@ const Editor = ({ documentJSON }: Props) => {
       document,
     }).then(resp => {
       setSaving(false);
+      toast.addSuccess('', 'File saved', { id: 'documentSaved', duration: 2 });
     });
   };
 
@@ -234,6 +237,18 @@ const Editor = ({ documentJSON }: Props) => {
     });
   };
 
+  const handleKeydown = e => {
+    const { keyCode, metaKey, ctrlKey } = e;
+    switch (keyCode) {
+      case 83:
+        if (metaKey || ctrlKey) {
+          e.preventDefault();
+          saveDocument();
+        }
+        break;
+    }
+  };
+
   useEffect(() => {
     // const localStorageContent = JSON.parse(localStorage.getItem('document'));
     // if (localStorageContent) {
@@ -249,8 +264,17 @@ const Editor = ({ documentJSON }: Props) => {
     }
   }, [blockRef]);
 
+  useEffect(() => {
+    if (process.browser) {
+      window.addEventListener('keydown', handleKeydown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+    };
+  }, []);
   return (
     <>
+      <SEO title={`${document.title} | Documents`} />
       <Modal
         onCloseClick={() => setShowDeleteModal(false)}
         show={showDeleteModal}
@@ -346,7 +370,7 @@ const Editor = ({ documentJSON }: Props) => {
                       onMoveBlockDownClick={e => moveItem(item.id, 'down', e)}
                       onMoveBlockUpClick={e => moveItem(item.id, 'up', e)}
                       onRemoveClick={e => removeItem(item.id)}
-                      onKeyUp={e => updateItem(item.id, e)}
+                      onChange={e => updateItem(item.id, e)}
                       onKeyDown={e => handleBlockKeyDown(e)}
                     >
                       {item.content}
