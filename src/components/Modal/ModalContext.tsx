@@ -6,7 +6,6 @@ export const ModalContextConsumer = ModalContext.Consumer;
 
 const reducer = (state: any, action: { payload: any; type: any }) => {
   const { payload, type } = action;
-  console.log(payload, type);
   switch (type) {
     case 'SET_ON_CLOSE_CLICK':
       return {

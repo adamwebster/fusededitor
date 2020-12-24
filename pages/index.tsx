@@ -116,7 +116,6 @@ const Index = () => {
   };
 
   const createDocument = () => {
-    console.log('create');
     useFetch('createDocument', {
       documentTitle,
     }).then(resp => {

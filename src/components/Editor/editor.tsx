@@ -2,6 +2,7 @@ import {
   faHeading,
   faParagraph,
   faSpinner,
+  faTrash,
 } from '@fortawesome/free-solid-svg-icons';
 import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -97,10 +98,16 @@ const StyledAttachmentList = styled.div`
     align-items: center;
     width: 100%;
     overflow: hidden;
+    margin-bottom: 10px;
   }
   img {
     width: 100%;
   }
+`;
+
+const StyledAttachment = styled.div`
+  display: flex;
+  flex-flow: column;
 `;
 interface Props {
   documentJSON: any;
@@ -250,7 +257,6 @@ const Editor = ({ documentJSON }: Props) => {
     formData.append('file', fileUpload.current.files[0]);
     formData.append('documentInfo', JSON.stringify(obj));
     useFetchFileUpload('uploadImage', formData).then(resp => {
-      console.log(resp);
       if (resp.attachments) {
         setDocument({ ...document, attachments: resp.attachments });
       }
@@ -265,7 +271,6 @@ const Editor = ({ documentJSON }: Props) => {
 
   const removeImage = (image, documentID) => {
     useFetch('removeImage', { image, documentID }).then(resp => {
-      console.log(resp);
       setDocument({ ...document, attachments: resp.attachments });
     });
   };
@@ -504,18 +509,23 @@ const Editor = ({ documentJSON }: Props) => {
           <StyledAttachmentList>
             {document.attachments.map(attachment => {
               return (
-                <div className="imageWrapper">
-                  <img
+                <StyledAttachment>
+                  <div className="imageWrapper">
+                    <img
+                      src={
+                        process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
+                        'images/fe/' +
+                        document._id +
+                        '/' +
+                        attachment
+                      }
+                    />
+                  </div>
+                  <FontAwesomeIcon
                     onClick={() => removeImage(attachment, document._id)}
-                    src={
-                      process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
-                      'images/fe/' +
-                      document._id +
-                      '/' +
-                      attachment
-                    }
+                    icon={faTrash}
                   />
-                </div>
+                </StyledAttachment>
               );
             })}
           </StyledAttachmentList>
