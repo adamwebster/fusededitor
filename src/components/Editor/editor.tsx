@@ -263,6 +263,12 @@ const Editor = ({ documentJSON }: Props) => {
     });
   };
 
+  const removeImage = (image, documentID) => {
+    useFetch('removeImage', { image, documentID }).then(resp => {
+      console.log(resp);
+      setDocument({ ...document, attachments: resp.attachments });
+    });
+  };
   const deleteDocument = () => {
     useFetch('deleteDocument', {
       document,
@@ -500,6 +506,7 @@ const Editor = ({ documentJSON }: Props) => {
               return (
                 <div className="imageWrapper">
                   <img
+                    onClick={() => removeImage(attachment, document._id)}
                     src={
                       process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
                       'images/fe/' +
