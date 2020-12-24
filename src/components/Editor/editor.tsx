@@ -14,7 +14,7 @@ import { Button } from '../Button';
 import { Panel } from '../Panel';
 import Tippy from '@tippyjs/react';
 import { Toggle } from '../Toggle';
-import { useFetch } from '../../hooks/useFetch';
+import { useFetch, useFetchFileUpload } from '../../hooks/useFetch';
 import { Modal } from '../Modal';
 import { useRouter } from 'next/router';
 import { SEO } from '../SEO';
@@ -84,6 +84,24 @@ const StyledBlockGrid = styled.div`
   }
 `;
 
+const StyledAttachmentList = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 16px;
+  margin-top: 16px;
+  align-items: center;
+  overflow: hidden;
+  div.imageWrapper {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    overflow: hidden;
+  }
+  img {
+    width: 100%;
+  }
+`;
 interface Props {
   documentJSON: any;
 }
@@ -95,8 +113,10 @@ const Editor = ({ documentJSON }: Props) => {
   const [activeElement, setActiveElement] = useState(null);
   const [activeId, setActiveId] = useState();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedFile, setSelectedFile] = useState('');
   const [saving, setSaving] = useState(false);
   const editor = useRef();
+  const fileUpload = useRef();
   const router = useRouter();
   const toast = useToast();
   const addBlock = (blockType: string) => {
@@ -217,6 +237,29 @@ const Editor = ({ documentJSON }: Props) => {
     }).then(resp => {
       setSaving(false);
       toast.addSuccess('', 'File saved', { id: 'documentSaved', duration: 2 });
+    });
+  };
+
+  const uploadImage = e => {
+    e.preventDefault();
+    const obj = {
+      _id: document._id,
+    };
+
+    const formData = new FormData();
+    formData.append('file', fileUpload.current.files[0]);
+    formData.append('documentInfo', JSON.stringify(obj));
+    useFetchFileUpload('uploadImage', formData).then(resp => {
+      console.log(resp);
+      if (resp.attachments) {
+        setDocument({ ...document, attachments: resp.attachments });
+      }
+      if (resp.status) {
+        if (resp.status === 'error') {
+          toast.addDanger(null, resp.message);
+        }
+      }
+      setSelectedFile('');
     });
   };
 
@@ -427,6 +470,48 @@ const Editor = ({ documentJSON }: Props) => {
           />
 
           <h3>Attachments</h3>
+          {!selectedFile && (
+            <Button onClick={() => fileUpload.current.click()}>
+              Choose File
+            </Button>
+          )}
+          <form
+            method="post"
+            encType="multipart/form-data"
+            onSubmit={e => uploadImage(e)}
+            // action="http://localhost:1984/fe/uploadImage"
+          >
+            <input
+              style={{ display: 'none' }}
+              ref={fileUpload}
+              type="file"
+              name="file"
+              onChange={e => setSelectedFile(e.target.value)}
+            />
+            {selectedFile && (
+              <>
+                <Button>Upload</Button>{' '}
+                <Button onClick={() => setSelectedFile('')}>Reset</Button>
+              </>
+            )}
+          </form>
+          <StyledAttachmentList>
+            {document.attachments.map(attachment => {
+              return (
+                <div className="imageWrapper">
+                  <img
+                    src={
+                      process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
+                      'images/fe/' +
+                      document._id +
+                      '/' +
+                      attachment
+                    }
+                  />
+                </div>
+              );
+            })}
+          </StyledAttachmentList>
         </Panel>
       </StyledEditorWrapper>
     </>
