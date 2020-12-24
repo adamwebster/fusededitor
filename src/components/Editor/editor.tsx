@@ -123,7 +123,7 @@ const Editor = ({ documentJSON }: Props) => {
   const [selectedFile, setSelectedFile] = useState('');
   const [saving, setSaving] = useState(false);
   const editor = useRef();
-  const fileUpload = useRef();
+  const fileUpload = useRef(null as HTMLInputElement);
   const router = useRouter();
   const toast = useToast();
   const addBlock = (blockType: string) => {
