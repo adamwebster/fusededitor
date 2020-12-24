@@ -511,7 +511,7 @@ const Editor = ({ documentJSON }: Props) => {
           <StyledAttachmentList>
             {document.attachments.map(attachment => {
               return (
-                <StyledAttachment>
+                <StyledAttachment key={attachment}>
                   <div className="imageWrapper">
                     <img
                       src={
