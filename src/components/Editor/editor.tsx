@@ -415,12 +415,14 @@ const Editor = ({ documentJSON }: Props) => {
                     <MarkdownBlock
                       ref={setBlockRef}
                       id={item.id}
+                      attachments={document.attachments}
                       key={`item_${item.id}`}
                       as={item.element}
                       onFocus={e => {
                         setActiveElement(e.target);
                         setActiveId(item.id);
                       }}
+                      documentID={document._id}
                       onMoveBlockDownClick={e => moveItem(item.id, 'down', e)}
                       onMoveBlockUpClick={e => moveItem(item.id, 'up', e)}
                       onRemoveClick={e => removeItem(item.id)}
