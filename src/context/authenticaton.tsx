@@ -26,7 +26,6 @@ export const AuthProvider = ({ children }) => {
     useFetch('checkifloggedin', {}).then(resp => {
       setLoggedIn(resp.loggedin);
       if (resp.loggedin) {
-        console.log(resp);
         setUser({
           username: resp.username,
           firstName: resp.firstName,

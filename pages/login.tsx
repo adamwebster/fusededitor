@@ -6,6 +6,7 @@ import { Button } from '../src/components/Button';
 import { Colors } from '../src/styles/colors';
 import { TextInput } from '../src/components/TextInput';
 import { lighten } from 'polished';
+import { SEO } from '../src/components/SEO';
 
 const StyledLoginForm = styled.form`
   width: 300px;
@@ -55,6 +56,7 @@ const Login = () => {
 
   return (
     <>
+      <SEO />
       <GlobalStyles />
       <StyledLoginForm onSubmit={e => SignIn(e)}>
         <h1>Fused Editor</h1>

@@ -10,6 +10,7 @@ import { Colors } from '../src/styles/colors';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAlignLeft, faList, faTh } from '@fortawesome/free-solid-svg-icons';
 import { useRouter } from 'next/router';
+import { SEO } from '../src/components/SEO';
 const StyledInnerPage = styled(InnerPage)`
   flex-flow: column;
 `;
@@ -115,7 +116,6 @@ const Index = () => {
   };
 
   const createDocument = () => {
-    console.log('create');
     useFetch('createDocument', {
       documentTitle,
     }).then(resp => {
@@ -127,6 +127,7 @@ const Index = () => {
   }, []);
   return (
     <Layout>
+      <SEO title="Documents" />
       <StyledInnerPage>
         <StyledPageHeader>
           <h1>Documents</h1>

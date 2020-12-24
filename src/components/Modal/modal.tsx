@@ -84,7 +84,6 @@ const StyledModalHeaderContent = styled.div`
 `;
 const ModalHeader = ({ children }) => {
   const { modalState, dispatch } = useContext(ModalContext);
-  console.log(modalState);
   return (
     <StyledModalHeader>
       <StyledModalHeaderContent>{children}</StyledModalHeaderContent>

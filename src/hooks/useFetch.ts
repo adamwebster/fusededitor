@@ -1,3 +1,6 @@
+import { computeStyles } from '@popperjs/core';
+import axios from 'axios';
+
 export const useFetch = async (path, body) => {
   const response = await fetch(process.env.NEXT_PUBLIC_API_BASE_URL + path, {
     method: 'POST',
@@ -11,4 +14,15 @@ export const useFetch = async (path, body) => {
     body: JSON.stringify(body),
   });
   return response.json();
+};
+
+export const useFetchFileUpload = async (path, data) => {
+  const response = await axios({
+    method: 'post',
+    url: process.env.NEXT_PUBLIC_API_BASE_URL + path,
+    data,
+  }).then(resp => {
+    return resp.data;
+  });
+  return response;
 };
