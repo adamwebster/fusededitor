@@ -11,6 +11,7 @@ export const GlobalStyles = createGlobalStyle`
     padding: 0;
     margin: 0;
     color: ${Colors.GREY[50]};
+    line-height: 150%;
     background-color: ${Colors.GREY[550]};
   }
   a{

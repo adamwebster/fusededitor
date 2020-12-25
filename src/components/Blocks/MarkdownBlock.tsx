@@ -7,9 +7,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBold,
   faCode,
+  faImage,
   faItalic,
   faLink,
 } from '@fortawesome/free-solid-svg-icons';
+import { Modal } from '../Modal';
+import { Button } from '../Button';
 
 const StyledMDWrapper = styled.div`
   max-height: calc(100% - 50px);
@@ -35,6 +38,7 @@ const StyledMarkdownBlock = styled.textarea`
 `;
 
 const StyledMarkdownToolbar = styled.div`
+  display: flex;
   flex: 1 1;
   background-color: ${Colors.GREY[500]};
   padding: 16px;
@@ -61,6 +65,43 @@ const StyledMarkdownPreview = styled(ReactMarkdown)`
   color: inherit;
   font-family: inherit;
   font-size: 1rem;
+  img[src*='#smallImage'] {
+    max-width: 300px;
+    height: auto;
+  }
+  img[src*='#tinyImage'] {
+    max-width: 100px;
+    height: auto;
+  }
+  img[src*='#floatLeft'] {
+    float: left;
+    margin-right: 16px;
+    margin-bottom: 16px;
+  }
+`;
+
+const StyledAttachmentGrid = styled.div`
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-gap: 16px;
+  div.imageWrapper {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    overflow: hidden;
+    margin-bottom: 10px;
+    border-radius: 5px;
+  }
+  img {
+    width: 100%;
+    height: auto;
+  }
+`;
+
+const StyledToolbarSpace = styled.div`
+  flex: 1 1;
 `;
 
 interface Props extends HTMLAttributes<HTMLParagraphElement> {
@@ -73,6 +114,8 @@ interface Props extends HTMLAttributes<HTMLParagraphElement> {
   onClick?: (e) => void;
   onFocus?: (e) => void;
   onChange?: (e) => void;
+  attachments?: any;
+  documentID: string;
 }
 
 const MarkdownBlock = forwardRef(
@@ -86,6 +129,8 @@ const MarkdownBlock = forwardRef(
       onClick,
       onFocus,
       onChange,
+      attachments,
+      documentID,
       ...rest
     }: Props,
     ref
@@ -95,6 +140,7 @@ const MarkdownBlock = forwardRef(
     const [isMounted, setIsMounted] = useState(false);
     const [content, setContent] = useState(children);
     const [preview, setPreview] = useState(false);
+    const [showAttachmentModal, setShowAttachmentModal] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(
       (ref as unknown) as HTMLTextAreaElement
     );
@@ -153,6 +199,33 @@ const MarkdownBlock = forwardRef(
       textarea.focus();
       textarea.setSelectionRange(end + openTag.length, end + openTag.length);
     };
+
+    const addImageToContent = url => {
+      const textarea = textareaRef.current;
+      const len = textarea.value.length;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const value =
+        textarea.value.substring(0, start) +
+        '![img](' +
+        url +
+        ')' +
+        textarea.value.substring(end, len);
+      setContent(textarea.value);
+
+      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+        window.HTMLTextAreaElement.prototype,
+        'value'
+      ).set;
+      nativeInputValueSetter.call(textarea, value);
+
+      const ev2 = new Event('input', { bubbles: true });
+      textarea.dispatchEvent(ev2);
+
+      textarea.focus();
+      textarea.setSelectionRange(end + url.length, end + url.length);
+      setShowAttachmentModal(false);
+    };
     useEffect(() => {
       sizeTextArea();
     }, [preview]);
@@ -183,42 +256,94 @@ const MarkdownBlock = forwardRef(
 
     return (
       <StyledMDWrapper ref={setReferenceElement}>
+        <Modal
+          onCloseClick={() => setShowAttachmentModal(false)}
+          show={showAttachmentModal}
+        >
+          <Modal.Header>
+            <h2>Choose an Image</h2>
+          </Modal.Header>
+          <Modal.Body>
+            <StyledAttachmentGrid>
+              {attachments.map(attachment => (
+                <div key={attachment} className="imageWrapper">
+                  <img
+                    onClick={() =>
+                      addImageToContent(
+                        process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
+                          'images/fe/' +
+                          documentID +
+                          '/' +
+                          attachment
+                      )
+                    }
+                    src={
+                      process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
+                      'images/fe/' +
+                      documentID +
+                      '/' +
+                      attachment
+                    }
+                  />
+                </div>
+              ))}
+            </StyledAttachmentGrid>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={() => setShowAttachmentModal(false)}>Close</Button>
+          </Modal.Footer>
+        </Modal>
         <StyledMarkdownToolbar>
-          <StyledMDToolButton onClick={() => wrapText('**', '**')}>
-            <FontAwesomeIcon icon={faBold} />
-          </StyledMDToolButton>
-          <StyledMDToolButton onClick={() => wrapText('*', '*')}>
-            <FontAwesomeIcon icon={faItalic} />
-          </StyledMDToolButton>
-          <StyledMDToolButton
-            onClick={() => wrapText('[', '](http://url.com)')}
-          >
-            <FontAwesomeIcon icon={faLink} />
-          </StyledMDToolButton>
-          <StyledMDToolButton onClick={() => wrapText('`', '`')}>
-            <FontAwesomeIcon icon={faCode} />
-          </StyledMDToolButton>
-          <StyledMDToolButton onClick={() => wrapText('# ', '')}>
-            H1
-          </StyledMDToolButton>
-          <StyledMDToolButton onClick={() => wrapText('## ', '')}>
-            H2
-          </StyledMDToolButton>
-          <StyledMDToolButton onClick={() => wrapText('### ', '')}>
-            H3
-          </StyledMDToolButton>
-          <StyledMDToolButton onClick={() => wrapText('#### ', '')}>
-            H4
-          </StyledMDToolButton>
-          <StyledMDToolButton onClick={() => wrapText('##### ', '')}>
-            H5
-          </StyledMDToolButton>
-          <StyledMDToolButton onClick={() => wrapText('###### ', '')}>
-            H6
-          </StyledMDToolButton>
-          <StyledMDToolButton onClick={() => setPreview(!preview)}>
-            {preview ? 'Edit' : 'Preview'}
-          </StyledMDToolButton>
+          {!preview && (
+            <>
+              <StyledMDToolButton onClick={() => wrapText('**', '**')}>
+                <FontAwesomeIcon icon={faBold} />
+              </StyledMDToolButton>
+              <StyledMDToolButton onClick={() => wrapText('*', '*')}>
+                <FontAwesomeIcon icon={faItalic} />
+              </StyledMDToolButton>
+              <StyledMDToolButton
+                onClick={() => wrapText('[', '](http://url.com)')}
+              >
+                <FontAwesomeIcon icon={faLink} />
+              </StyledMDToolButton>
+              {attachments.length > 0 && (
+                <StyledMDToolButton
+                  onClick={() => setShowAttachmentModal(true)}
+                >
+                  <FontAwesomeIcon icon={faImage} />
+                </StyledMDToolButton>
+              )}
+              <StyledMDToolButton onClick={() => wrapText('`', '`')}>
+                <FontAwesomeIcon icon={faCode} />
+              </StyledMDToolButton>
+              <StyledMDToolButton onClick={() => wrapText('# ', '')}>
+                H1
+              </StyledMDToolButton>
+              <StyledMDToolButton onClick={() => wrapText('## ', '')}>
+                H2
+              </StyledMDToolButton>
+              <StyledMDToolButton onClick={() => wrapText('### ', '')}>
+                H3
+              </StyledMDToolButton>
+              <StyledMDToolButton onClick={() => wrapText('#### ', '')}>
+                H4
+              </StyledMDToolButton>
+              <StyledMDToolButton onClick={() => wrapText('##### ', '')}>
+                H5
+              </StyledMDToolButton>
+              <StyledMDToolButton onClick={() => wrapText('###### ', '')}>
+                H6
+              </StyledMDToolButton>
+            </>
+          )}
+
+          <>
+            <StyledToolbarSpace />
+            <StyledMDToolButton onClick={() => setPreview(!preview)}>
+              {preview ? 'Edit' : 'Preview'}
+            </StyledMDToolButton>
+          </>
         </StyledMarkdownToolbar>
         {!preview ? (
           <StyledMarkdownBlock

@@ -123,7 +123,7 @@ const Editor = ({ documentJSON }: Props) => {
   const [selectedFile, setSelectedFile] = useState('');
   const [saving, setSaving] = useState(false);
   const editor = useRef();
-  const fileUpload = useRef();
+  const fileUpload = useRef(null as HTMLInputElement);
   const router = useRouter();
   const toast = useToast();
   const addBlock = (blockType: string) => {
@@ -415,12 +415,14 @@ const Editor = ({ documentJSON }: Props) => {
                     <MarkdownBlock
                       ref={setBlockRef}
                       id={item.id}
+                      attachments={document.attachments}
                       key={`item_${item.id}`}
                       as={item.element}
                       onFocus={e => {
                         setActiveElement(e.target);
                         setActiveId(item.id);
                       }}
+                      documentID={document._id}
                       onMoveBlockDownClick={e => moveItem(item.id, 'down', e)}
                       onMoveBlockUpClick={e => moveItem(item.id, 'up', e)}
                       onRemoveClick={e => removeItem(item.id)}
@@ -490,7 +492,6 @@ const Editor = ({ documentJSON }: Props) => {
             method="post"
             encType="multipart/form-data"
             onSubmit={e => uploadImage(e)}
-            // action="http://localhost:1984/fe/uploadImage"
           >
             <input
               style={{ display: 'none' }}
@@ -509,7 +510,7 @@ const Editor = ({ documentJSON }: Props) => {
           <StyledAttachmentList>
             {document.attachments.map(attachment => {
               return (
-                <StyledAttachment>
+                <StyledAttachment key={attachment}>
                   <div className="imageWrapper">
                     <img
                       src={

@@ -21,6 +21,7 @@ export const useFetchFileUpload = async (path, data) => {
     method: 'post',
     url: process.env.NEXT_PUBLIC_API_BASE_URL + path,
     data,
+    withCredentials: true,
   }).then(resp => {
     return resp.data;
   });
