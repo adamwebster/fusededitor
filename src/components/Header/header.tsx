@@ -13,11 +13,17 @@ const StyledHeader = styled.header`
   padding: 8px 16px;
   background-color: ${({ theme }) => theme.COLORS.PRIMARY};
   box-sizing: border-box;
-  color: ${({ theme }) => darken(0.5, theme.COLORS.PRIMARY)};
+  color: ${({ theme }) =>
+    theme.name === 'dark'
+      ? darken(0.5, theme.COLORS.PRIMARY)
+      : theme.COLORS.WHITE};
   display: flex;
   align-items: center;
   a {
-    color: ${({ theme }) => darken(0.5, theme.COLORS.PRIMARY)};
+    color: ${({ theme }) =>
+      theme.name === 'dark'
+        ? darken(0.5, theme.COLORS.PRIMARY)
+        : theme.COLORS.WHITE};
     text-decoration: none;
     h1 {
       margin: 0;
@@ -53,8 +59,14 @@ const StyledAvatar = styled.div`
 
 const StyledLogoutButton = styled(Button)`
   margin-left: 16px;
-  border-color: ${({ theme }) => darken(0.5, theme.COLORS.PRIMARY)};
-  color: ${({ theme }) => darken(0.5, theme.COLORS.PRIMARY)};
+  border-color: ${({ theme }) =>
+    theme.name === 'dark'
+      ? darken(0.5, theme.COLORS.PRIMARY)
+      : theme.COLORS.WHITE};
+  color: ${({ theme }) =>
+    theme.name === 'dark'
+      ? darken(0.5, theme.COLORS.PRIMARY)
+      : theme.COLORS.WHITE};
 `;
 
 const Header = () => {

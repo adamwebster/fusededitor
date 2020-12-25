@@ -1,9 +1,9 @@
 import { ReactNode } from 'react';
 import styled from 'styled-components';
-import { Colors } from '../../styles/colors';
 
 const StyledPanel = styled.div`
-  background-color: ${({ theme }) => theme.COLORS.GREY[450]};
+  background-color: ${({ theme }) =>
+    theme.name === 'dark' ? theme.COLORS.GREY[450] : theme.COLORS.GREY[550]};
   padding: 16px;
   h3 {
     font-weight: 300;

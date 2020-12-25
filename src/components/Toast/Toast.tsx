@@ -7,7 +7,8 @@ const StyledToast = styled.div`
   margin: 0 auto;
   border-radius: 8px;
   box-sizing: border-box;
-  background-color: ${({ theme }) => theme.COLORS.GREY[400]};
+  background-color: ${({ theme }) =>
+    theme.name === 'dark' ? theme.COLORS.GREY[400] : theme.COLORS.GREY[600]};
   padding: 16px;
   transition: all;
   margin-bottom: 10px;

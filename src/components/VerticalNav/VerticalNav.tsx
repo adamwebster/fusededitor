@@ -13,14 +13,14 @@ const StyledVerticalNav = styled.nav`
   width: 50px;
   display: flex;
   background-color: ${({ theme }) => theme.COLORS.GREY[500]};
-  color: ${({ theme }) => theme.COLORS.WHITE};
+  color: ${({ theme }) => theme.COLORS.PRIMARY};
   flex-flow: column;
 `;
 
 const StyledLink = styled.a`
   width: 100%;
   height: 50px;
-  color: ${({ theme }) => theme.COLORS.WHITE};
+  color: ${({ theme }) => theme.COLORS.PRIMARY};
   justify-content: center;
   align-items: center;
   display: flex;

@@ -1,10 +1,15 @@
 import { createContext, ReactElement, useReducer } from 'react';
 import { ThemeProvider } from 'styled-components';
-import { darkTheme, redTheme } from '../styles/colors';
+import {
+  darkTheme,
+  lightTheme,
+  redThemeDark,
+  redThemeLight,
+} from '../styles/colors';
 
 const initialState = {
   profilePicture: '',
-  theme: darkTheme,
+  theme: { colorMode: 'dark', theme: darkTheme },
 };
 
 export const UserContext = createContext({
@@ -16,6 +21,7 @@ export const UserConsumer = UserContext.Consumer;
 
 const reducer = (state: any, action: { payload: any; type: any }) => {
   const { payload, type } = action;
+  console.log(payload, type);
   switch (type) {
     case 'SET_PROFILE_PICTURE':
       return {
@@ -24,18 +30,25 @@ const reducer = (state: any, action: { payload: any; type: any }) => {
       };
     case 'SET_THEME':
       let themeObject;
-      switch (payload) {
+      switch (payload.theme) {
         case 'red':
-          themeObject = redTheme;
+          if (payload.colorMode === 'dark') {
+            themeObject = redThemeDark;
+          } else {
+            themeObject = redThemeLight;
+          }
           break;
         default:
-          themeObject = darkTheme;
+          if (payload.colorMode === 'dark') {
+            themeObject = darkTheme;
+          } else {
+            themeObject = lightTheme;
+          }
       }
       return {
         ...state,
-        theme: themeObject,
+        theme: { theme: themeObject, colorMode: payload.colorMode },
       };
-
     default:
       return state;
   }
@@ -48,7 +61,7 @@ export const UserProvider = ({ children }: Props) => {
   const [userState, dispatchUser] = useReducer(reducer, initialState);
   return (
     <UserContext.Provider value={{ userState, dispatchUser }}>
-      <ThemeProvider theme={userState.theme}>{children}</ThemeProvider>
+      <ThemeProvider theme={userState.theme.theme}>{children}</ThemeProvider>
     </UserContext.Provider>
   );
 };

@@ -10,13 +10,16 @@ const StyledButton = styled.button`
   padding: 8px 16px;
   height: 40px;
   color: ${({ primary, theme }) =>
-    primary ? darken(0.5, theme.COLORS.PRIMARY) : theme.COLORS.PRIMARY};
+    primary
+      ? theme.name === 'dark'
+        ? darken(0.5, theme.COLORS.PRIMARY)
+        : theme.COLORS.GREY[600]
+      : theme.COLORS.PRIMARY};
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.2s;
   &:hover {
-    background-color: ${({ primary, theme }) =>
-      primary ? darken(0.1, theme.COLORS.PRIMARY) : theme.COLORS.PRIMARY};
+    filter: brightness(1.5);
   }
 
   + button {
