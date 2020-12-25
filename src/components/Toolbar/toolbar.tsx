@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { Colors } from '../../styles/colors';
 import { Button } from '../Button';
 
 const StyledToolbar = styled.div`

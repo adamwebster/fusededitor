@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { Colors } from '../../styles/colors';
 
 const InnerPage = styled.div`
   margin: 16px;
