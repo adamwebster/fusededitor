@@ -1,5 +1,4 @@
 import styled, { createGlobalStyle } from 'styled-components';
-import { Colors } from '../../styles/colors';
 import { Footer } from '../Footer';
 import { Header } from '../Header';
 import { VerticalNav } from '../VerticalNav';
@@ -10,12 +9,12 @@ export const GlobalStyles = createGlobalStyle`
     font-size: 100%;
     padding: 0;
     margin: 0;
-    color: ${Colors.GREY[50]};
+    color: ${({ theme }) => theme.COLORS.GREY[50]};
     line-height: 150%;
-    background-color: ${Colors.GREY[550]};
+    background-color: ${({ theme }) => theme.COLORS.GREY[550]};
   }
   a{
-    color: ${Colors.PRIMARY};
+    color: ${({ theme }) => theme.COLORS.PRIMARY};
   }
 `;
 

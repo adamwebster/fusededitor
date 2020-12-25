@@ -6,7 +6,7 @@ const StyledToolbar = styled.div`
   padding: 8px;
   display: flex;
   align-items: center;
-  background-color: ${Colors.GREY[500]};
+  background-color: ${({ theme }) => theme.COLORS.GREY[500]};
 `;
 
 const EditorTools = styled.div`
@@ -19,7 +19,7 @@ const ToolbarButton = styled.button`
   background-color: transparent;
   border: none;
   padding: 8px;
-  color: ${Colors.WHITE};
+  color: ${({ theme }) => theme.COLORS.WHITE};
   &:last-child {
     cursor: pointer;
   }

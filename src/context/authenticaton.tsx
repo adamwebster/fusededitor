@@ -2,6 +2,7 @@ import { createContext, useState, useContext, useEffect } from 'react';
 import Router, { useRouter } from 'next/router';
 import { useFetch } from '../hooks/useFetch';
 import { UserContext } from './user';
+import { darkTheme } from '../styles/colors';
 
 interface Props {
   loggedIn: boolean;
@@ -29,6 +30,7 @@ export const AuthProvider = ({ children }) => {
     lastName: '',
     isAdmin: false,
     profilePicture: '',
+    userSettings: { colorMode: 'dark', theme: 'default' },
   });
   const [loading, setLoading] = useState(true);
 
@@ -45,6 +47,10 @@ export const AuthProvider = ({ children }) => {
           lastName: resp.lastName,
           isAdmin: resp.isAdmin,
           profilePicture: resp.profilePicture,
+          userSettings: resp.userSettings || {
+            colorMode: 'dark',
+            theme: 'default',
+          },
         });
       }
       setLoading(false);
@@ -57,6 +63,13 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     dispatchUser({ type: 'SET_PROFILE_PICTURE', payload: user.profilePicture });
+    dispatchUser({
+      type: 'SET_THEME',
+      payload: {
+        theme: user.userSettings.theme,
+        colorMode: user.userSettings.colorMode,
+      },
+    });
   }, [user]);
   return (
     <AuthContext.Provider value={{ loggedIn, loading, user }}>

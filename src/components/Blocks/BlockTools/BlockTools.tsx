@@ -6,14 +6,15 @@ import {
   faTrash,
 } from '@fortawesome/free-solid-svg-icons';
 import Tippy from '@tippyjs/react';
-import { Colors } from '../../../styles/colors';
 import { usePopper } from 'react-popper';
 import styled from 'styled-components';
 
 import 'tippy.js/dist/tippy.css';
 
 const StyledPopper = styled.span`
-  background-color: ${Colors.GREY[400]};
+  background-color: ${({ theme }) =>
+    theme.name === 'dark' ? theme.COLORS.GREY[450] : theme.COLORS.GREY[500]};
+
   padding: 16px;
 `;
 

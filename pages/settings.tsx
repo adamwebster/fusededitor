@@ -5,8 +5,7 @@ import { InnerPage, Layout } from '../src/components/Layout';
 import { ProtectedRoute } from '../src/components/ProtectedRoute/ProtectedRoute';
 import { useAuth } from '../src/context/authenticaton';
 import { UserContext } from '../src/context/user';
-import { useFetchFileUpload } from '../src/hooks/useFetch';
-import { Colors } from '../src/styles/colors';
+import { useFetch, useFetchFileUpload } from '../src/hooks/useFetch';
 
 const StyledSettingsWrapper = styled(InnerPage)`
   flex-flow: column;
@@ -30,12 +29,20 @@ const StyledProfileImageWrapper = styled.div`
   display: flex;
   align-items: center;
 `;
+
+const StyledSettingsHeader = styled.div`
+  display: flex;
+  align-items: center;
+  h1 {
+    flex: 1 1;
+  }
+`;
 const Settings = () => {
   const fileUpload = useRef(('' as unknown) as HTMLInputElement);
   const [selectedFile, setSelectedFile] = useState('');
   const [userProfile, setUserProfile] = useState<any>({});
   const { user } = useAuth();
-  const { dispatchUser } = useContext(UserContext);
+  const { dispatchUser, userState } = useContext(UserContext);
   const updateProfilePicture = e => {
     e.preventDefault();
     const obj = {
@@ -56,13 +63,25 @@ const Settings = () => {
     });
   };
 
+  const saveSettings = () => {
+    useFetch('updateUserSettings', {
+      colorMode: userState.theme.colorMode,
+      theme: userState.theme.theme.colorName,
+    });
+  };
   useEffect(() => {
     setUserProfile({ profilePicture: user.profilePicture, id: user.id });
   }, [user]);
   return (
     <Layout>
       <StyledSettingsWrapper>
-        <h1>Settings</h1>
+        <StyledSettingsHeader>
+          <h1>Settings</h1>
+
+          <Button primary onClick={() => saveSettings()}>
+            Save
+          </Button>
+        </StyledSettingsHeader>
         <h2>Change Profile Picture</h2>
         <StyledProfileImageWrapper>
           {userProfile.profilePicture && (
@@ -105,6 +124,62 @@ const Settings = () => {
             )}
           </form>
         </StyledProfileImageWrapper>
+        <h2>Color Mode</h2>
+        <div>
+          <Button
+            onClick={() => {
+              dispatchUser({
+                type: 'SET_THEME',
+                payload: {
+                  theme: userState.theme.theme.colorName,
+                  colorMode: 'light',
+                },
+              });
+            }}
+          >
+            Light
+          </Button>
+          <Button
+            onClick={() => {
+              dispatchUser({
+                type: 'SET_THEME',
+                payload: {
+                  theme: userState.theme.theme.colorName,
+                  colorMode: 'dark',
+                },
+              });
+            }}
+          >
+            Dark
+          </Button>
+        </div>
+
+        <h2>Themes</h2>
+        <div>
+          <Button
+            onClick={() =>
+              dispatchUser({
+                type: 'SET_THEME',
+                payload: { theme: 'red', colorMode: userState.theme.colorMode },
+              })
+            }
+          >
+            Set Theme To red
+          </Button>
+          <Button
+            onClick={() =>
+              dispatchUser({
+                type: 'SET_THEME',
+                payload: {
+                  theme: 'default',
+                  colorMode: userState.theme.colorMode,
+                },
+              })
+            }
+          >
+            Set theme to default
+          </Button>
+        </div>
       </StyledSettingsWrapper>
     </Layout>
   );

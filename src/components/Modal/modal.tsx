@@ -2,7 +2,6 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ReactNode, useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { Colors } from '../../styles/colors';
 import { ModalContext, ModalContextProvider } from './ModalContext';
 
 const StyledOverlay = styled.div`
@@ -18,10 +17,10 @@ const StyledOverlay = styled.div`
 `;
 
 const StyledModal = styled.div`
-  width: 500px;
+  max-width: 500px;
   display: flex;
-  background-color: ${Colors.GREY[500]};
-  max-height: 300px;
+  background-color: ${({ theme }) => theme.COLORS.GREY[500]};
+  max-height: 95vh;
   z-index: 9;
   position: absolute;
   flex-flow: column;
@@ -54,7 +53,7 @@ const Modal = ({ show, children, onCloseClick, ...rest }: Props) => {
     return (
       <ModalContextProvider state={state}>
         <StyledOverlay ref={overlay} onClick={e => handleClose(e)}>
-          <StyledModal>{children}</StyledModal>
+          <StyledModal {...rest}>{children}</StyledModal>
         </StyledOverlay>
       </ModalContextProvider>
     );
@@ -63,7 +62,7 @@ const Modal = ({ show, children, onCloseClick, ...rest }: Props) => {
 };
 
 const StyledModalHeader = styled.header`
-  border-bottom: solid 1px ${Colors.GREY[400]};
+  border-bottom: solid 1px ${({ theme }) => theme.COLORS.GREY[400]};
   margin-bottom: 16px;
   display: flex;
   align-items: center;
@@ -100,7 +99,7 @@ const ModalBody = styled.div`
 `;
 
 const ModalFooter = styled.div`
-  border-top: solid 1px ${Colors.GREY[400]};
+  border-top: solid 1px ${({ theme }) => theme.COLORS.GREY[400]};
   padding-top: 16px;
   display: flex;
   justify-content: flex-end;

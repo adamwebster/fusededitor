@@ -8,7 +8,6 @@ import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { Colors } from '../../styles/colors';
 import { HeadingBlock, ParagraphBlock } from '../Blocks';
 import MarkdownBlock from '../Blocks/MarkdownBlock';
 import { Button } from '../Button';
@@ -37,11 +36,11 @@ const StyledDocument = styled.div`
 `;
 const StyledEditor = styled.div`
   padding: 8px 16px;
-  background-color: ${Colors.GREY[600]};
+  background-color: ${({ theme }) => theme.COLORS.GREY[600]};
   box-sizing: border-box;
   flex: 1 1;
   resize: none;
-  color: ${Colors.GREY[50]};
+  color: ${({ theme }) => theme.COLORS.GREY[50]};
   overflow: auto;
   &:focus {
     outline: none;
@@ -54,13 +53,13 @@ const StyledDocumentHeader = styled.div`
   h2 {
     margin: 0 16px 0 0;
     font-weight: 100;
-    color: ${Colors.PRIMARY};
+    color: ${({ theme }) => theme.COLORS.PRIMARY};
   }
 `;
 
 const StyledDocumentTitle = styled.input`
   background: transparent;
-  color: ${Colors.PRIMARY};
+  color: ${({ theme }) => theme.COLORS.PRIMARY};
   font-size: inherit;
   border: none;
   font-weight: 100;
@@ -109,6 +108,26 @@ const StyledAttachment = styled.div`
   display: flex;
   flex-flow: column;
 `;
+
+const StyledImageModal = styled(Modal)`
+  max-width: 90vw;
+  img {
+    max-height: 80vh;
+    max-width: 100%;
+  }
+  ${Modal.Body} {
+    display: flex;
+    justify-content: center;
+  }
+`;
+
+const StyledSectionHeader = styled.div`
+  font-size: 1.2rem;
+  margin: 16px 0;
+  color: ${({ theme }) => theme.COLORS.PRIMARY};
+  font-weight: 300;
+  text-transform: uppercase;
+`;
 interface Props {
   documentJSON: any;
 }
@@ -120,6 +139,10 @@ const Editor = ({ documentJSON }: Props) => {
   const [activeElement, setActiveElement] = useState(null);
   const [activeId, setActiveId] = useState();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [imageModal, setImageModal] = useState({
+    show: false,
+    selectedImage: '',
+  });
   const [selectedFile, setSelectedFile] = useState('');
   const [saving, setSaving] = useState(false);
   const editor = useRef();
@@ -346,11 +369,25 @@ const Editor = ({ documentJSON }: Props) => {
           </Button>
         </Modal.Footer>
       </Modal>
+      <StyledImageModal
+        onCloseClick={() => setImageModal({ ...imageModal, show: false })}
+        show={imageModal.show}
+      >
+        <StyledImageModal.Header>
+          <h2>Image</h2>
+        </StyledImageModal.Header>
+        <StyledImageModal.Body>
+          <div>
+            <img src={imageModal.selectedImage} />
+          </div>
+        </StyledImageModal.Body>
+      </StyledImageModal>
       <StyledEditorWrapper>
         <StyledDocument>
           <StyledDocumentHeader>
             <StyledDocumentTitle
               value={document.title}
+              aria-label="title"
               onChange={e =>
                 setDocument({
                   ...document,
@@ -437,25 +474,34 @@ const Editor = ({ documentJSON }: Props) => {
           </StyledEditor>
         </StyledDocument>
         <Panel>
-          <h3>Blocks</h3>
+          <StyledSectionHeader>Blocks</StyledSectionHeader>
           <StyledBlockGrid>
             <Tippy content="Heading Block">
-              <button onClick={() => addBlock('heading')}>
+              <button
+                aria-label="Heading Block"
+                onClick={() => addBlock('heading')}
+              >
                 <FontAwesomeIcon icon={faHeading} />
               </button>
             </Tippy>
             <Tippy content="Paragraph Block">
-              <button onClick={() => addBlock('paragraph')}>
+              <button
+                aria-label="Paragraph Block"
+                onClick={() => addBlock('paragraph')}
+              >
                 <FontAwesomeIcon icon={faParagraph} />
               </button>
             </Tippy>
             <Tippy content="Markdown Block">
-              <button onClick={() => addBlock('markdown')}>
+              <button
+                aria-label="Markdown Block"
+                onClick={() => addBlock('markdown')}
+              >
                 <FontAwesomeIcon icon={faMarkdown} />
               </button>
             </Tippy>
           </StyledBlockGrid>
-          <h3>Document Settings</h3>
+          <StyledSectionHeader>Document Settings</StyledSectionHeader>
           <label
             onClick={() =>
               setDocument({
@@ -482,7 +528,7 @@ const Editor = ({ documentJSON }: Props) => {
             }
           />
 
-          <h3>Attachments</h3>
+          <StyledSectionHeader>Attachments</StyledSectionHeader>
           {!selectedFile && (
             <Button onClick={() => fileUpload.current.click()}>
               Choose File
@@ -513,6 +559,18 @@ const Editor = ({ documentJSON }: Props) => {
                 <StyledAttachment key={attachment}>
                   <div className="imageWrapper">
                     <img
+                      alt="Uploaded Image"
+                      onClick={() =>
+                        setImageModal({
+                          show: true,
+                          selectedImage:
+                            process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
+                            'images/fe/' +
+                            document._id +
+                            '/' +
+                            attachment,
+                        })
+                      }
                       src={
                         process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
                         'images/fe/' +

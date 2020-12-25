@@ -1,13 +1,13 @@
 import { ReactNode } from 'react';
 import styled from 'styled-components';
-import { Colors } from '../../styles/colors';
 
 const StyledPanel = styled.div`
-  background-color: ${Colors.GREY[450]};
+  background-color: ${({ theme }) =>
+    theme.name === 'dark' ? theme.COLORS.GREY[450] : theme.COLORS.GREY[550]};
   padding: 16px;
   h3 {
     font-weight: 300;
-    color: ${Colors.PRIMARY};
+    color: ${({ theme }) => theme.COLORS.PRIMARY};
   }
 `;
 interface Props {
