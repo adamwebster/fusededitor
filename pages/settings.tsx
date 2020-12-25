@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { Button } from '../src/components/Button';
 import { InnerPage, Layout } from '../src/components/Layout';
 import { ProtectedRoute } from '../src/components/ProtectedRoute/ProtectedRoute';
 import { useAuth } from '../src/context/authenticaton';
+import { UserContext } from '../src/context/user';
 import { useFetchFileUpload } from '../src/hooks/useFetch';
 import { Colors } from '../src/styles/colors';
 
@@ -34,7 +35,7 @@ const Settings = () => {
   const [selectedFile, setSelectedFile] = useState('');
   const [userProfile, setUserProfile] = useState<any>({});
   const { user } = useAuth();
-
+  const { dispatchUser } = useContext(UserContext);
   const updateProfilePicture = e => {
     e.preventDefault();
     const obj = {
@@ -48,6 +49,10 @@ const Settings = () => {
     useFetchFileUpload('updateUser', formData).then(resp => {
       setSelectedFile('');
       setUserProfile({ ...userProfile, profilePicture: resp.profilePicture });
+      dispatchUser({
+        type: 'SET_PROFILE_PICTURE',
+        payload: resp.profilePicture,
+      });
     });
   };
 

@@ -1,6 +1,8 @@
 import { useRouter } from 'next/router';
+import { useContext } from 'react';
 import styled from 'styled-components';
 import { useAuth } from '../../context/authenticaton';
+import { UserContext } from '../../context/user';
 import { useFetch } from '../../hooks/useFetch';
 import { Colors } from '../../styles/colors';
 import { Button } from '../Button';
@@ -50,6 +52,7 @@ const StyledLogoutButton = styled(Button)`
 
 const Header = () => {
   const { user } = useAuth();
+  const { userState } = useContext(UserContext);
   const router = useRouter();
   const logout = () => {
     useFetch('logout', {}).then(resp => {
@@ -68,7 +71,7 @@ const Header = () => {
                 'images/fe/ProfilePictures/' +
                 user.id +
                 '/' +
-                user.profilePicture
+                userState.profilePicture
               }
             />
           </StyledAvatar>
