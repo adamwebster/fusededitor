@@ -8,6 +8,8 @@ interface Props {
     username?: string;
     firstName?: string;
     lastName?: string;
+    id?: string;
+    profilePicture?: string;
   };
   loading: boolean;
 }
@@ -27,10 +29,12 @@ export const AuthProvider = ({ children }) => {
       setLoggedIn(resp.loggedin);
       if (resp.loggedin) {
         setUser({
+          id: resp._id,
           username: resp.username,
           firstName: resp.firstName,
           lastName: resp.lastName,
           isAdmin: resp.isAdmin,
+          profilePicture: resp.profilePicture,
         });
       }
       setLoading(false);

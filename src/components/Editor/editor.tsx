@@ -492,7 +492,6 @@ const Editor = ({ documentJSON }: Props) => {
             method="post"
             encType="multipart/form-data"
             onSubmit={e => uploadImage(e)}
-            // action="http://localhost:1984/fe/uploadImage"
           >
             <input
               style={{ display: 'none' }}

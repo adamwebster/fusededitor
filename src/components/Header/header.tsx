@@ -34,6 +34,14 @@ const StyledAvatar = styled.div`
   border-radius: 50%;
   background-color: ${Colors.GREY[300]};
   margin-right: 10px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  img {
+    height: 100%;
+    width: auto;
+  }
 `;
 
 const StyledLogoutButton = styled(Button)`
@@ -52,7 +60,19 @@ const Header = () => {
     <StyledHeader>
       <h1>Fused Editor</h1>
       <StyledUserInfo>
-        <StyledAvatar />
+        {user.profilePicture && (
+          <StyledAvatar>
+            <img
+              src={
+                process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
+                'images/fe/ProfilePictures/' +
+                user.id +
+                '/' +
+                user.profilePicture
+              }
+            />
+          </StyledAvatar>
+        )}
         Welcome, {user.firstName}
         <StyledLogoutButton onClick={() => logout()}>Logout</StyledLogoutButton>
       </StyledUserInfo>
