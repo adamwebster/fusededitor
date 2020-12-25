@@ -8,7 +8,6 @@ import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { Colors } from '../../styles/colors';
 import { HeadingBlock, ParagraphBlock } from '../Blocks';
 import MarkdownBlock from '../Blocks/MarkdownBlock';
 import { Button } from '../Button';
@@ -37,11 +36,11 @@ const StyledDocument = styled.div`
 `;
 const StyledEditor = styled.div`
   padding: 8px 16px;
-  background-color: ${Colors.GREY[600]};
+  background-color: ${({ theme }) => theme.COLORS.GREY[600]};
   box-sizing: border-box;
   flex: 1 1;
   resize: none;
-  color: ${Colors.GREY[50]};
+  color: ${({ theme }) => theme.COLORS.GREY[50]};
   overflow: auto;
   &:focus {
     outline: none;
@@ -54,13 +53,13 @@ const StyledDocumentHeader = styled.div`
   h2 {
     margin: 0 16px 0 0;
     font-weight: 100;
-    color: ${Colors.PRIMARY};
+    color: ${({ theme }) => theme.COLORS.PRIMARY};
   }
 `;
 
 const StyledDocumentTitle = styled.input`
   background: transparent;
-  color: ${Colors.PRIMARY};
+  color: ${({ theme }) => theme.COLORS.PRIMARY};
   font-size: inherit;
   border: none;
   font-weight: 100;
@@ -125,7 +124,7 @@ const StyledImageModal = styled(Modal)`
 const StyledSectionHeader = styled.div`
   font-size: 1.2rem;
   margin: 16px 0;
-  color: ${Colors.PRIMARY};
+  color: ${({ theme }) => theme.COLORS.PRIMARY};
   font-weight: 300;
   text-transform: uppercase;
 `;

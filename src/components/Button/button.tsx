@@ -1,23 +1,22 @@
 import { ButtonHTMLAttributes, ReactElement } from 'react';
 import styled, { css } from 'styled-components';
-import { Colors } from '../../styles/colors';
 import { darken } from 'polished';
 const StyledButton = styled.button`
-  border: ${({ primary }) =>
-    primary ? 'none' : `solid 1px ${Colors.PRIMARY}`};
-  background-color: ${({ primary }) =>
-    primary ? Colors.PRIMARY : 'transparent'};
+  border: ${({ primary, theme }) =>
+    primary ? 'none' : `solid 1px ${theme.COLORS.PRIMARY}`};
+  background-color: ${({ primary, theme }) =>
+    primary ? theme.COLORS.PRIMARY : 'transparent'};
   border-radius: 2px;
   padding: 8px 16px;
   height: 40px;
-  color: ${({ primary }) =>
-    primary ? darken(0.5, Colors.PRIMARY) : Colors.PRIMARY};
+  color: ${({ primary, theme }) =>
+    primary ? darken(0.5, theme.COLORS.PRIMARY) : theme.COLORS.PRIMARY};
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.2s;
   &:hover {
-    background-color: ${({ primary }) =>
-      primary ? darken(0.1, Colors.PRIMARY) : Colors.PRIMARY};
+    background-color: ${({ primary, theme }) =>
+      primary ? darken(0.1, theme.COLORS.PRIMARY) : theme.COLORS.PRIMARY};
   }
 
   + button {

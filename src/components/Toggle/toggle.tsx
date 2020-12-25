@@ -1,14 +1,13 @@
 import styled from 'styled-components';
-import { Colors } from '../../styles/colors';
 
 const StyledToggle = styled.div`
   height: 16px;
   width: 32px;
-  border: solid 1px ${Colors.GREY[200]};
+  border: solid 1px ${({ theme }) => theme.COLORS.GREY[200]};
   border-radius: 16px;
   display: flex;
-  background-color: ${({ checked }) =>
-    checked ? Colors.PRIMARY : 'transparent'};
+  background-color: ${({ checked, theme }) =>
+    checked ? theme.COLORS.PRIMARY : 'transparent'};
   justify-content: ${({ checked }) => (checked ? 'flex-end' : 'flex-start')};
   margin-top: 16px;
 `;
@@ -16,7 +15,7 @@ const StyledToggle = styled.div`
 const StyledToggleSwitch = styled.div`
   width: 16px;
   height: 16px;
-  background-color: ${Colors.GREY[200]};
+  background-color: ${({ theme }) => theme.COLORS.GREY[200]};
   border-radius: 50%;
 `;
 

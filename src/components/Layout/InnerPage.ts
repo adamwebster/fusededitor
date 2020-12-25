@@ -6,7 +6,7 @@ const InnerPage = styled.div`
   padding: 16px;
   box-sizing: border-box;
   width: 100%;
-  background-color: ${Colors.GREY[500]};
+  background-color: ${({ theme }) => theme.COLORS.GREY[500]};
   display: flex;
 `;
 

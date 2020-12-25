@@ -1,6 +1,5 @@
 import { forwardRef, HTMLAttributes, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { Colors } from '../../styles/colors';
 import { BlockTools } from './BlockTools';
 import ReactMarkdown from 'react-markdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -21,7 +20,7 @@ const StyledMarkdownBlock = styled.textarea`
   resize: vertical;
   width: 100%;
   background-color: transparent;
-  border: solid 1px ${Colors.GREY[500]};
+  border: solid 1px ${({ theme }) => theme.COLORS.GREY[500]};
   padding: 16px;
   box-sizing: border-box;
   color: inherit;
@@ -40,16 +39,16 @@ const StyledMarkdownBlock = styled.textarea`
 const StyledMarkdownToolbar = styled.div`
   display: flex;
   flex: 1 1;
-  background-color: ${Colors.GREY[500]};
+  background-color: ${({ theme }) => theme.COLORS.GREY[500]};
   padding: 16px;
-  color: ${Colors.GREY[200]};
+  color: ${({ theme }) => theme.COLORS.GREY[200]};
 `;
 
 const StyledMDToolButton = styled.button`
   background-color: transparent;
   border: none;
   color: inherit;
-  border-right: solid 1px ${Colors.GREY[200]};
+  border-right: solid 1px ${({ theme }) => theme.COLORS.GREY[200]};
   padding: 0px 16px;
   &:last-child {
     border-right: none;
@@ -59,7 +58,7 @@ const StyledMDToolButton = styled.button`
 const StyledMarkdownPreview = styled(ReactMarkdown)`
   width: 100%;
   background-color: transparent;
-  border: solid 1px ${Colors.GREY[500]};
+  border: solid 1px ${({ theme }) => theme.COLORS.GREY[500]};
   padding: 16px;
   box-sizing: border-box;
   color: inherit;

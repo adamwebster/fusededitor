@@ -3,11 +3,11 @@ import styled from 'styled-components';
 import { Colors } from '../../styles/colors';
 
 const StyledPanel = styled.div`
-  background-color: ${Colors.GREY[450]};
+  background-color: ${({ theme }) => theme.COLORS.GREY[450]};
   padding: 16px;
   h3 {
     font-weight: 300;
-    color: ${Colors.PRIMARY};
+    color: ${({ theme }) => theme.COLORS.PRIMARY};
   }
 `;
 interface Props {

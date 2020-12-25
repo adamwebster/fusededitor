@@ -1,22 +1,26 @@
 import styled from 'styled-components';
-import { Colors } from '../../styles/colors';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendar, faCog, faFileAlt, faHome } from '@fortawesome/free-solid-svg-icons';
+import {
+  faCalendar,
+  faCog,
+  faFileAlt,
+  faHome,
+} from '@fortawesome/free-solid-svg-icons';
 import { ReactElement } from 'react';
 import Link from 'next/link';
 
 const StyledVerticalNav = styled.nav`
   width: 50px;
   display: flex;
-  background-color: ${Colors.GREY[500]};
-  color: ${Colors.WHITE};
+  background-color: ${({ theme }) => theme.COLORS.GREY[500]};
+  color: ${({ theme }) => theme.COLORS.WHITE};
   flex-flow: column;
 `;
 
 const StyledLink = styled.a`
   width: 100%;
   height: 50px;
-  color: ${Colors.WHITE};
+  color: ${({ theme }) => theme.COLORS.WHITE};
   justify-content: center;
   align-items: center;
   display: flex;

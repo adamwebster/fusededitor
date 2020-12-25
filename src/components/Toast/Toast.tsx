@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, ReactElement, useRef } from 'react';
 import styled from 'styled-components';
-import { Colors } from '../../styles/colors';
 
 const StyledToast = styled.div`
   width: 500px;
@@ -8,23 +7,23 @@ const StyledToast = styled.div`
   margin: 0 auto;
   border-radius: 8px;
   box-sizing: border-box;
-  background-color: ${Colors.GREY[400]};
+  background-color: ${({ theme }) => theme.COLORS.GREY[400]};
   padding: 16px;
   transition: all;
   margin-bottom: 10px;
   border-top: solid 4px
-    ${({ toastStyle }) => {
+    ${({ toastStyle, theme }) => {
       switch (toastStyle) {
         case 'info':
-          return Colors.INFO;
+          return theme.COLORS.INFO;
         case 'danger':
-          return Colors.DANGER;
+          return theme.COLORS.DANGER;
         case 'warning':
-          return Colors.WARNING;
+          return theme.COLORS.WARNING;
         case 'success':
-          return Colors.SUCCESS;
+          return theme.COLORS.SUCCESS;
         default:
-          return Colors.GREY[300];
+          return theme.COLORS.GREY[300];
       }
     }};
 

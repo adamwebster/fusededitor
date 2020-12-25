@@ -6,7 +6,6 @@ import { useFetch } from '../src/hooks/useFetch';
 import styled from 'styled-components';
 import { Button } from '../src/components/Button';
 import { TextInput } from '../src/components/TextInput';
-import { Colors } from '../src/styles/colors';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAlignLeft, faList, faTh } from '@fortawesome/free-solid-svg-icons';
 import { useRouter } from 'next/router';
@@ -37,7 +36,7 @@ const StyledDocumentList = styled.ul`
   padding: 0;
   margin: 0;
   li {
-    border-bottom: solid 1px ${Colors.GREY[400]};
+    border-bottom: solid 1px ${({ theme }) => theme.COLORS.GREY[400]};
     a {
       display: block;
       padding: 16px 8px;
@@ -45,15 +44,15 @@ const StyledDocumentList = styled.ul`
       box-sizing: border-box;
       text-decoration: none;
       &:hover {
-        background-color: ${Colors.GREY[450]};
+        background-color: ${({ theme }) => theme.COLORS.GREY[450]};
       }
     }
   }
 `;
 
 const StyledDocument = styled.div`
-  background-color: ${Colors.GREY[450]};
-  border: solid 1px ${Colors.GREY[400]};
+  background-color: ${({ theme }) => theme.COLORS.GREY[450]};
+  border: solid 1px ${({ theme }) => theme.COLORS.GREY[400]};
   padding: 16px;
   height: 230px;
   justify-content: flex-end;
@@ -61,12 +60,12 @@ const StyledDocument = styled.div`
   flex-flow: column;
   align-items: center;
   span {
-    background-color: ${Colors.GREY[400]};
+    background-color: ${({ theme }) => theme.COLORS.GREY[400]};
     text-align: center;
     padding: 8px;
     border-radius: 5px;
     width: 100%;
-    color: ${Colors.GREY[100]};
+    color: ${({ theme }) => theme.COLORS.GREY[100]};
     display: block;
   }
 `;
@@ -74,7 +73,7 @@ const StyledDocument = styled.div`
 const StyledDocumentLink = styled.a`
   text-decoration: none;
   cursor: pointer;
-  color: ${Colors.GREY[200]};
+  color: ${({ theme }) => theme.COLORS.GREY[200]};
   &:hover {
     opacity: 0.5;
   }
@@ -90,7 +89,7 @@ const StyledDocumentIconWrapper = styled.div`
   align-items: flex-start;
   margin-top: 16px;
   svg {
-    color: ${Colors.GREY[500]};
+    color: ${({ theme }) => theme.COLORS.GREY[500]};
   }
 `;
 
@@ -103,9 +102,12 @@ const StyledListControls = styled.div`
 
 interface SDVCProps {
   active: boolean;
+  theme: any;
 }
+
 const StyledDocumentViewControl = styled(FontAwesomeIcon)`
-  color: ${({ active }: SDVCProps) => (active ? Colors.PRIMARY : 'inherit')};
+  color: ${({ active, theme }: SDVCProps) =>
+    active ? theme.COLORS.PRIMARY : 'inherit'};
 `;
 
 const Index = () => {

@@ -13,7 +13,7 @@ import styled from 'styled-components';
 import 'tippy.js/dist/tippy.css';
 
 const StyledPopper = styled.span`
-  background-color: ${Colors.GREY[400]};
+  background-color: ${({ theme }) => theme.COLORS.GREY[400]};
   padding: 16px;
 `;
 

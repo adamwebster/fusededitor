@@ -6,7 +6,6 @@ import { ProtectedRoute } from '../src/components/ProtectedRoute/ProtectedRoute'
 import { useAuth } from '../src/context/authenticaton';
 import { UserContext } from '../src/context/user';
 import { useFetchFileUpload } from '../src/hooks/useFetch';
-import { Colors } from '../src/styles/colors';
 
 const StyledSettingsWrapper = styled(InnerPage)`
   flex-flow: column;
@@ -105,6 +104,21 @@ const Settings = () => {
             )}
           </form>
         </StyledProfileImageWrapper>
+        <h2>Themes</h2>
+        <div>
+          <Button
+            onClick={() => dispatchUser({ type: 'SET_THEME', payload: 'red' })}
+          >
+            Set THeme To Red
+          </Button>
+          <Button
+            onClick={() =>
+              dispatchUser({ type: 'SET_THEME', payload: 'default' })
+            }
+          >
+            Set them to default
+          </Button>
+        </div>
       </StyledSettingsWrapper>
     </Layout>
   );
