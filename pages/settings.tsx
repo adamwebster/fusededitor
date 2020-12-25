@@ -64,7 +64,6 @@ const Settings = () => {
   };
 
   const saveSettings = () => {
-    console.log(userState);
     useFetch('updateUserSettings', {
       colorMode: userState.theme.colorMode,
       theme: userState.theme.theme.colorName,

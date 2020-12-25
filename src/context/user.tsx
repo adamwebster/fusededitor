@@ -21,7 +21,6 @@ export const UserConsumer = UserContext.Consumer;
 
 const reducer = (state: any, action: { payload: any; type: any }) => {
   const { payload, type } = action;
-  console.log(payload, type);
   switch (type) {
     case 'SET_PROFILE_PICTURE':
       return {
