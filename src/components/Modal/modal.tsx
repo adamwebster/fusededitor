@@ -18,10 +18,10 @@ const StyledOverlay = styled.div`
 `;
 
 const StyledModal = styled.div`
-  width: 500px;
+  max-width: 500px;
   display: flex;
   background-color: ${Colors.GREY[500]};
-  max-height: 300px;
+  max-height: 95vh;
   z-index: 9;
   position: absolute;
   flex-flow: column;
@@ -54,7 +54,7 @@ const Modal = ({ show, children, onCloseClick, ...rest }: Props) => {
     return (
       <ModalContextProvider state={state}>
         <StyledOverlay ref={overlay} onClick={e => handleClose(e)}>
-          <StyledModal>{children}</StyledModal>
+          <StyledModal {...rest}>{children}</StyledModal>
         </StyledOverlay>
       </ModalContextProvider>
     );

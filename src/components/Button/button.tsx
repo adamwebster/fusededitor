@@ -10,14 +10,14 @@ const StyledButton = styled.button`
   border-radius: 2px;
   padding: 8px 16px;
   height: 40px;
-  color: ${({ primary }) => (primary ? Colors.WHITE : Colors.PRIMARY)};
+  color: ${({ primary }) =>
+    primary ? darken(0.5, Colors.PRIMARY) : Colors.PRIMARY};
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.2s;
   &:hover {
     background-color: ${({ primary }) =>
       primary ? darken(0.1, Colors.PRIMARY) : Colors.PRIMARY};
-    color: ${Colors.WHITE};
   }
 
   + button {

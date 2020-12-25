@@ -61,11 +61,12 @@ const StyledDocument = styled.div`
   flex-flow: column;
   align-items: center;
   span {
-    background-color: ${Colors.GREY[350]};
+    background-color: ${Colors.GREY[400]};
     text-align: center;
     padding: 8px;
     border-radius: 5px;
     width: 100%;
+    color: ${Colors.GREY[100]};
     display: block;
   }
 `;
@@ -100,8 +101,11 @@ const StyledListControls = styled.div`
   padding: 0 16px;
 `;
 
+interface SDVCProps {
+  active: boolean;
+}
 const StyledDocumentViewControl = styled(FontAwesomeIcon)`
-  color: ${({ active }) => (active ? Colors.PRIMARY : 'inherit')};
+  color: ${({ active }: SDVCProps) => (active ? Colors.PRIMARY : 'inherit')};
 `;
 
 const Index = () => {
@@ -115,7 +119,8 @@ const Index = () => {
     });
   };
 
-  const createDocument = () => {
+  const createDocument = e => {
+    e.preventDefault();
     useFetch('createDocument', {
       documentTitle,
     }).then(resp => {
@@ -144,14 +149,15 @@ const Index = () => {
             />
           </StyledListControls>
           <StyledActionsWrapper>
-            <StyledTextInput
-              placeholder="Document Name"
-              value={documentTitle}
-              onChange={e => setDocumentTitle(e.target.value)}
-            />
-            <Button primary onClick={() => createDocument()}>
-              Create Document
-            </Button>
+            <form method="post" onSubmit={e => createDocument(e)}>
+              <StyledTextInput
+                aria-label="Document Name"
+                placeholder="Document Name"
+                value={documentTitle}
+                onChange={e => setDocumentTitle(e.target.value)}
+              />
+              <Button primary>Create Document</Button>
+            </form>
           </StyledActionsWrapper>
         </StyledPageHeader>
         {selectedView === 'list' && (

@@ -296,43 +296,72 @@ const MarkdownBlock = forwardRef(
         <StyledMarkdownToolbar>
           {!preview && (
             <>
-              <StyledMDToolButton onClick={() => wrapText('**', '**')}>
+              <StyledMDToolButton
+                title="Bold"
+                onClick={() => wrapText('**', '**')}
+              >
                 <FontAwesomeIcon icon={faBold} />
               </StyledMDToolButton>
-              <StyledMDToolButton onClick={() => wrapText('*', '*')}>
+              <StyledMDToolButton
+                title="Italics"
+                onClick={() => wrapText('*', '*')}
+              >
                 <FontAwesomeIcon icon={faItalic} />
               </StyledMDToolButton>
               <StyledMDToolButton
+                title="Link"
                 onClick={() => wrapText('[', '](http://url.com)')}
               >
                 <FontAwesomeIcon icon={faLink} />
               </StyledMDToolButton>
               {attachments.length > 0 && (
                 <StyledMDToolButton
+                  title="Add Image"
                   onClick={() => setShowAttachmentModal(true)}
                 >
                   <FontAwesomeIcon icon={faImage} />
                 </StyledMDToolButton>
               )}
-              <StyledMDToolButton onClick={() => wrapText('`', '`')}>
+              <StyledMDToolButton
+                title="Inline Code"
+                onClick={() => wrapText('`', '`')}
+              >
                 <FontAwesomeIcon icon={faCode} />
               </StyledMDToolButton>
-              <StyledMDToolButton onClick={() => wrapText('# ', '')}>
+              <StyledMDToolButton
+                title="Heading Level 1"
+                onClick={() => wrapText('# ', '')}
+              >
                 H1
               </StyledMDToolButton>
-              <StyledMDToolButton onClick={() => wrapText('## ', '')}>
+              <StyledMDToolButton
+                title="Heading Level 2"
+                onClick={() => wrapText('## ', '')}
+              >
                 H2
               </StyledMDToolButton>
-              <StyledMDToolButton onClick={() => wrapText('### ', '')}>
+              <StyledMDToolButton
+                title="Heading Level 3"
+                onClick={() => wrapText('### ', '')}
+              >
                 H3
               </StyledMDToolButton>
-              <StyledMDToolButton onClick={() => wrapText('#### ', '')}>
+              <StyledMDToolButton
+                title="Heading Level 4"
+                onClick={() => wrapText('#### ', '')}
+              >
                 H4
               </StyledMDToolButton>
-              <StyledMDToolButton onClick={() => wrapText('##### ', '')}>
+              <StyledMDToolButton
+                title="Heading Level 5"
+                onClick={() => wrapText('##### ', '')}
+              >
                 H5
               </StyledMDToolButton>
-              <StyledMDToolButton onClick={() => wrapText('###### ', '')}>
+              <StyledMDToolButton
+                title="Heading Level 6"
+                onClick={() => wrapText('###### ', '')}
+              >
                 H6
               </StyledMDToolButton>
             </>
@@ -347,6 +376,7 @@ const MarkdownBlock = forwardRef(
         </StyledMarkdownToolbar>
         {!preview ? (
           <StyledMarkdownBlock
+            aria-label="Markdown Editor"
             ref={textareaRef}
             placeHolder="Start typing"
             onChange={e => handleChange(e)}

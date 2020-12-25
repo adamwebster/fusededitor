@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useContext } from 'react';
 import styled from 'styled-components';
@@ -15,11 +16,14 @@ const StyledHeader = styled.header`
   color: ${Colors.WHITE};
   display: flex;
   align-items: center;
-  h1 {
-    margin: 0;
-    font-weight: 200;
-    text-transform: uppercase;
-    font-size: 1rem;
+  a {
+    text-decoration: none;
+    h1 {
+      margin: 0;
+      font-weight: 200;
+      text-transform: uppercase;
+      font-size: 1.2rem;
+    }
   }
 `;
 
@@ -61,11 +65,16 @@ const Header = () => {
   };
   return (
     <StyledHeader>
-      <h1>Fused Editor</h1>
+      <Link href="/">
+        <a>
+          <h1>Fused Editor</h1>
+        </a>
+      </Link>
       <StyledUserInfo>
         {user.profilePicture && (
           <StyledAvatar>
             <img
+              alt="Profile Image"
               src={
                 process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
                 'images/fe/ProfilePictures/' +
