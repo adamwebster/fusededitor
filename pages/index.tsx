@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAlignLeft, faList, faTh } from '@fortawesome/free-solid-svg-icons';
 import { useRouter } from 'next/router';
 import { SEO } from '../src/components/SEO';
+import dayjs from 'dayjs';
 const StyledInnerPage = styled(InnerPage)`
   flex-flow: column;
 `;
@@ -35,17 +36,27 @@ const StyledDocumentList = styled.ul`
   list-style: none;
   padding: 0;
   margin: 0;
+
+  div {
+    flex: 1 1;
+    align-items: center;
+    display: flex;
+  }
   li {
+    display: flex;
     border-bottom: solid 1px ${({ theme }) => theme.COLORS.GREY[400]};
+    padding: 16px 8px;
+    box-sizing: border-box;
+    text-decoration: none;
+    &.list-header {
+      font-weight: bold;
+      background-color: ${({ theme }) => theme.COLORS.GREY[400]};
+    }
+    &:not(.list-header):hover {
+      background-color: ${({ theme }) => theme.COLORS.GREY[450]};
+    }
     a {
       display: block;
-      padding: 16px 8px;
-      width: 100%;
-      box-sizing: border-box;
-      text-decoration: none;
-      &:hover {
-        background-color: ${({ theme }) => theme.COLORS.GREY[450]};
-      }
     }
   }
 `;
@@ -101,13 +112,15 @@ const StyledListControls = styled.div`
 `;
 
 interface SDVCProps {
-  active: boolean;
+  isActive: boolean;
   theme: any;
 }
 
-const StyledDocumentViewControl = styled(FontAwesomeIcon)`
-  color: ${({ active, theme }: SDVCProps) =>
-    active ? theme.COLORS.PRIMARY : 'inherit'};
+const StyledDocumentViewControl = styled.div<SDVCProps>`
+  svg {
+    color: ${({ isActive, theme }) =>
+      isActive ? theme.COLORS.PRIMARY : 'inherit'};
+  }
 `;
 
 const Index = () => {
@@ -141,14 +154,17 @@ const Index = () => {
           <StyledListControls>
             <StyledDocumentViewControl
               onClick={() => setSelectedView('grid')}
-              active={selectedView === 'grid'}
-              icon={faTh}
-            />
+              isActive={selectedView === 'grid'}
+            >
+              <FontAwesomeIcon icon={faTh} />
+            </StyledDocumentViewControl>
             <StyledDocumentViewControl
               onClick={() => setSelectedView('list')}
-              active={selectedView === 'list'}
+              isActive={selectedView === 'list'}
               icon={faList}
-            />
+            >
+              <FontAwesomeIcon icon={faList} />
+            </StyledDocumentViewControl>
           </StyledListControls>
           <StyledActionsWrapper>
             <form method="post" onSubmit={e => createDocument(e)}>
@@ -164,16 +180,21 @@ const Index = () => {
         </StyledPageHeader>
         {selectedView === 'list' && (
           <StyledDocumentList>
+            <li className="list-header">
+              <div>Document Name</div>
+              <div>Last Modified</div>
+            </li>
+            {console.log(documents)}
             {documents.map(document => {
               return (
-                <li>
-                  <Link
-                    key={document._id}
-                    href={`/editor/${document._id}`}
-                    passHref
-                  >
-                    <a>{document.title}</a>
-                  </Link>
+                <li
+                  onClick={() => router.push(`/editor/${document._id}`)}
+                  key={document._id}
+                >
+                  <div>{document.title}</div>
+                  <div>
+                    {dayjs(document.dateModified).format('MMMM DD YYYY')}
+                  </div>
                 </li>
               );
             })}

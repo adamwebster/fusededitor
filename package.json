@@ -12,6 +12,7 @@
     "@popperjs/core": "^2.6.0",
     "@tippyjs/react": "^4.2.0",
     "axios": "^0.21.1",
+    "dayjs": "^1.9.8",
     "next": "10.0.3",
     "polished": "^4.0.5",
     "react": "17.0.1",
