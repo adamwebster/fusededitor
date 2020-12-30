@@ -1,4 +1,6 @@
 import {
+  faChevronCircleLeft,
+  faChevronCircleRight,
   faHeading,
   faParagraph,
   faSpinner,
@@ -24,7 +26,9 @@ const StyledEditorWrapper = styled.div`
   display: grid;
   flex-flow: column;
   overflow: hidden;
-  grid-template-columns: 1fr 300px;
+  grid-template-columns: 1fr ${({ panelOpen }) =>
+      panelOpen ? '300px' : '50px'};
+  transition: all 0.6s;
   flex: 1 1;
 `;
 
@@ -145,6 +149,7 @@ const Editor = ({ documentJSON }: Props) => {
   });
   const [selectedFile, setSelectedFile] = useState('');
   const [saving, setSaving] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(false);
   const editor = useRef();
   const fileUpload = useRef(null as HTMLInputElement);
   const router = useRouter();
@@ -382,7 +387,7 @@ const Editor = ({ documentJSON }: Props) => {
           </div>
         </StyledImageModal.Body>
       </StyledImageModal>
-      <StyledEditorWrapper>
+      <StyledEditorWrapper panelOpen={panelOpen}>
         <StyledDocument>
           <StyledDocumentHeader>
             <StyledDocumentTitle
@@ -474,120 +479,128 @@ const Editor = ({ documentJSON }: Props) => {
           </StyledEditor>
         </StyledDocument>
         <Panel>
-          <StyledSectionHeader>Blocks</StyledSectionHeader>
-          <StyledBlockGrid>
-            <Tippy content="Heading Block">
-              <button
-                aria-label="Heading Block"
-                onClick={() => addBlock('heading')}
-              >
-                <FontAwesomeIcon icon={faHeading} />
-              </button>
-            </Tippy>
-            <Tippy content="Paragraph Block">
-              <button
-                aria-label="Paragraph Block"
-                onClick={() => addBlock('paragraph')}
-              >
-                <FontAwesomeIcon icon={faParagraph} />
-              </button>
-            </Tippy>
-            <Tippy content="Markdown Block">
-              <button
-                aria-label="Markdown Block"
-                onClick={() => addBlock('markdown')}
-              >
-                <FontAwesomeIcon icon={faMarkdown} />
-              </button>
-            </Tippy>
-          </StyledBlockGrid>
-          <StyledSectionHeader>Document Settings</StyledSectionHeader>
-          <label
-            onClick={() =>
-              setDocument({
-                ...document,
-                settings: {
-                  createNewParagraphOnReturn: !document.settings
-                    .createNewParagraphOnReturn,
-                },
-              })
-            }
-          >
-            Create new paragraph block on return
-          </label>
-          <Toggle
-            checked={document.settings.createNewParagraphOnReturn}
-            onClick={() =>
-              setDocument({
-                ...document,
-                settings: {
-                  createNewParagraphOnReturn: !document.settings
-                    .createNewParagraphOnReturn,
-                },
-              })
-            }
+          <FontAwesomeIcon
+            onClick={() => setPanelOpen(!panelOpen)}
+            icon={panelOpen ? faChevronCircleRight : faChevronCircleLeft}
           />
+          {panelOpen && (
+            <>
+              <StyledSectionHeader>Blocks</StyledSectionHeader>
+              <StyledBlockGrid>
+                <Tippy content="Heading Block">
+                  <button
+                    aria-label="Heading Block"
+                    onClick={() => addBlock('heading')}
+                  >
+                    <FontAwesomeIcon icon={faHeading} />
+                  </button>
+                </Tippy>
+                <Tippy content="Paragraph Block">
+                  <button
+                    aria-label="Paragraph Block"
+                    onClick={() => addBlock('paragraph')}
+                  >
+                    <FontAwesomeIcon icon={faParagraph} />
+                  </button>
+                </Tippy>
+                <Tippy content="Markdown Block">
+                  <button
+                    aria-label="Markdown Block"
+                    onClick={() => addBlock('markdown')}
+                  >
+                    <FontAwesomeIcon icon={faMarkdown} />
+                  </button>
+                </Tippy>
+              </StyledBlockGrid>
+              <StyledSectionHeader>Document Settings</StyledSectionHeader>
+              <label
+                onClick={() =>
+                  setDocument({
+                    ...document,
+                    settings: {
+                      createNewParagraphOnReturn: !document.settings
+                        .createNewParagraphOnReturn,
+                    },
+                  })
+                }
+              >
+                Create new paragraph block on return
+              </label>
+              <Toggle
+                checked={document.settings.createNewParagraphOnReturn}
+                onClick={() =>
+                  setDocument({
+                    ...document,
+                    settings: {
+                      createNewParagraphOnReturn: !document.settings
+                        .createNewParagraphOnReturn,
+                    },
+                  })
+                }
+              />
 
-          <StyledSectionHeader>Attachments</StyledSectionHeader>
-          {!selectedFile && (
-            <Button onClick={() => fileUpload.current.click()}>
-              Choose File
-            </Button>
-          )}
-          <form
-            method="post"
-            encType="multipart/form-data"
-            onSubmit={e => uploadImage(e)}
-          >
-            <input
-              style={{ display: 'none' }}
-              ref={fileUpload}
-              type="file"
-              name="file"
-              onChange={e => setSelectedFile(e.target.value)}
-            />
-            {selectedFile && (
-              <>
-                <Button>Upload</Button>{' '}
-                <Button onClick={() => setSelectedFile('')}>Reset</Button>
-              </>
-            )}
-          </form>
-          <StyledAttachmentList>
-            {document.attachments.map(attachment => {
-              return (
-                <StyledAttachment key={attachment}>
-                  <div className="imageWrapper">
-                    <img
-                      alt="Uploaded Image"
-                      onClick={() =>
-                        setImageModal({
-                          show: true,
-                          selectedImage:
+              <StyledSectionHeader>Attachments</StyledSectionHeader>
+              {!selectedFile && (
+                <Button onClick={() => fileUpload.current.click()}>
+                  Choose File
+                </Button>
+              )}
+              <form
+                method="post"
+                encType="multipart/form-data"
+                onSubmit={e => uploadImage(e)}
+              >
+                <input
+                  style={{ display: 'none' }}
+                  ref={fileUpload}
+                  type="file"
+                  name="file"
+                  onChange={e => setSelectedFile(e.target.value)}
+                />
+                {selectedFile && (
+                  <>
+                    <Button>Upload</Button>{' '}
+                    <Button onClick={() => setSelectedFile('')}>Reset</Button>
+                  </>
+                )}
+              </form>
+              <StyledAttachmentList>
+                {document.attachments.map(attachment => {
+                  return (
+                    <StyledAttachment key={attachment}>
+                      <div className="imageWrapper">
+                        <img
+                          alt="Uploaded Image"
+                          onClick={() =>
+                            setImageModal({
+                              show: true,
+                              selectedImage:
+                                process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
+                                'images/fe/' +
+                                document._id +
+                                '/' +
+                                attachment,
+                            })
+                          }
+                          src={
                             process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
                             'images/fe/' +
                             document._id +
                             '/' +
-                            attachment,
-                        })
-                      }
-                      src={
-                        process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
-                        'images/fe/' +
-                        document._id +
-                        '/' +
-                        attachment
-                      }
-                    />
-                  </div>
-                  <FontAwesomeIcon
-                    onClick={() => removeImage(attachment, document._id)}
-                    icon={faTrash}
-                  />
-                </StyledAttachment>
-              );
-            })}
-          </StyledAttachmentList>
+                            attachment
+                          }
+                        />
+                      </div>
+                      <FontAwesomeIcon
+                        onClick={() => removeImage(attachment, document._id)}
+                        icon={faTrash}
+                      />
+                    </StyledAttachment>
+                  );
+                })}
+              </StyledAttachmentList>
+            </>
+          )}
         </Panel>
       </StyledEditorWrapper>
     </>
