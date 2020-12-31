@@ -70,6 +70,7 @@ const StyledDocumentTitle = styled.input`
   font-size: 1.5rem;
   flex: 1 1;
   -webkit-appearance: none;
+  min-width: 100px;
 `;
 
 const StyledBlockGrid = styled.div`

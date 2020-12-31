@@ -169,7 +169,7 @@ const MarkdownBlock = forwardRef(
         placement: 'top',
         modifiers: [
           { name: 'arrow', options: { element: arrowElement } },
-          { name: 'offset', options: { offset: [0, 16] } },
+          { name: 'offset', options: { offset: [0, 18] } },
         ],
       }
     );
