@@ -1,21 +1,15 @@
 import {
   faChevronCircleLeft,
   faChevronCircleRight,
-  faHeading,
-  faParagraph,
   faSpinner,
   faTrash,
 } from '@fortawesome/free-solid-svg-icons';
-import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { HeadingBlock, ParagraphBlock } from '../Blocks';
 import MarkdownBlock from '../Blocks/MarkdownBlock';
 import { Button } from '../Button';
 import { Panel } from '../Panel';
-import Tippy from '@tippyjs/react';
-import { Toggle } from '../Toggle';
 import { useFetch, useFetchFileUpload } from '../../hooks/useFetch';
 import { Modal } from '../Modal';
 import { useRouter } from 'next/router';
@@ -155,70 +149,6 @@ const Editor = ({ documentJSON }: Props) => {
   const fileUpload = useRef(null as HTMLInputElement);
   const router = useRouter();
   const toast = useToast();
-  const addBlock = (blockType: string) => {
-    const copyOfdocument = [...document.documentLayout];
-    const activeItem = copyOfdocument.find(item => item.id === activeId);
-    let indexOfActiveItem = copyOfdocument.findIndex(
-      item => item.id === activeId
-    );
-    if (indexOfActiveItem === -1) {
-      indexOfActiveItem = copyOfdocument.length;
-    }
-    switch (blockType) {
-      case 'heading':
-        const headingElements = copyOfdocument.filter(
-          item => item.type === 'heading'
-        );
-        const itemExist = headingElements.find(
-          item => item.id === 'heading' + (headingElements.length + 1)
-        );
-        if (!itemExist) {
-          copyOfdocument.splice(indexOfActiveItem + 1, 0, {
-            id: 'heading' + (headingElements.length + 1),
-            type: 'heading',
-            content: 'Heading',
-            element: 'h1',
-          });
-        }
-        break;
-      case 'paragraph':
-        const paragraphItems = copyOfdocument.filter(
-          item => item.type === 'paragraph'
-        );
-        const paragraphItemExist = paragraphItems.find(
-          item => item.id === 'paragraph' + (paragraphItems.length + 1)
-        );
-        if (!paragraphItemExist) {
-          copyOfdocument.splice(indexOfActiveItem + 1, 0, {
-            id: 'paragraph' + (paragraphItems.length + 1),
-            type: 'paragraph',
-            content: '',
-            element: 'p',
-          });
-        }
-        break;
-      case 'markdown':
-        const markdownItems = copyOfdocument.filter(
-          item => item.type === 'markdown'
-        );
-        const markdownItemExist = markdownItems.find(
-          item => item.id === 'markdown' + (markdownItems.length + 1)
-        );
-        if (!markdownItemExist) {
-          copyOfdocument.splice(indexOfActiveItem + 1, 0, {
-            id: 'markdown' + (markdownItems.length + 1),
-            type: 'markdown',
-            content: '',
-            element: 'textarea',
-          });
-        }
-    }
-    setDocument({
-      ...document,
-      documentLayout: copyOfdocument,
-    });
-    setAutoFocus(true);
-  };
 
   const updateItem =  (e: any) => {
     const itemToUpdate = document;
@@ -227,44 +157,6 @@ const Editor = ({ documentJSON }: Props) => {
     }
   };
 
-  const removeItem = id => {
-    let copyOfdocument = [...document.documentLayout];
-    copyOfdocument = copyOfdocument.filter(item => item.id !== id);
-    setDocument({
-      ...document,
-      documentLayout: copyOfdocument,
-    });
-  };
-
-  const moveItem = (id, direction, e) => {
-    let copyOfdocument = [...document.documentLayout];
-    const itemToMove = copyOfdocument.find(item => item.id === id);
-    const indexOfItemToMove = copyOfdocument.findIndex(item => item.id === id);
-    copyOfdocument = copyOfdocument.filter(item => item.id !== id);
-    if (direction === 'up') {
-      copyOfdocument.splice(indexOfItemToMove - 1, 0, itemToMove);
-    } else if (direction === 'down') {
-      copyOfdocument.splice(indexOfItemToMove + 1, 0, itemToMove);
-    }
-    setDocument({
-      ...document,
-      documentLayout: copyOfdocument,
-    });
-    if (activeElement) activeElement.focus();
-  };
-
-  const handleBlockKeyDown = e => {
-    const { keyCode } = e;
-    switch (keyCode) {
-      case 13:
-        // Enter key
-        if (!e.shiftKey && document.settings.createNewParagraphOnReturn) {
-          e.preventDefault();
-          addBlock('paragraph');
-        }
-        break;
-    }
-  };
 
   const saveDocument = () => {
     setSaving(true);
@@ -303,21 +195,13 @@ const Editor = ({ documentJSON }: Props) => {
       setDocument({ ...document, attachments: resp.attachments });
     });
   };
+
   const deleteDocument = () => {
     useFetch('deleteDocument', {
       document,
     });
     setShowDeleteModal(false);
     router.push('/');
-  };
-
-  const changeElement = (index, element) => {
-    const copyOfdocument = [...document.documentLayout];
-    copyOfdocument[index].element = element;
-    setDocument({
-      ...document,
-      documentLayout: copyOfdocument,
-    });
   };
 
   const handleKeydown = e => {
@@ -333,11 +217,6 @@ const Editor = ({ documentJSON }: Props) => {
   };
 
   useEffect(() => {
-    // const localStorageContent = JSON.parse(localStorage.getItem('document'));
-    // if (localStorageContent) {
-    //   setDocument(localStorageContent);
-    // } else {
-    // }
     setDocument(documentJSON);
   }, [documentJSON]);
 
@@ -414,8 +293,6 @@ const Editor = ({ documentJSON }: Props) => {
               }}
               documentID={document._id}
               onChange={e => updateItem(e)}
-
-              onKeyDown={e => handleBlockKeyDown(e)}
             >
               {document.content}
             </MarkdownBlock>

@@ -1,6 +1,5 @@
 import { forwardRef, HTMLAttributes, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { BlockTools } from './BlockTools';
 import ReactMarkdown from 'react-markdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -134,8 +133,6 @@ const MarkdownBlock = forwardRef(
     }: Props,
     ref
   ) => {
-    const [showPopper, setShowPopper] = useState(false);
-    const [referenceElement, setReferenceElement] = useState(null);
     const [referenceElementHeadings, setReferenceElementHeadings] = useState(
       null
     );
@@ -165,7 +162,6 @@ const MarkdownBlock = forwardRef(
     );
 
     const handleKeyDown = e => {
-      setShowPopper(false);
       if (onKeyDown) {
         onKeyDown(e);
       }
@@ -299,7 +295,7 @@ const MarkdownBlock = forwardRef(
     }, [popperElementHeadings, referenceElementHeadings]);
 
     return (
-      <StyledMDWrapper ref={setReferenceElement}>
+      <StyledMDWrapper>
         <Modal
           onCloseClick={() => setShowAttachmentModal(false)}
           show={showAttachmentModal}
@@ -438,22 +434,7 @@ const MarkdownBlock = forwardRef(
             ref={textareaRef}
             placeHolder="Start typing"
             onChange={e => handleChange(e)}
-            onFocus={e => {
-              setShowPopper(true);
-            }}
-            onClick={e => {
-              setShowPopper(true);
-            }}
             onKeyDown={e => handleKeyDown(e)}
-            onBlur={() =>
-              setTimeout(() => {
-                if (showPopper) {
-                  if (isMounted) {
-                    setShowPopper(false);
-                  }
-                }
-              }, 250)
-            }
             {...rest}
             value={content}
           />
