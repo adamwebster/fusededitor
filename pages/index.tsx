@@ -7,10 +7,16 @@ import styled from 'styled-components';
 import { Button } from '../src/components/Button';
 import { TextInput } from '../src/components/TextInput';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAlignLeft, faList, faTh } from '@fortawesome/free-solid-svg-icons';
+import {
+  faAlignLeft,
+  faFolder,
+  faList,
+  faTh,
+} from '@fortawesome/free-solid-svg-icons';
 import { useRouter } from 'next/router';
 import { SEO } from '../src/components/SEO';
 import dayjs from 'dayjs';
+import { Modal } from '../src/components/Modal';
 const StyledInnerPage = styled(InnerPage)`
   flex-flow: column;
 `;
@@ -104,6 +110,17 @@ const StyledDocumentIconWrapper = styled.div`
   }
 `;
 
+const StyledFolderIconWrapper = styled.div`
+  flex: 1 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin-top: 16px;
+  svg {
+    color: ${({ theme }) => theme.COLORS.GREY[500]};
+  }
+`;
+
 const StyledListControls = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -125,12 +142,21 @@ const StyledDocumentViewControl = styled.div<SDVCProps>`
 
 const Index = () => {
   const [documents, setDocuments] = useState([]);
+  const [folders, setFolders] = useState([]);
+  const [showFolder, setShowFolder] = useState(false);
   const [documentTitle, setDocumentTitle] = useState('');
+  const [folderName, setFolderName] = useState('');
   const [selectedView, setSelectedView] = useState('grid');
   const router = useRouter();
   const getDocuments = () => {
     useFetch('getDocuments', {}).then(resp => {
       setDocuments(resp);
+    });
+  };
+
+  const getFolders = () => {
+    useFetch('getFolders', {}).then(resp => {
+      setFolders(resp);
     });
   };
 
@@ -142,8 +168,17 @@ const Index = () => {
       router.push(`/editor/${resp.id}`);
     });
   };
+
+  const createFolder = e => {
+    e.preventDefault();
+    useFetch('createFolder', {
+      name: folderName,
+    });
+  };
+
   useEffect(() => {
     getDocuments();
+    getFolders();
   }, []);
   return (
     <Layout>
@@ -175,6 +210,16 @@ const Index = () => {
                 onChange={e => setDocumentTitle(e.target.value)}
               />
               <Button primary>Create Document</Button>
+            </form>
+
+            <form method="post" onSubmit={e => createFolder(e)}>
+              <StyledTextInput
+                aria-label="Folder Name"
+                placeholder="Folder Name"
+                value={folderName}
+                onChange={e => setFolderName(e.target.value)}
+              />
+              <Button primary>Create Folder</Button>
             </form>
           </StyledActionsWrapper>
         </StyledPageHeader>
@@ -221,9 +266,26 @@ const Index = () => {
                 </Link>
               );
             })}
+            {folders.map(folder => {
+              return (
+                <StyledDocument onClick={() => setShowFolder(true)}>
+                  <StyledFolderIconWrapper key={folder._id}>
+                    <FontAwesomeIcon size="8x" icon={faFolder} />
+                  </StyledFolderIconWrapper>
+                  <span>{folder.name}</span>
+                </StyledDocument>
+              );
+            })}
           </StyledDocumentGrid>
         )}
       </StyledInnerPage>
+      {showFolder && (
+        <Modal onCloseClick={() => setShowFolder(false)} show={showFolder}>
+          <Modal.Header>Folder</Modal.Header>
+          <Modal.Body>File List</Modal.Body>
+          <Modal.Footer><Button>Cancel</Button><Button primary buttonStyle="danger">Delete</Button></Modal.Footer>
+        </Modal>
+      )}
     </Layout>
   );
 };

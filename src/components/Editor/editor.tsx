@@ -32,14 +32,15 @@ const StyledDocument = styled.div`
   overflow: hidden;
   flex-flow: column;
 `;
+
 const StyledEditor = styled.div`
-  padding: 8px 16px;
   background-color: ${({ theme }) => theme.COLORS.GREY[600]};
   box-sizing: border-box;
   flex: 1 1;
   resize: none;
   color: ${({ theme }) => theme.COLORS.GREY[50]};
   overflow: auto;
+  display:flex;
   &:focus {
     outline: none;
   }

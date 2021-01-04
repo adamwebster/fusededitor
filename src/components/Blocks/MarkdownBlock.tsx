@@ -22,10 +22,13 @@ const StyledPopper = styled.span`
 `;
 
 const StyledMDWrapper = styled.div`
-  max-height: calc(100% - 50px);
+  flex: 1 1;
+  display: flex;
+  flex-flow: column;
 `;
+
 const StyledMarkdownBlock = styled.textarea`
-  resize: vertical;
+  resize: none;
   width: 100%;
   background-color: transparent;
   border: solid 1px ${({ theme }) => theme.COLORS.GREY[500]};
@@ -34,7 +37,7 @@ const StyledMarkdownBlock = styled.textarea`
   color: inherit;
   font-family: inherit;
   font-size: 1rem;
-  max-height: 100%;
+  flex: 1 1;
   :empty:before {
     content: attr(data-ph);
     opacity: 0.5;
@@ -46,7 +49,7 @@ const StyledMarkdownBlock = styled.textarea`
 
 const StyledMarkdownToolbar = styled.div`
   display: flex;
-  flex: 1 1;
+  height: 24px;
   background-color: ${({ theme }) => theme.COLORS.GREY[500]};
   padding: 16px;
   color: ${({ theme }) => theme.COLORS.GREY[200]};
@@ -73,6 +76,8 @@ const StyledMarkdownPreview = styled(ReactMarkdown)`
   color: inherit;
   font-family: inherit;
   font-size: 1rem;
+  flex: 1 1;
+  overflow: auto;
   img[src*='#smallImage'] {
     max-width: 300px;
     height: auto;
@@ -174,16 +179,7 @@ const MarkdownBlock = forwardRef(
       };
     }, []);
 
-    const sizeTextArea = () => {
-      if (textareaRef.current) {
-        textareaRef.current.style.height = '0px';
-        const scrollHeight = textareaRef.current.scrollHeight;
-        textareaRef.current.style.height = scrollHeight + 'px';
-      }
-    };
-
     const handleChange = e => {
-      sizeTextArea();
       setContent(e.target.value);
       if (onChange) {
         onChange(e);
@@ -247,10 +243,6 @@ const MarkdownBlock = forwardRef(
       wrapText(openTag, closeTag);
       setHeadingsOpen(false);
     };
-
-    useEffect(() => {
-      sizeTextArea();
-    }, [preview]);
 
     const handleWindowKeydown = e => {
       const { keyCode, metaKey, ctrlKey } = e;
