@@ -145,6 +145,7 @@ const StyledDocumentViewControl = styled.div<SDVCProps>`
 const Index = () => {
   const [documents, setDocuments] = useState([]);
   const [folders, setFolders] = useState([]);
+  const [documentsInFolder, setDocumentsInFolder] = useState([]);
   const [showFolder, setShowFolder] = useState(false);
   const [documentTitle, setDocumentTitle] = useState('');
   const [folderName, setFolderName] = useState('');
@@ -175,6 +176,26 @@ const Index = () => {
     e.preventDefault();
     useFetch('createFolder', {
       name: folderName,
+    });
+  };
+
+  const handleDrop = result => {
+    console.log('result', result);
+    if (result.combine) {
+      useFetch('combineDocumentsIntoFolder', {
+        name: '',
+        documents: [result.draggableId, result.combine.draggableId],
+      });
+    }
+  };
+
+  const openFolder = id => {
+    setShowFolder(true);
+    useFetch('getDocumentsInFolder', {
+      id,
+    }).then(resp => {
+      console.log(resp);
+      setDocumentsInFolder(resp.documents);
     });
   };
 
@@ -249,67 +270,86 @@ const Index = () => {
         )}
 
         {selectedView === 'grid' && (
-          <DragDropContext>
-            <Droppable droppableId="folders">
-              {provided => (
-                <StyledDocumentGrid
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                >
-                  {documents.map((document, index) => {
-                    return (
-                      <Draggable
-                        key={document._id}
-                        draggableId={document._id}
-                        index={index}
+          <StyledDocumentGrid>
+            <DragDropContext onDragEnd={result => handleDrop(result)}>
+              {documents.map((document, index) => {
+                return (
+                  <Droppable
+                    isCombineEnabled
+                    key={document._id}
+                    direction="horizontal"
+                    droppableId={`drop_${document._id}`}
+                  >
+                    {providedDrop => (
+                      <div
+                        {...providedDrop.droppableProps}
+                        ref={providedDrop.innerRef}
                       >
-                        {provided => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                          >
-                            <Link href={`/editor/${document._id}`} passHref>
-                              <StyledDocumentLink>
-                                <StyledDocument>
-                                  <StyledDocumentIconWrapper>
-                                    <FontAwesomeIcon
-                                      size="8x"
-                                      icon={faAlignLeft}
-                                    />
-                                  </StyledDocumentIconWrapper>
-                                  <span>{document.title}</span>
-                                </StyledDocument>
-                              </StyledDocumentLink>
-                            </Link>
-                          </div>
-                        )}
-                      </Draggable>
-                    );
-                  })}
+                        <Draggable draggableId={document._id} index={index}>
+                          {provided => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                            >
+                              <Link href={`/editor/${document._id}`} passHref>
+                                <StyledDocumentLink>
+                                  <StyledDocument>
+                                    <StyledDocumentIconWrapper>
+                                      <FontAwesomeIcon
+                                        size="8x"
+                                        icon={faAlignLeft}
+                                      />
+                                    </StyledDocumentIconWrapper>
+                                    <span>{document.title}</span>
+                                  </StyledDocument>
+                                </StyledDocumentLink>
+                              </Link>
+                            </div>
+                          )}
+                        </Draggable>
+                        {providedDrop.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                );
+              })}
+            </DragDropContext>
 
-                  {folders.map(folder => {
-                    return (
-                      <StyledDocument onClick={() => setShowFolder(true)}>
-                        <StyledFolderIconWrapper key={folder._id}>
-                          <FontAwesomeIcon size="8x" icon={faFolder} />
-                        </StyledFolderIconWrapper>
-                        <span>{folder.name}</span>
-                      </StyledDocument>
-                    );
-                  })}
-                </StyledDocumentGrid>
-              )}
-            </Droppable>
-          </DragDropContext>
+            {folders.map(folder => {
+              return (
+                <StyledDocument
+                  key={folder._id}
+                  onClick={() => openFolder(folder._id)}
+                >
+                  <StyledFolderIconWrapper>
+                    <FontAwesomeIcon size="8x" icon={faFolder} />
+                  </StyledFolderIconWrapper>
+                  <span>{folder.name}</span>
+                </StyledDocument>
+              );
+            })}
+          </StyledDocumentGrid>
         )}
       </StyledInnerPage>
       {showFolder && (
         <Modal onCloseClick={() => setShowFolder(false)} show={showFolder}>
           <Modal.Header>Folder</Modal.Header>
-          <Modal.Body>File List</Modal.Body>
+          <Modal.Body>
+            <ul>
+              {documentsInFolder.map(document => {
+                return (
+                  <li key={document._id}>
+                    <Link href={`/editor/${document._id}`} passHref>
+                      {document.title}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </Modal.Body>
           <Modal.Footer>
-            <Button>Cancel</Button>
+            <Button onClick={() => setShowFolder(false)}>Cancel</Button>
             <Button primary buttonStyle="danger">
               Delete
             </Button>
