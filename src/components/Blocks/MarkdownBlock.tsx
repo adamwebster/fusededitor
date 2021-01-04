@@ -114,15 +114,10 @@ const StyledToolbarSpace = styled.div`
 `;
 
 interface Props extends HTMLAttributes<HTMLParagraphElement> {
-  as: string;
   children: string;
-  onRemoveClick: (e) => void;
-  onMoveBlockUpClick?: (e) => void;
-  onMoveBlockDownClick?: (e) => void;
   onKeyDown?: (e) => void;
-  onClick?: (e) => void;
-  onFocus?: (e) => void;
   onChange?: (e) => void;
+
   attachments?: any;
   documentID: string;
 }
@@ -131,12 +126,7 @@ const MarkdownBlock = forwardRef(
   (
     {
       children,
-      onRemoveClick,
-      onMoveBlockUpClick,
-      onMoveBlockDownClick,
       onKeyDown,
-      onClick,
-      onFocus,
       onChange,
       attachments,
       documentID,
@@ -449,11 +439,9 @@ const MarkdownBlock = forwardRef(
             placeHolder="Start typing"
             onChange={e => handleChange(e)}
             onFocus={e => {
-              onFocus && onFocus(e);
               setShowPopper(true);
             }}
             onClick={e => {
-              onClick && onClick(e);
               setShowPopper(true);
             }}
             onKeyDown={e => handleKeyDown(e)}
@@ -472,14 +460,7 @@ const MarkdownBlock = forwardRef(
         ) : (
           <StyledMarkdownPreview>{content}</StyledMarkdownPreview>
         )}
-        {showPopper && (
-          <BlockTools
-            referenceElement={referenceElement}
-            onRemoveClick={onRemoveClick}
-            onMoveBlockUpClick={onMoveBlockUpClick}
-            onMoveBlockDownClick={onMoveBlockDownClick}
-          />
-        )}
+      
       </StyledMDWrapper>
     );
   }

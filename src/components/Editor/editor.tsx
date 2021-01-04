@@ -220,8 +220,8 @@ const Editor = ({ documentJSON }: Props) => {
     setAutoFocus(true);
   };
 
-  const updateItem = (id: string, e: any) => {
-    const itemToUpdate = document.documentLayout.find(item => item.id === id);
+  const updateItem =  (e: any) => {
+    const itemToUpdate = document;
     if (itemToUpdate) {
       itemToUpdate.content = e.target.value || e.target.innerHTML;
     }
@@ -407,76 +407,18 @@ const Editor = ({ documentJSON }: Props) => {
             <Button onClick={() => setShowDeleteModal(true)}>Delete</Button>
           </StyledDocumentHeader>
           <StyledEditor ref={editor}>
-            {document.documentLayout.map((item, index) => {
-              switch (item.type) {
-                case 'heading':
-                  return (
-                    <HeadingBlock
-                      ref={setBlockRef}
-                      id={item.id}
-                      item={item}
-                      as={item.element}
-                      key={`item_${item.id}`}
-                      changeElement={newElement =>
-                        changeElement(index, newElement)
-                      }
-                      onFocus={e => {
-                        setActiveElement(e.target);
-                        setActiveId(item.id);
-                      }}
-                      onMoveBlockDownClick={e => moveItem(item.id, 'down', e)}
-                      onMoveBlockUpClick={e => moveItem(item.id, 'up', e)}
-                      onRemoveClick={e => removeItem(item.id)}
-                      onKeyUp={e => updateItem(item.id, e)}
-                      onKeyDown={e => handleBlockKeyDown(e)}
-                    >
-                      {item.content}
-                    </HeadingBlock>
-                  );
-                case 'paragraph':
-                  return (
-                    <ParagraphBlock
-                      ref={setBlockRef}
-                      id={item.id}
-                      key={`item_${item.id}`}
-                      as={item.element}
-                      onFocus={e => {
-                        setActiveElement(e.target);
-                        setActiveId(item.id);
-                      }}
-                      onMoveBlockDownClick={e => moveItem(item.id, 'down', e)}
-                      onMoveBlockUpClick={e => moveItem(item.id, 'up', e)}
-                      onRemoveClick={e => removeItem(item.id)}
-                      onKeyUp={e => updateItem(item.id, e)}
-                      onKeyDown={e => handleBlockKeyDown(e)}
-                    >
-                      {item.content}
-                    </ParagraphBlock>
-                  );
-                case 'markdown':
-                  return (
-                    <MarkdownBlock
-                      ref={setBlockRef}
-                      id={item.id}
-                      attachments={document.attachments}
-                      key={`item_${item.id}`}
-                      as={item.element}
-                      onFocus={e => {
-                        setActiveElement(e.target);
-                        setActiveId(item.id);
-                      }}
-                      documentID={document._id}
-                      onMoveBlockDownClick={e => moveItem(item.id, 'down', e)}
-                      onMoveBlockUpClick={e => moveItem(item.id, 'up', e)}
-                      onRemoveClick={e => removeItem(item.id)}
-                      onChange={e => updateItem(item.id, e)}
-                      onKeyDown={e => handleBlockKeyDown(e)}
-                    >
-                      {item.content}
-                    </MarkdownBlock>
-                  );
-              }
-            })}
+            <MarkdownBlock
+              attachments={document.attachments}
+              onFocus={e => {
+                setActiveElement(e.target);
+              }}
+              documentID={document._id}
+              onChange={e => updateItem(e)}
+
+              onKeyDown={e => handleBlockKeyDown(e)}
+            >
+              {document.content}
+            </MarkdownBlock>
           </StyledEditor>
         </StyledDocument>
         <Panel>
@@ -486,59 +428,6 @@ const Editor = ({ documentJSON }: Props) => {
           />
           {panelOpen && (
             <>
-              <StyledSectionHeader>Blocks</StyledSectionHeader>
-              <StyledBlockGrid>
-                <Tippy content="Heading Block">
-                  <button
-                    aria-label="Heading Block"
-                    onClick={() => addBlock('heading')}
-                  >
-                    <FontAwesomeIcon icon={faHeading} />
-                  </button>
-                </Tippy>
-                <Tippy content="Paragraph Block">
-                  <button
-                    aria-label="Paragraph Block"
-                    onClick={() => addBlock('paragraph')}
-                  >
-                    <FontAwesomeIcon icon={faParagraph} />
-                  </button>
-                </Tippy>
-                <Tippy content="Markdown Block">
-                  <button
-                    aria-label="Markdown Block"
-                    onClick={() => addBlock('markdown')}
-                  >
-                    <FontAwesomeIcon icon={faMarkdown} />
-                  </button>
-                </Tippy>
-              </StyledBlockGrid>
-              <StyledSectionHeader>Document Settings</StyledSectionHeader>
-              <label
-                onClick={() =>
-                  setDocument({
-                    ...document,
-                    settings: {
-                      createNewParagraphOnReturn: !document.settings
-                        .createNewParagraphOnReturn,
-                    },
-                  })
-                }
-              >
-                Create new paragraph block on return
-              </label>
-              <Toggle
-                checked={document.settings.createNewParagraphOnReturn}
-                onClick={() =>
-                  setDocument({
-                    ...document,
-                    settings: {
-                      createNewParagraphOnReturn: !document.settings
-                        .createNewParagraphOnReturn,
-                    },
-                  })
-                }
-              />
 
               <StyledSectionHeader>Attachments</StyledSectionHeader>
               {!selectedFile && (
