@@ -17,6 +17,8 @@ import { useRouter } from 'next/router';
 import { SEO } from '../src/components/SEO';
 import dayjs from 'dayjs';
 import { Modal } from '../src/components/Modal';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+
 const StyledInnerPage = styled(InnerPage)`
   flex-flow: column;
 `;
@@ -247,43 +249,71 @@ const Index = () => {
         )}
 
         {selectedView === 'grid' && (
-          <StyledDocumentGrid>
-            {documents.map(document => {
-              return (
-                <Link
-                  key={document._id}
-                  href={`/editor/${document._id}`}
-                  passHref
+          <DragDropContext>
+            <Droppable droppableId="folders">
+              {provided => (
+                <StyledDocumentGrid
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
                 >
-                  <StyledDocumentLink>
-                    <StyledDocument>
-                      <StyledDocumentIconWrapper>
-                        <FontAwesomeIcon size="8x" icon={faAlignLeft} />
-                      </StyledDocumentIconWrapper>
-                      <span>{document.title}</span>
-                    </StyledDocument>
-                  </StyledDocumentLink>
-                </Link>
-              );
-            })}
-            {folders.map(folder => {
-              return (
-                <StyledDocument onClick={() => setShowFolder(true)}>
-                  <StyledFolderIconWrapper key={folder._id}>
-                    <FontAwesomeIcon size="8x" icon={faFolder} />
-                  </StyledFolderIconWrapper>
-                  <span>{folder.name}</span>
-                </StyledDocument>
-              );
-            })}
-          </StyledDocumentGrid>
+                  {documents.map((document, index) => {
+                    return (
+                      <Draggable
+                        key={document._id}
+                        draggableId={document._id}
+                        index={index}
+                      >
+                        {provided => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                          >
+                            <Link href={`/editor/${document._id}`} passHref>
+                              <StyledDocumentLink>
+                                <StyledDocument>
+                                  <StyledDocumentIconWrapper>
+                                    <FontAwesomeIcon
+                                      size="8x"
+                                      icon={faAlignLeft}
+                                    />
+                                  </StyledDocumentIconWrapper>
+                                  <span>{document.title}</span>
+                                </StyledDocument>
+                              </StyledDocumentLink>
+                            </Link>
+                          </div>
+                        )}
+                      </Draggable>
+                    );
+                  })}
+
+                  {folders.map(folder => {
+                    return (
+                      <StyledDocument onClick={() => setShowFolder(true)}>
+                        <StyledFolderIconWrapper key={folder._id}>
+                          <FontAwesomeIcon size="8x" icon={faFolder} />
+                        </StyledFolderIconWrapper>
+                        <span>{folder.name}</span>
+                      </StyledDocument>
+                    );
+                  })}
+                </StyledDocumentGrid>
+              )}
+            </Droppable>
+          </DragDropContext>
         )}
       </StyledInnerPage>
       {showFolder && (
         <Modal onCloseClick={() => setShowFolder(false)} show={showFolder}>
           <Modal.Header>Folder</Modal.Header>
           <Modal.Body>File List</Modal.Body>
-          <Modal.Footer><Button>Cancel</Button><Button primary buttonStyle="danger">Delete</Button></Modal.Footer>
+          <Modal.Footer>
+            <Button>Cancel</Button>
+            <Button primary buttonStyle="danger">
+              Delete
+            </Button>
+          </Modal.Footer>
         </Modal>
       )}
     </Layout>

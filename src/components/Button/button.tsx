@@ -3,7 +3,6 @@ import styled, { css } from 'styled-components';
 import { darken } from 'polished';
 
 const buttonBGColor = (theme, buttonStyle) => {
-  console.log(buttonStyle)
   switch (buttonStyle) {
     case 'danger':
       return theme.COLORS.DANGER;
@@ -13,7 +12,6 @@ const buttonBGColor = (theme, buttonStyle) => {
 };
 
 const buttonTextColor = (theme, buttonStyle) => {
-  console.log(buttonStyle)
   switch (buttonStyle) {
     case 'danger':
       return theme.COLORS.WHITE;
