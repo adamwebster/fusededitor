@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { InnerPage, Layout } from '../src/components/Layout';
 import { ProtectedRoute } from '../src/components/ProtectedRoute/ProtectedRoute';
 import { useFetch } from '../src/hooks/useFetch';
@@ -36,6 +36,7 @@ const StyledActionsWrapper = styled.div`
 const StyledDocumentGrid = styled.div`
   display: flex;
   flex-wrap: wrap;
+  overflow: auto;
 `;
 
 const StyledDocumentList = styled.ul`
@@ -72,7 +73,6 @@ const StyledDocument = styled.div`
   border: solid 1px ${({ theme }) => theme.COLORS.GREY[400]};
   padding: 16px;
   height: 230px;
-  flex: 1 1;
   max-width: 150px;
   width: 150px;
   justify-content: flex-end;
@@ -136,6 +136,7 @@ const StyledDocumentFolder = styled.div`
   background-color: ${({ theme }) => theme.COLORS.GREY[550]};
   flex: 0 100%;
   padding: 16px;
+  box-sizing: border-box;
   margin-bottom: 16px;
 `;
 
@@ -158,7 +159,14 @@ const Index = () => {
   const [folderName, setFolderName] = useState('');
   const [selectedView, setSelectedView] = useState('grid');
   const [folderInfo, setFolderInfo] = useState({ _id: '' });
+  const [numberOfItemsInRow, setNumberOfItemsInRow] = useState(0);
+  const [folderTop, setFolderTop] = useState(0);
+  const [selectedFolderIndex, setSelectedFolderIndex] = useState(-1);
+  const documentGrid = useRef();
+  const documentFolder = useRef();
   const router = useRouter();
+  const widthOfDocument = 211;
+  const heightOfDocument = 264;
   const getDocuments = () => {
     useFetch('getDocuments', {}).then(resp => {
       setDocuments(resp);
@@ -191,8 +199,36 @@ const Index = () => {
     }
   };
 
-  const openFolder = folder => {
-    setFolderInfo(folder);
+  const openFolder = (folder, index) => {
+    let copyOfDocuments = [...documents];
+    copyOfDocuments = copyOfDocuments.filter(
+      document => document.type !== 'folderGroup'
+    );
+
+    const realIndex = copyOfDocuments.indexOf(folder);
+
+    const maxNumberOfItemsInRows = Math.round(
+      (documentGrid.current.offsetWidth - 32) / widthOfDocument
+    );
+
+    if (realIndex + 1 <= maxNumberOfItemsInRows) {
+      copyOfDocuments.splice(maxNumberOfItemsInRows, 0, {
+        type: 'folderGroup',
+        content: '',
+      });
+    } else {
+      copyOfDocuments.splice(
+        Math.ceil((realIndex + 1) / maxNumberOfItemsInRows) * maxNumberOfItemsInRows,
+        0,
+        {
+          type: 'folderGroup',
+          content: '',
+        }
+      );
+      console.log('Not first row');
+    }
+
+    setDocuments(copyOfDocuments);
     useFetch('getDocumentsInFolder', {
       id: folder._id,
     }).then(resp => {
@@ -201,9 +237,12 @@ const Index = () => {
     });
   };
 
+ 
+
   useEffect(() => {
     getDocuments();
   }, []);
+
   return (
     <Layout>
       <SEO title="Documents" />
@@ -271,7 +310,7 @@ const Index = () => {
         )}
 
         {selectedView === 'grid' && (
-          <StyledDocumentGrid>
+          <StyledDocumentGrid ref={documentGrid}>
             <DragDropContext onDragEnd={result => handleDrop(result)}>
               {documents.map((document, index) => {
                 if (document.type === 'document')
@@ -315,19 +354,38 @@ const Index = () => {
                       )}
                     </Droppable>
                   );
+                if (document.type === 'folderGroup')
+                  return (
+                    <StyledDocumentFolder>
+                      <ul>
+                        {documentsInFolder.map(document => {
+                          return (
+                            <li key={document._id}>
+                              <Link href={`/editor/${document._id}`} passHref>
+                                {document.title}
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </StyledDocumentFolder>
+                  );
                 return (
                   <>
                     <StyledDocument
                       key={document._id}
-                      onClick={() => openFolder(document)}
+                      onClick={() => openFolder(document, index)}
                     >
                       <StyledFolderIconWrapper>
                         <FontAwesomeIcon size="8x" icon={faFolder} />
                       </StyledFolderIconWrapper>
                       <span>{document.name}</span>
                     </StyledDocument>
-                    {folderInfo._id === document._id && (
-                      <StyledDocumentFolder>
+                    {/* {folderInfo._id === document._id && (
+                      <StyledDocumentFolder
+                        ref={documentFolder}
+                        folderTop={folderTop}
+                      >
                         <ul>
                           {documentsInFolder.map(document => {
                             return (
@@ -340,7 +398,7 @@ const Index = () => {
                           })}
                         </ul>
                       </StyledDocumentFolder>
-                    )}
+                    )} */}
                   </>
                 );
               })}
