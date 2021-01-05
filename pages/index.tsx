@@ -16,7 +16,6 @@ import {
 import { useRouter } from 'next/router';
 import { SEO } from '../src/components/SEO';
 import dayjs from 'dayjs';
-import { Modal } from '../src/components/Modal';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 const StyledInnerPage = styled(InnerPage)`
@@ -35,9 +34,8 @@ const StyledActionsWrapper = styled.div`
 `;
 
 const StyledDocumentGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  grid-gap: 16px;
+  display: flex;
+  flex-wrap: wrap;
 `;
 
 const StyledDocumentList = styled.ul`
@@ -74,10 +72,13 @@ const StyledDocument = styled.div`
   border: solid 1px ${({ theme }) => theme.COLORS.GREY[400]};
   padding: 16px;
   height: 230px;
+  flex: 1 1;
+  max-width: 150px;
   justify-content: flex-end;
   display: flex;
   flex-flow: column;
   align-items: center;
+  margin: 0 8px 16px 8px;
   span {
     background-color: ${({ theme }) => theme.COLORS.GREY[400]};
     text-align: center;
@@ -130,6 +131,13 @@ const StyledListControls = styled.div`
   padding: 0 16px;
 `;
 
+const StyledDocumentFolder = styled.div`
+  background-color: ${({ theme }) => theme.COLORS.GREY[550]};
+  flex: 0 100%;
+  padding: 16px;
+  margin-bottom: 16px;
+`;
+
 interface SDVCProps {
   isActive: boolean;
   theme: any;
@@ -146,10 +154,10 @@ const Index = () => {
   const [documents, setDocuments] = useState([]);
   const [folders, setFolders] = useState([]);
   const [documentsInFolder, setDocumentsInFolder] = useState([]);
-  const [showFolder, setShowFolder] = useState(false);
   const [documentTitle, setDocumentTitle] = useState('');
   const [folderName, setFolderName] = useState('');
   const [selectedView, setSelectedView] = useState('grid');
+  const [folderInfo, setFolderInfo] = useState({ _id: '' });
   const router = useRouter();
   const getDocuments = () => {
     useFetch('getDocuments', {}).then(resp => {
@@ -189,10 +197,10 @@ const Index = () => {
     }
   };
 
-  const openFolder = id => {
-    setShowFolder(true);
+  const openFolder = folder => {
+    setFolderInfo(folder);
     useFetch('getDocumentsInFolder', {
-      id,
+      id: folder._id,
     }).then(resp => {
       console.log(resp);
       setDocumentsInFolder(resp.documents);
@@ -318,44 +326,37 @@ const Index = () => {
 
             {folders.map(folder => {
               return (
-                <StyledDocument
-                  key={folder._id}
-                  onClick={() => openFolder(folder._id)}
-                >
-                  <StyledFolderIconWrapper>
-                    <FontAwesomeIcon size="8x" icon={faFolder} />
-                  </StyledFolderIconWrapper>
-                  <span>{folder.name}</span>
-                </StyledDocument>
+                <>
+                  <StyledDocument
+                    key={folder._id}
+                    onClick={() => openFolder(folder)}
+                  >
+                    <StyledFolderIconWrapper>
+                      <FontAwesomeIcon size="8x" icon={faFolder} />
+                    </StyledFolderIconWrapper>
+                    <span>{folder.name}</span>
+                  </StyledDocument>
+                  {folderInfo._id === folder._id && (
+                    <StyledDocumentFolder>
+                      <ul>
+                        {documentsInFolder.map(document => {
+                          return (
+                            <li key={document._id}>
+                              <Link href={`/editor/${document._id}`} passHref>
+                                {document.title}
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </StyledDocumentFolder>
+                  )}
+                </>
               );
             })}
           </StyledDocumentGrid>
         )}
       </StyledInnerPage>
-      {showFolder && (
-        <Modal onCloseClick={() => setShowFolder(false)} show={showFolder}>
-          <Modal.Header>Folder</Modal.Header>
-          <Modal.Body>
-            <ul>
-              {documentsInFolder.map(document => {
-                return (
-                  <li key={document._id}>
-                    <Link href={`/editor/${document._id}`} passHref>
-                      {document.title}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button onClick={() => setShowFolder(false)}>Cancel</Button>
-            <Button primary buttonStyle="danger">
-              Delete
-            </Button>
-          </Modal.Footer>
-        </Modal>
-      )}
     </Layout>
   );
 };
