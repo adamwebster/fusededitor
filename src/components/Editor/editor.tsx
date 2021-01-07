@@ -237,7 +237,7 @@ const Editor = ({ documentJSON }: Props) => {
   }, []);
   return (
     <>
-      <SEO title={`${document.title} | Documents`} />
+      <SEO title={`${document.name} | Documents`} />
       <Modal
         onCloseClick={() => setShowDeleteModal(false)}
         show={showDeleteModal}
@@ -246,7 +246,7 @@ const Editor = ({ documentJSON }: Props) => {
           <h2>Delete</h2>
         </Modal.Header>
         <Modal.Body>
-          Are you sure you would like to delete '{document.title}'?
+          Are you sure you would like to delete '{document.name}'?
         </Modal.Body>
         <Modal.Footer>
           <Button onClick={() => setShowDeleteModal(false)}>Cancel</Button>
@@ -272,12 +272,12 @@ const Editor = ({ documentJSON }: Props) => {
         <StyledDocument>
           <StyledDocumentHeader>
             <StyledDocumentTitle
-              value={document.title}
+              value={document.name}
               aria-label="title"
               onChange={e =>
                 setDocument({
                   ...document,
-                  title: e.target.value,
+                  name: e.target.value,
                 })
               }
             />
