@@ -1,19 +1,15 @@
 import {
-  faHeading,
-  faParagraph,
+  faChevronCircleLeft,
+  faChevronCircleRight,
   faSpinner,
   faTrash,
 } from '@fortawesome/free-solid-svg-icons';
-import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { HeadingBlock, ParagraphBlock } from '../Blocks';
 import MarkdownBlock from '../Blocks/MarkdownBlock';
 import { Button } from '../Button';
 import { Panel } from '../Panel';
-import Tippy from '@tippyjs/react';
-import { Toggle } from '../Toggle';
 import { useFetch, useFetchFileUpload } from '../../hooks/useFetch';
 import { Modal } from '../Modal';
 import { useRouter } from 'next/router';
@@ -24,7 +20,9 @@ const StyledEditorWrapper = styled.div`
   display: grid;
   flex-flow: column;
   overflow: hidden;
-  grid-template-columns: 1fr 300px;
+  grid-template-columns: 1fr ${({ panelOpen }) =>
+      panelOpen ? '300px' : '50px'};
+  transition: all 0.6s;
   flex: 1 1;
 `;
 
@@ -34,14 +32,15 @@ const StyledDocument = styled.div`
   overflow: hidden;
   flex-flow: column;
 `;
+
 const StyledEditor = styled.div`
-  padding: 8px 16px;
   background-color: ${({ theme }) => theme.COLORS.GREY[600]};
   box-sizing: border-box;
   flex: 1 1;
   resize: none;
   color: ${({ theme }) => theme.COLORS.GREY[50]};
   overflow: auto;
+  display:flex;
   &:focus {
     outline: none;
   }
@@ -66,6 +65,7 @@ const StyledDocumentTitle = styled.input`
   font-size: 1.5rem;
   flex: 1 1;
   -webkit-appearance: none;
+  min-width: 100px;
 `;
 
 const StyledBlockGrid = styled.div`
@@ -145,120 +145,19 @@ const Editor = ({ documentJSON }: Props) => {
   });
   const [selectedFile, setSelectedFile] = useState('');
   const [saving, setSaving] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(false);
   const editor = useRef();
   const fileUpload = useRef(null as HTMLInputElement);
   const router = useRouter();
   const toast = useToast();
-  const addBlock = (blockType: string) => {
-    const copyOfdocument = [...document.documentLayout];
-    const activeItem = copyOfdocument.find(item => item.id === activeId);
-    let indexOfActiveItem = copyOfdocument.findIndex(
-      item => item.id === activeId
-    );
-    if (indexOfActiveItem === -1) {
-      indexOfActiveItem = copyOfdocument.length;
-    }
-    switch (blockType) {
-      case 'heading':
-        const headingElements = copyOfdocument.filter(
-          item => item.type === 'heading'
-        );
-        const itemExist = headingElements.find(
-          item => item.id === 'heading' + (headingElements.length + 1)
-        );
-        if (!itemExist) {
-          copyOfdocument.splice(indexOfActiveItem + 1, 0, {
-            id: 'heading' + (headingElements.length + 1),
-            type: 'heading',
-            content: 'Heading',
-            element: 'h1',
-          });
-        }
-        break;
-      case 'paragraph':
-        const paragraphItems = copyOfdocument.filter(
-          item => item.type === 'paragraph'
-        );
-        const paragraphItemExist = paragraphItems.find(
-          item => item.id === 'paragraph' + (paragraphItems.length + 1)
-        );
-        if (!paragraphItemExist) {
-          copyOfdocument.splice(indexOfActiveItem + 1, 0, {
-            id: 'paragraph' + (paragraphItems.length + 1),
-            type: 'paragraph',
-            content: '',
-            element: 'p',
-          });
-        }
-        break;
-      case 'markdown':
-        const markdownItems = copyOfdocument.filter(
-          item => item.type === 'markdown'
-        );
-        const markdownItemExist = markdownItems.find(
-          item => item.id === 'markdown' + (markdownItems.length + 1)
-        );
-        if (!markdownItemExist) {
-          copyOfdocument.splice(indexOfActiveItem + 1, 0, {
-            id: 'markdown' + (markdownItems.length + 1),
-            type: 'markdown',
-            content: '',
-            element: 'textarea',
-          });
-        }
-    }
-    setDocument({
-      ...document,
-      documentLayout: copyOfdocument,
-    });
-    setAutoFocus(true);
-  };
 
-  const updateItem = (id: string, e: any) => {
-    const itemToUpdate = document.documentLayout.find(item => item.id === id);
+  const updateItem =  (e: any) => {
+    const itemToUpdate = document;
     if (itemToUpdate) {
       itemToUpdate.content = e.target.value || e.target.innerHTML;
     }
   };
 
-  const removeItem = id => {
-    let copyOfdocument = [...document.documentLayout];
-    copyOfdocument = copyOfdocument.filter(item => item.id !== id);
-    setDocument({
-      ...document,
-      documentLayout: copyOfdocument,
-    });
-  };
-
-  const moveItem = (id, direction, e) => {
-    let copyOfdocument = [...document.documentLayout];
-    const itemToMove = copyOfdocument.find(item => item.id === id);
-    const indexOfItemToMove = copyOfdocument.findIndex(item => item.id === id);
-    copyOfdocument = copyOfdocument.filter(item => item.id !== id);
-    if (direction === 'up') {
-      copyOfdocument.splice(indexOfItemToMove - 1, 0, itemToMove);
-    } else if (direction === 'down') {
-      copyOfdocument.splice(indexOfItemToMove + 1, 0, itemToMove);
-    }
-    setDocument({
-      ...document,
-      documentLayout: copyOfdocument,
-    });
-    if (activeElement) activeElement.focus();
-  };
-
-  const handleBlockKeyDown = e => {
-    const { keyCode } = e;
-    switch (keyCode) {
-      case 13:
-        // Enter key
-        if (!e.shiftKey && document.settings.createNewParagraphOnReturn) {
-          e.preventDefault();
-          addBlock('paragraph');
-        }
-        break;
-    }
-  };
 
   const saveDocument = () => {
     setSaving(true);
@@ -297,21 +196,13 @@ const Editor = ({ documentJSON }: Props) => {
       setDocument({ ...document, attachments: resp.attachments });
     });
   };
+
   const deleteDocument = () => {
     useFetch('deleteDocument', {
       document,
     });
     setShowDeleteModal(false);
     router.push('/');
-  };
-
-  const changeElement = (index, element) => {
-    const copyOfdocument = [...document.documentLayout];
-    copyOfdocument[index].element = element;
-    setDocument({
-      ...document,
-      documentLayout: copyOfdocument,
-    });
   };
 
   const handleKeydown = e => {
@@ -327,11 +218,6 @@ const Editor = ({ documentJSON }: Props) => {
   };
 
   useEffect(() => {
-    // const localStorageContent = JSON.parse(localStorage.getItem('document'));
-    // if (localStorageContent) {
-    //   setDocument(localStorageContent);
-    // } else {
-    // }
     setDocument(documentJSON);
   }, [documentJSON]);
 
@@ -351,7 +237,7 @@ const Editor = ({ documentJSON }: Props) => {
   }, []);
   return (
     <>
-      <SEO title={`${document.title} | Documents`} />
+      <SEO title={`${document.name} | Documents`} />
       <Modal
         onCloseClick={() => setShowDeleteModal(false)}
         show={showDeleteModal}
@@ -360,7 +246,7 @@ const Editor = ({ documentJSON }: Props) => {
           <h2>Delete</h2>
         </Modal.Header>
         <Modal.Body>
-          Are you sure you would like to delete '{document.title}'?
+          Are you sure you would like to delete '{document.name}'?
         </Modal.Body>
         <Modal.Footer>
           <Button onClick={() => setShowDeleteModal(false)}>Cancel</Button>
@@ -382,16 +268,16 @@ const Editor = ({ documentJSON }: Props) => {
           </div>
         </StyledImageModal.Body>
       </StyledImageModal>
-      <StyledEditorWrapper>
+      <StyledEditorWrapper panelOpen={panelOpen}>
         <StyledDocument>
           <StyledDocumentHeader>
             <StyledDocumentTitle
-              value={document.title}
+              value={document.name}
               aria-label="title"
               onChange={e =>
                 setDocument({
                   ...document,
-                  title: e.target.value,
+                  name: e.target.value,
                 })
               }
             />
@@ -401,193 +287,88 @@ const Editor = ({ documentJSON }: Props) => {
             <Button onClick={() => setShowDeleteModal(true)}>Delete</Button>
           </StyledDocumentHeader>
           <StyledEditor ref={editor}>
-            {document.documentLayout.map((item, index) => {
-              switch (item.type) {
-                case 'heading':
-                  return (
-                    <HeadingBlock
-                      ref={setBlockRef}
-                      id={item.id}
-                      item={item}
-                      as={item.element}
-                      key={`item_${item.id}`}
-                      changeElement={newElement =>
-                        changeElement(index, newElement)
-                      }
-                      onFocus={e => {
-                        setActiveElement(e.target);
-                        setActiveId(item.id);
-                      }}
-                      onMoveBlockDownClick={e => moveItem(item.id, 'down', e)}
-                      onMoveBlockUpClick={e => moveItem(item.id, 'up', e)}
-                      onRemoveClick={e => removeItem(item.id)}
-                      onKeyUp={e => updateItem(item.id, e)}
-                      onKeyDown={e => handleBlockKeyDown(e)}
-                    >
-                      {item.content}
-                    </HeadingBlock>
-                  );
-                case 'paragraph':
-                  return (
-                    <ParagraphBlock
-                      ref={setBlockRef}
-                      id={item.id}
-                      key={`item_${item.id}`}
-                      as={item.element}
-                      onFocus={e => {
-                        setActiveElement(e.target);
-                        setActiveId(item.id);
-                      }}
-                      onMoveBlockDownClick={e => moveItem(item.id, 'down', e)}
-                      onMoveBlockUpClick={e => moveItem(item.id, 'up', e)}
-                      onRemoveClick={e => removeItem(item.id)}
-                      onKeyUp={e => updateItem(item.id, e)}
-                      onKeyDown={e => handleBlockKeyDown(e)}
-                    >
-                      {item.content}
-                    </ParagraphBlock>
-                  );
-                case 'markdown':
-                  return (
-                    <MarkdownBlock
-                      ref={setBlockRef}
-                      id={item.id}
-                      attachments={document.attachments}
-                      key={`item_${item.id}`}
-                      as={item.element}
-                      onFocus={e => {
-                        setActiveElement(e.target);
-                        setActiveId(item.id);
-                      }}
-                      documentID={document._id}
-                      onMoveBlockDownClick={e => moveItem(item.id, 'down', e)}
-                      onMoveBlockUpClick={e => moveItem(item.id, 'up', e)}
-                      onRemoveClick={e => removeItem(item.id)}
-                      onChange={e => updateItem(item.id, e)}
-                      onKeyDown={e => handleBlockKeyDown(e)}
-                    >
-                      {item.content}
-                    </MarkdownBlock>
-                  );
-              }
-            })}
+            <MarkdownBlock
+              attachments={document.attachments}
+              onFocus={e => {
+                setActiveElement(e.target);
+              }}
+              documentID={document._id}
+              onChange={e => updateItem(e)}
+            >
+              {document.content}
+            </MarkdownBlock>
           </StyledEditor>
         </StyledDocument>
         <Panel>
-          <StyledSectionHeader>Blocks</StyledSectionHeader>
-          <StyledBlockGrid>
-            <Tippy content="Heading Block">
-              <button
-                aria-label="Heading Block"
-                onClick={() => addBlock('heading')}
-              >
-                <FontAwesomeIcon icon={faHeading} />
-              </button>
-            </Tippy>
-            <Tippy content="Paragraph Block">
-              <button
-                aria-label="Paragraph Block"
-                onClick={() => addBlock('paragraph')}
-              >
-                <FontAwesomeIcon icon={faParagraph} />
-              </button>
-            </Tippy>
-            <Tippy content="Markdown Block">
-              <button
-                aria-label="Markdown Block"
-                onClick={() => addBlock('markdown')}
-              >
-                <FontAwesomeIcon icon={faMarkdown} />
-              </button>
-            </Tippy>
-          </StyledBlockGrid>
-          <StyledSectionHeader>Document Settings</StyledSectionHeader>
-          <label
-            onClick={() =>
-              setDocument({
-                ...document,
-                settings: {
-                  createNewParagraphOnReturn: !document.settings
-                    .createNewParagraphOnReturn,
-                },
-              })
-            }
-          >
-            Create new paragraph block on return
-          </label>
-          <Toggle
-            checked={document.settings.createNewParagraphOnReturn}
-            onClick={() =>
-              setDocument({
-                ...document,
-                settings: {
-                  createNewParagraphOnReturn: !document.settings
-                    .createNewParagraphOnReturn,
-                },
-              })
-            }
+          <FontAwesomeIcon
+            onClick={() => setPanelOpen(!panelOpen)}
+            icon={panelOpen ? faChevronCircleRight : faChevronCircleLeft}
           />
+          {panelOpen && (
+            <>
 
-          <StyledSectionHeader>Attachments</StyledSectionHeader>
-          {!selectedFile && (
-            <Button onClick={() => fileUpload.current.click()}>
-              Choose File
-            </Button>
-          )}
-          <form
-            method="post"
-            encType="multipart/form-data"
-            onSubmit={e => uploadImage(e)}
-          >
-            <input
-              style={{ display: 'none' }}
-              ref={fileUpload}
-              type="file"
-              name="file"
-              onChange={e => setSelectedFile(e.target.value)}
-            />
-            {selectedFile && (
-              <>
-                <Button>Upload</Button>{' '}
-                <Button onClick={() => setSelectedFile('')}>Reset</Button>
-              </>
-            )}
-          </form>
-          <StyledAttachmentList>
-            {document.attachments.map(attachment => {
-              return (
-                <StyledAttachment key={attachment}>
-                  <div className="imageWrapper">
-                    <img
-                      alt="Uploaded Image"
-                      onClick={() =>
-                        setImageModal({
-                          show: true,
-                          selectedImage:
+              <StyledSectionHeader>Attachments</StyledSectionHeader>
+              {!selectedFile && (
+                <Button onClick={() => fileUpload.current.click()}>
+                  Choose File
+                </Button>
+              )}
+              <form
+                method="post"
+                encType="multipart/form-data"
+                onSubmit={e => uploadImage(e)}
+              >
+                <input
+                  style={{ display: 'none' }}
+                  ref={fileUpload}
+                  type="file"
+                  name="file"
+                  onChange={e => setSelectedFile(e.target.value)}
+                />
+                {selectedFile && (
+                  <>
+                    <Button>Upload</Button>{' '}
+                    <Button onClick={() => setSelectedFile('')}>Reset</Button>
+                  </>
+                )}
+              </form>
+              <StyledAttachmentList>
+                {document.attachments.map(attachment => {
+                  return (
+                    <StyledAttachment key={attachment}>
+                      <div className="imageWrapper">
+                        <img
+                          alt="Uploaded Image"
+                          onClick={() =>
+                            setImageModal({
+                              show: true,
+                              selectedImage:
+                                process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
+                                'images/fe/' +
+                                document._id +
+                                '/' +
+                                attachment,
+                            })
+                          }
+                          src={
                             process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
                             'images/fe/' +
                             document._id +
                             '/' +
-                            attachment,
-                        })
-                      }
-                      src={
-                        process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
-                        'images/fe/' +
-                        document._id +
-                        '/' +
-                        attachment
-                      }
-                    />
-                  </div>
-                  <FontAwesomeIcon
-                    onClick={() => removeImage(attachment, document._id)}
-                    icon={faTrash}
-                  />
-                </StyledAttachment>
-              );
-            })}
-          </StyledAttachmentList>
+                            attachment
+                          }
+                        />
+                      </div>
+                      <FontAwesomeIcon
+                        onClick={() => removeImage(attachment, document._id)}
+                        icon={faTrash}
+                      />
+                    </StyledAttachment>
+                  );
+                })}
+              </StyledAttachmentList>
+            </>
+          )}
         </Panel>
       </StyledEditorWrapper>
     </>

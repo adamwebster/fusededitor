@@ -1,23 +1,34 @@
 import { forwardRef, HTMLAttributes, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { BlockTools } from './BlockTools';
 import ReactMarkdown from 'react-markdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBold,
   faCode,
+  faHeading,
   faImage,
   faItalic,
   faLink,
 } from '@fortawesome/free-solid-svg-icons';
 import { Modal } from '../Modal';
 import { Button } from '../Button';
+import { usePopper } from 'react-popper';
+
+const StyledPopper = styled.span`
+  background-color: ${({ theme }) =>
+    theme.name === 'dark' ? theme.COLORS.GREY[450] : theme.COLORS.GREY[500]};
+
+  padding: 16px;
+`;
 
 const StyledMDWrapper = styled.div`
-  max-height: calc(100% - 50px);
+  flex: 1 1;
+  display: flex;
+  flex-flow: column;
 `;
+
 const StyledMarkdownBlock = styled.textarea`
-  resize: vertical;
+  resize: none;
   width: 100%;
   background-color: transparent;
   border: solid 1px ${({ theme }) => theme.COLORS.GREY[500]};
@@ -26,7 +37,7 @@ const StyledMarkdownBlock = styled.textarea`
   color: inherit;
   font-family: inherit;
   font-size: 1rem;
-  max-height: 100%;
+  flex: 1 1;
   :empty:before {
     content: attr(data-ph);
     opacity: 0.5;
@@ -38,10 +49,11 @@ const StyledMarkdownBlock = styled.textarea`
 
 const StyledMarkdownToolbar = styled.div`
   display: flex;
-  flex: 1 1;
+  height: 24px;
   background-color: ${({ theme }) => theme.COLORS.GREY[500]};
   padding: 16px;
   color: ${({ theme }) => theme.COLORS.GREY[200]};
+  flex-wrap: wrap;
 `;
 
 const StyledMDToolButton = styled.button`
@@ -64,6 +76,8 @@ const StyledMarkdownPreview = styled(ReactMarkdown)`
   color: inherit;
   font-family: inherit;
   font-size: 1rem;
+  flex: 1 1;
+  overflow: auto;
   img[src*='#smallImage'] {
     max-width: 300px;
     height: auto;
@@ -104,15 +118,10 @@ const StyledToolbarSpace = styled.div`
 `;
 
 interface Props extends HTMLAttributes<HTMLParagraphElement> {
-  as: string;
   children: string;
-  onRemoveClick: (e) => void;
-  onMoveBlockUpClick?: (e) => void;
-  onMoveBlockDownClick?: (e) => void;
   onKeyDown?: (e) => void;
-  onClick?: (e) => void;
-  onFocus?: (e) => void;
   onChange?: (e) => void;
+
   attachments?: any;
   documentID: string;
 }
@@ -121,12 +130,7 @@ const MarkdownBlock = forwardRef(
   (
     {
       children,
-      onRemoveClick,
-      onMoveBlockUpClick,
-      onMoveBlockDownClick,
       onKeyDown,
-      onClick,
-      onFocus,
       onChange,
       attachments,
       documentID,
@@ -134,17 +138,35 @@ const MarkdownBlock = forwardRef(
     }: Props,
     ref
   ) => {
-    const [showPopper, setShowPopper] = useState(false);
-    const [referenceElement, setReferenceElement] = useState(null);
+    const [referenceElementHeadings, setReferenceElementHeadings] = useState(
+      null
+    );
+
     const [isMounted, setIsMounted] = useState(false);
     const [content, setContent] = useState(children);
     const [preview, setPreview] = useState(false);
+    const [headingsOpen, setHeadingsOpen] = useState(false);
     const [showAttachmentModal, setShowAttachmentModal] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(
       (ref as unknown) as HTMLTextAreaElement
     );
+
+    const [popperElementHeadings, setPopperElementHeadings] = useState(null);
+    const [arrowElement, setArrowElement] = useState(null);
+
+    const { styles, attributes } = usePopper(
+      referenceElementHeadings,
+      popperElementHeadings,
+      {
+        placement: 'top',
+        modifiers: [
+          { name: 'arrow', options: { element: arrowElement } },
+          { name: 'offset', options: { offset: [0, 18] } },
+        ],
+      }
+    );
+
     const handleKeyDown = e => {
-      setShowPopper(false);
       if (onKeyDown) {
         onKeyDown(e);
       }
@@ -157,16 +179,7 @@ const MarkdownBlock = forwardRef(
       };
     }, []);
 
-    const sizeTextArea = () => {
-      if (textareaRef.current) {
-        textareaRef.current.style.height = '0px';
-        const scrollHeight = textareaRef.current.scrollHeight;
-        textareaRef.current.style.height = scrollHeight + 'px';
-      }
-    };
-
     const handleChange = e => {
-      sizeTextArea();
       setContent(e.target.value);
       if (onChange) {
         onChange(e);
@@ -225,9 +238,11 @@ const MarkdownBlock = forwardRef(
       textarea.setSelectionRange(end + url.length, end + url.length);
       setShowAttachmentModal(false);
     };
-    useEffect(() => {
-      sizeTextArea();
-    }, [preview]);
+
+    const WrapTextHeaders = (openTag, closeTag) => {
+      wrapText(openTag, closeTag);
+      setHeadingsOpen(false);
+    };
 
     const handleWindowKeydown = e => {
       const { keyCode, metaKey, ctrlKey } = e;
@@ -244,17 +259,35 @@ const MarkdownBlock = forwardRef(
       }
     };
 
+    const checkIfParent = (el: HTMLElement, elToCompare: unknown): boolean => {
+      while (el.parentNode) {
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        el = el.parentNode as HTMLElement;
+        if (el === elToCompare) return true;
+      }
+      return false;
+    };
+
+    const handleBodyClick = e => {
+      const childOfButton = checkIfParent(e.target, referenceElementHeadings);
+      if (popperElementHeadings) {
+        if (!childOfButton && e.target !== referenceElementHeadings) {
+          setHeadingsOpen(false);
+        }
+      }
+    };
     useEffect(() => {
       if (process.browser) {
         window.addEventListener('keydown', handleWindowKeydown);
       }
+      document.addEventListener('click', handleBodyClick);
       return () => {
         window.removeEventListener('keydown', handleWindowKeydown);
       };
-    }, []);
+    }, [popperElementHeadings, referenceElementHeadings]);
 
     return (
-      <StyledMDWrapper ref={setReferenceElement}>
+      <StyledMDWrapper>
         <Modal
           onCloseClick={() => setShowAttachmentModal(false)}
           show={showAttachmentModal}
@@ -327,41 +360,55 @@ const MarkdownBlock = forwardRef(
               >
                 <FontAwesomeIcon icon={faCode} />
               </StyledMDToolButton>
+              {headingsOpen && (
+                <StyledPopper
+                  style={styles.popper}
+                  ref={setPopperElementHeadings}
+                  {...attributes.popper}
+                >
+                  <StyledMDToolButton
+                    title="Heading Level 1"
+                    onClick={() => WrapTextHeaders('# ', '')}
+                  >
+                    H1
+                  </StyledMDToolButton>
+                  <StyledMDToolButton
+                    title="Heading Level 2"
+                    onClick={() => WrapTextHeaders('## ', '')}
+                  >
+                    H2
+                  </StyledMDToolButton>
+                  <StyledMDToolButton
+                    title="Heading Level 3"
+                    onClick={() => WrapTextHeaders('### ', '')}
+                  >
+                    H3
+                  </StyledMDToolButton>
+                  <StyledMDToolButton
+                    title="Heading Level 4"
+                    onClick={() => WrapTextHeaders('#### ', '')}
+                  >
+                    H4
+                  </StyledMDToolButton>
+                  <StyledMDToolButton
+                    title="Heading Level 5"
+                    onClick={() => WrapTextHeaders('##### ', '')}
+                  >
+                    H5
+                  </StyledMDToolButton>
+                  <StyledMDToolButton
+                    title="Heading Level 6"
+                    onClick={() => WrapTextHeaders('###### ', '')}
+                  >
+                    H6
+                  </StyledMDToolButton>
+                </StyledPopper>
+              )}
               <StyledMDToolButton
-                title="Heading Level 1"
-                onClick={() => wrapText('# ', '')}
+                ref={setReferenceElementHeadings}
+                onClick={() => setHeadingsOpen(!headingsOpen)}
               >
-                H1
-              </StyledMDToolButton>
-              <StyledMDToolButton
-                title="Heading Level 2"
-                onClick={() => wrapText('## ', '')}
-              >
-                H2
-              </StyledMDToolButton>
-              <StyledMDToolButton
-                title="Heading Level 3"
-                onClick={() => wrapText('### ', '')}
-              >
-                H3
-              </StyledMDToolButton>
-              <StyledMDToolButton
-                title="Heading Level 4"
-                onClick={() => wrapText('#### ', '')}
-              >
-                H4
-              </StyledMDToolButton>
-              <StyledMDToolButton
-                title="Heading Level 5"
-                onClick={() => wrapText('##### ', '')}
-              >
-                H5
-              </StyledMDToolButton>
-              <StyledMDToolButton
-                title="Heading Level 6"
-                onClick={() => wrapText('###### ', '')}
-              >
-                H6
+                <FontAwesomeIcon icon={faHeading} />
               </StyledMDToolButton>
             </>
           )}
@@ -379,38 +426,14 @@ const MarkdownBlock = forwardRef(
             ref={textareaRef}
             placeHolder="Start typing"
             onChange={e => handleChange(e)}
-            onFocus={e => {
-              onFocus && onFocus(e);
-              setShowPopper(true);
-            }}
-            onClick={e => {
-              onClick && onClick(e);
-              setShowPopper(true);
-            }}
             onKeyDown={e => handleKeyDown(e)}
-            onBlur={() =>
-              setTimeout(() => {
-                if (showPopper) {
-                  if (isMounted) {
-                    setShowPopper(false);
-                  }
-                }
-              }, 250)
-            }
             {...rest}
             value={content}
           />
         ) : (
           <StyledMarkdownPreview>{content}</StyledMarkdownPreview>
         )}
-        {showPopper && (
-          <BlockTools
-            referenceElement={referenceElement}
-            onRemoveClick={onRemoveClick}
-            onMoveBlockUpClick={onMoveBlockUpClick}
-            onMoveBlockDownClick={onMoveBlockDownClick}
-          />
-        )}
+      
       </StyledMDWrapper>
     );
   }
