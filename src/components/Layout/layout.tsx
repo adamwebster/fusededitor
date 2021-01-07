@@ -1,4 +1,8 @@
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useContext } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
+import { SiteContext } from '../../context/site';
 import { Footer } from '../Footer';
 import { Header } from '../Header';
 import { VerticalNav } from '../VerticalNav';
@@ -38,18 +42,37 @@ const StyledWrapper = styled.div`
   flex-flow: column;
   height: 100vh;
 `;
-const Layout = ({ children }) => (
-  <>
-    <GlobalStyles />
-    <StyledWrapper>
-      <Header />
-      <StyledContentWrapper>
-        <VerticalNav />
-        <StyledContent>{children}</StyledContent>
-      </StyledContentWrapper>
-      <Footer />
-    </StyledWrapper>
-  </>
-);
+
+const StyledLoading = styled.div`
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  background-color: rgba(0, 0, 0, 0.8);
+  position: fixed;
+  justify-content: center;
+  align-items: center;
+`;
+
+const Layout = ({ children }) => {
+  const { siteState } = useContext(SiteContext);
+  return (
+    <>
+      <GlobalStyles />
+      <StyledWrapper>
+        <Header />
+        {siteState.loading && (
+          <StyledLoading>
+            <FontAwesomeIcon icon={faSpinner} spin size="3x" />
+          </StyledLoading>
+        )}
+        <StyledContentWrapper>
+          <VerticalNav />
+          <StyledContent>{children}</StyledContent>
+        </StyledContentWrapper>
+        <Footer />
+      </StyledWrapper>
+    </>
+  );
+};
 
 export default Layout;

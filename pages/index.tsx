@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useContext } from 'react';
 import { InnerPage, Layout } from '../src/components/Layout';
 import { ProtectedRoute } from '../src/components/ProtectedRoute/ProtectedRoute';
 import { useFetch } from '../src/hooks/useFetch';
@@ -18,6 +18,7 @@ import { SEO } from '../src/components/SEO';
 import dayjs from 'dayjs';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Modal } from '../src/components/Modal';
+import { SiteContext } from '../src/context/site';
 
 const StyledInnerPage = styled(InnerPage)`
   flex-flow: column;
@@ -196,6 +197,7 @@ const Index = () => {
   const [editingFolder, setEditingFolder] = useState(false);
   const documentGrid = useRef();
   const router = useRouter();
+  const { dispatchSite } = useContext(SiteContext);
   const getDocuments = () => {
     useFetch('getDocuments', {}).then(resp => {
       setDocuments(resp);
@@ -212,7 +214,9 @@ const Index = () => {
   };
 
   const handleDrop = result => {
+    console.log('drop');
     if (result.combine) {
+      dispatchSite({ type: 'SET_LOADING', payload: true });
       const droppedItem = documents.find(
         doc => doc._id === result.combine.draggableId
       );
@@ -223,6 +227,7 @@ const Index = () => {
           id: result.combine.draggableId,
         }).then(res => {
           getDocuments();
+          dispatchSite({ type: 'SET_LOADING', payload: false });
         });
       } else {
         useFetch('combineDocumentsIntoFolder', {
@@ -231,6 +236,7 @@ const Index = () => {
         }).then(res => {
           if (res.status === 'saved') {
             getDocuments();
+            dispatchSite({ type: 'SET_LOADING', payload: false });
           }
         });
       }
