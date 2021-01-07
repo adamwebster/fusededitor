@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faAlignLeft,
   faFolder,
+  faFolderMinus,
   faList,
   faTh,
 } from '@fortawesome/free-solid-svg-icons';
@@ -70,11 +71,31 @@ const StyledDocumentList = styled.ul`
   }
 `;
 
+const StyledDocumentWrapper = styled.div`
+  position: relative;
+`;
+
+const StyledRemoveDocumentButton = styled.button`
+  width: 32px;
+  height: 32px;
+  position: absolute;
+  top: 0;
+  right: 16px;
+  color: #fff;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+`;
 const StyledDocument = styled.div`
+  cursor: pointer;
   background-color: ${({ theme }) => theme.COLORS.GREY[450]};
   border: solid 1px
     ${({ theme, isDraggingOver, isDragging }) =>
-      isDraggingOver ? (isDragging ? '' : 'red') : theme.COLORS.GREY[400]};
+      isDraggingOver
+        ? isDragging
+          ? ''
+          : theme.COLORS.PRIMARY
+        : theme.COLORS.GREY[400]};
   padding: 16px;
   height: 230px;
   max-width: 150px;
@@ -93,15 +114,16 @@ const StyledDocument = styled.div`
     color: ${({ theme }) => theme.COLORS.GREY[100]};
     display: block;
   }
+  &:hover {
+    opacity: 0.5;
+  }
 `;
 
 const StyledDocumentLink = styled.a`
   text-decoration: none;
   cursor: pointer;
   color: ${({ theme }) => theme.COLORS.GREY[200]};
-  &:hover {
-    opacity: 0.5;
-  }
+
 `;
 const StyledTextInput = styled(TextInput)`
   margin-right: 8px;
@@ -284,6 +306,19 @@ const Index = () => {
     });
   };
 
+  const removeDocumentFromFolder = documentID => {
+    useFetch('removeDocumentFromFolder', {
+      documentID,
+    }).then(() => {
+      useFetch('getDocumentsInFolder', {
+        id: folderInfo._id,
+      }).then(resp => {
+        setDocumentsInFolder(resp.documents);
+        getDocuments();
+      });
+    });
+  };
+
   useEffect(() => {
     getDocuments();
   }, []);
@@ -327,13 +362,28 @@ const Index = () => {
               <div>Document Name</div>
               <div>Last Modified</div>
             </li>
-            {documents.map(document => {
+            {documents.map((document, index) => {
               return (
                 <li
-                  onClick={() => router.push(`/editor/${document._id}`)}
+                  onClick={() =>
+                    document.type === 'folder'
+                      ? openFolder(document, index)
+                      : router.push(`/editor/${document._id}`)
+                  }
                   key={document._id}
                 >
-                  <div>{document.name}</div>
+                  <div>
+                    {' '}
+                    {document.type === 'folder' ? (
+                      <FontAwesomeIcon
+                        style={{ marginRight: '8px' }}
+                        icon={faFolder}
+                      />
+                    ) : (
+                      <></>
+                    )}{' '}
+                    {document.name}
+                  </div>
                   <div>
                     {dayjs(document.dateModified).format('MMMM DD YYYY')}
                   </div>
@@ -493,20 +543,30 @@ const Index = () => {
         <StyledDocumentFolder.Body>
           <StyledDocumentGrid>
             {documentsInFolder.map(document => (
-              <Link
-                key={document._id}
-                href={`/editor/${document._id}`}
-                passHref
-              >
-                <StyledDocumentLink>
-                  <StyledDocument>
-                    <StyledDocumentIconWrapper>
-                      <FontAwesomeIcon size="8x" icon={faAlignLeft} />
-                    </StyledDocumentIconWrapper>
-                    <span>{document.name}</span>
-                  </StyledDocument>
-                </StyledDocumentLink>
-              </Link>
+              <StyledDocumentWrapper>
+                <Link
+                  key={document._id}
+                  href={`/editor/${document._id}`}
+                  passHref
+                >
+                  <StyledDocumentLink>
+                    <StyledDocument>
+                      <StyledDocumentIconWrapper>
+                        <FontAwesomeIcon size="8x" icon={faAlignLeft} />
+                      </StyledDocumentIconWrapper>
+                      <span>{document.name}</span>
+                    </StyledDocument>
+                  </StyledDocumentLink>
+                </Link>
+                {editingFolder && (
+                  <StyledRemoveDocumentButton
+                    title="Remove from folder"
+                    onClick={() => removeDocumentFromFolder(document._id)}
+                  >
+                    <FontAwesomeIcon icon={faFolderMinus} />
+                  </StyledRemoveDocumentButton>
+                )}
+              </StyledDocumentWrapper>
             ))}
           </StyledDocumentGrid>
         </StyledDocumentFolder.Body>
