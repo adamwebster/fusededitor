@@ -73,7 +73,7 @@ const StyledDocument = styled.div`
   background-color: ${({ theme }) => theme.COLORS.GREY[450]};
   border: solid 1px
     ${({ theme, isDraggingOver, isDragging }) =>
-      isDraggingOver ? isDragging ? '' : 'red' : theme.COLORS.GREY[400]};
+      isDraggingOver ? (isDragging ? '' : 'red') : theme.COLORS.GREY[400]};
   padding: 16px;
   height: 230px;
   max-width: 150px;
@@ -183,9 +183,7 @@ const StyledFolderHeader = styled.div`
   }
 `;
 
-const StyledDroppable = styled.div`
- 
-`;
+const StyledDroppable = styled.div``;
 
 const Index = () => {
   const [documents, setDocuments] = useState([]);
@@ -223,14 +221,19 @@ const Index = () => {
         useFetch('addDocumentToFolder', {
           documentID: result.draggableId,
           id: result.combine.draggableId,
+        }).then(res => {
+          getDocuments();
         });
       } else {
         useFetch('combineDocumentsIntoFolder', {
           name: 'New folder',
           documents: [result.draggableId, result.combine.draggableId],
+        }).then(res => {
+          if (res.status === 'saved') {
+            getDocuments();
+          }
         });
       }
-      getDocuments();
     }
   };
 
@@ -360,13 +363,13 @@ const Index = () => {
                                 style={getStyle(
                                   provided.draggableProps.style,
                                   snapshot,
-                                dropSnap,
+                                  dropSnap
                                 )}
                               >
                                 <Link href={`/editor/${document._id}`} passHref>
                                   <StyledDocumentLink>
                                     <StyledDocument
-                                    isDragging={snapshot.isDragging}
+                                      isDragging={snapshot.isDragging}
                                       isDraggingOver={dropSnap.isDraggingOver}
                                     >
                                       <StyledDocumentIconWrapper>
@@ -396,7 +399,7 @@ const Index = () => {
                     droppableId={`drop_${document._id}`}
                     direction="horizontal"
                   >
-                    {providedDrop => (
+                    {(providedDrop, dropSnap) => (
                       <div
                         {...providedDrop.droppableProps}
                         ref={providedDrop.innerRef}
@@ -411,10 +414,15 @@ const Index = () => {
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              style={getStyle(provided.style, snapshot)}
+                              style={getStyle(
+                                provided.style,
+                                snapshot,
+                                dropSnap
+                              )}
                             >
                               <StyledDocument
                                 onClick={() => openFolder(document, index)}
+                                isDraggingOver={dropSnap.isDraggingOver}
                               >
                                 <StyledFolderIconWrapper>
                                   <FontAwesomeIcon size="8x" icon={faFolder} />
