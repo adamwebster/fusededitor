@@ -1,3 +1,5 @@
+import { faCog } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { darken } from 'polished';
@@ -69,6 +71,10 @@ const StyledLogoutButton = styled(Button)`
       : theme.COLORS.WHITE};
 `;
 
+const SettingsItem = styled.div`
+  margin: 0 16px;
+`;
+
 const Header = () => {
   const { user } = useAuth();
   const { userState } = useContext(UserContext);
@@ -101,6 +107,13 @@ const Header = () => {
           </StyledAvatar>
         )}
         Welcome, {user.firstName}
+        <SettingsItem>
+          <Link href="/settings">
+            <a>
+              <FontAwesomeIcon icon={faCog} />
+            </a>
+          </Link>
+        </SettingsItem>
         <StyledLogoutButton onClick={() => logout()}>Logout</StyledLogoutButton>
       </StyledUserInfo>
     </StyledHeader>

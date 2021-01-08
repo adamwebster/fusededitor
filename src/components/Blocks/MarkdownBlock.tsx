@@ -31,12 +31,12 @@ const StyledMarkdownBlock = styled.textarea`
   resize: none;
   width: 100%;
   background-color: transparent;
-  border: solid 1px ${({ theme }) => theme.COLORS.GREY[500]};
   padding: 16px;
   box-sizing: border-box;
   color: inherit;
   font-family: inherit;
   font-size: 1rem;
+  border:none;
   flex: 1 1;
   :empty:before {
     content: attr(data-ph);

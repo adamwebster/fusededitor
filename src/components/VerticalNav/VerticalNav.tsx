@@ -1,10 +1,8 @@
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCalendar,
   faCog,
   faFileAlt,
-  faHome,
 } from '@fortawesome/free-solid-svg-icons';
 import { ReactElement } from 'react';
 import Link from 'next/link';
@@ -12,9 +10,11 @@ import Link from 'next/link';
 const StyledVerticalNav = styled.nav`
   width: 50px;
   display: flex;
-  background-color: ${({ theme }) => theme.COLORS.GREY[500]};
+  background-color: ${({ theme }) => theme.COLORS.GREY[550]};
   color: ${({ theme }) => theme.COLORS.PRIMARY};
   flex-flow: column;
+  border-right: solid 1px ${({ theme }) => theme.COLORS.GREY[450]};
+
 `;
 
 const StyledLink = styled.a`

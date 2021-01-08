@@ -9,6 +9,7 @@ const StyledPanel = styled.div`
     font-weight: 300;
     color: ${({ theme }) => theme.COLORS.PRIMARY};
   }
+  border-left: solid 1px ${({ theme }) => theme.COLORS.GREY[450]};
 `;
 interface Props {
   children: ReactNode;

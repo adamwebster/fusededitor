@@ -159,7 +159,6 @@ const StyledListControls = styled.div`
 `;
 
 const StyledDocumentFolder = styled(Modal)`
-  background-color: ${({ theme }) => theme.COLORS.GREY[550]};
   flex: 0 100%;
   padding: 16px;
   box-sizing: border-box;
@@ -169,7 +168,7 @@ const StyledDocumentFolder = styled(Modal)`
   height: 95vh;
   max-height: 95vh;
   backdrop-filter: blur(10px);
-  background-color: rgba(0, 0, 0, 0.35);
+  background-color: ${({ theme }) => theme.name === 'dark' ?  "rgba(0, 0, 0, 0.35)" : "rgba(255, 255, 255, 0.35)" };
   border-radius: 20px;
 `;
 
