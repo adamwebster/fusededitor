@@ -3,16 +3,18 @@ import { useEffect, useState, useRef, useContext } from 'react';
 import { InnerPage, Layout } from '../src/components/Layout';
 import { ProtectedRoute } from '../src/components/ProtectedRoute/ProtectedRoute';
 import { useFetch } from '../src/hooks/useFetch';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { Button } from '../src/components/Button';
 import { TextInput } from '../src/components/TextInput';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faAlignLeft,
+  faFile,
   faFolder,
   faFolderMinus,
   faList,
   faTh,
+  faTrash,
 } from '@fortawesome/free-solid-svg-icons';
 import { useRouter } from 'next/router';
 import { SEO } from '../src/components/SEO';
@@ -21,196 +23,74 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Modal } from '../src/components/Modal';
 import { SiteContext } from '../src/context/site';
 
-const StyledInnerPage = styled(InnerPage)`
-  flex-flow: column;
-`;
+const StyledDocumentList = styled.div``;
 
-const StyledPageHeader = styled.div`
-  display: flex;
-  align-items: center;
-`;
-
-const StyledActionsWrapper = styled.div`
-  flex: 1 1;
-  display: flex;
-  justify-content: flex-end;
-`;
-
-const StyledDocumentGrid = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  overflow: auto;
-`;
-
-const StyledDocumentList = styled.ul`
-  list-style: none;
-  padding: 0;
-  margin: 0;
-
-  div {
-    flex: 1 1;
-    align-items: center;
-    display: flex;
+const StyledDocumentItem = styled.div`
+  border-bottom: solid 1px ${({ theme }) => theme.COLORS.GREY[350]};
+  &:last-child {
+    border-bottom: none;
   }
-  li {
-    display: flex;
-    border-bottom: solid 1px ${({ theme }) => theme.COLORS.GREY[400]};
-    padding: 16px 8px;
-    box-sizing: border-box;
-    text-decoration: none;
-    &.list-header {
-      font-weight: bold;
-      background-color: ${({ theme }) => theme.COLORS.GREY[400]};
-    }
-    &:not(.list-header):hover {
-      background-color: ${({ theme }) => theme.COLORS.GREY[450]};
-    }
-    a {
-      display: block;
-    }
-  }
-`;
-
-const StyledDocumentWrapper = styled.div`
-  position: relative;
-`;
-
-const StyledRemoveDocumentButton = styled.button`
-  width: 32px;
-  height: 32px;
-  position: absolute;
-  top: 0;
-  right: 16px;
-  color: #fff;
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
 `;
 const StyledDocument = styled.div`
-  cursor: pointer;
-  background-color: ${({ theme }) => theme.COLORS.GREY[450]};
-  border: solid 1px
-    ${({ theme, isDraggingOver, isDragging }) =>
-      isDraggingOver
-        ? isDragging
-          ? ''
-          : theme.COLORS.PRIMARY
-        : theme.COLORS.GREY[400]};
+  svg {
+    margin-right: 16px;
+  }
+  ${({ hasLink }) =>
+    !hasLink &&
+    css`
+      padding: 16px;
+    `}
+  a {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    ${({ hasLink }) =>
+      hasLink &&
+      css`
+        padding: 16px;
+      `}
+  }
+
+  ${({ theme, isDraggingOver, isDragging }) =>
+    isDraggingOver &&
+    css`
+      border: solid 1px ${theme.COLORS.PRIMARY};
+    `};
+  ${({ theme, isDraggingOver, isDragging }) =>
+    isDragging &&
+    css`
+      border: solid 1px ${theme.COLORS.GREY[300]};
+    `};
+`;
+
+const StyledFolderList = styled.div`
   padding: 16px;
-  height: 230px;
-  max-width: 150px;
-  width: 150px;
-  justify-content: flex-end;
+  background-color: ${({ theme }) => theme.COLORS.GREY[550]};
+`;
+
+const StyledDateModified = styled.div`
+  font-size: 0.85rem;
+`;
+
+const StyledDocumentHeading = styled.h2`
+  padding: 0 16px 16px 16px;
+  margin: 0;
+`;
+
+const StyledDocumentsEmptyState = styled.div`
   display: flex;
   flex-flow: column;
-  align-items: center;
-  margin: 0 8px 16px 8px;
-  span {
-    background-color: ${({ theme }) => theme.COLORS.GREY[400]};
-    text-align: center;
-    padding: 8px;
-    border-radius: 5px;
-    width: 100%;
-    color: ${({ theme }) => theme.COLORS.GREY[100]};
-    display: block;
-  }
-  &:hover {
-    opacity: 0.5;
-  }
-`;
-
-const StyledDocumentLink = styled.a`
-  text-decoration: none;
-  cursor: pointer;
-  color: ${({ theme }) => theme.COLORS.GREY[200]};
-
-`;
-const StyledTextInput = styled(TextInput)`
-  margin-right: 8px;
-`;
-
-const StyledDocumentIconWrapper = styled.div`
-  flex: 1 1;
-  display: flex;
   justify-content: center;
-  align-items: flex-start;
-  margin-top: 16px;
-  svg {
-    color: ${({ theme }) => theme.COLORS.GREY[500]};
-  }
-`;
-
-const StyledFolderIconWrapper = styled.div`
-  flex: 1 1;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  margin-top: 16px;
-  svg {
-    color: ${({ theme }) => theme.COLORS.GREY[500]};
-  }
-`;
-
-const StyledListControls = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-gap: 16px;
-  padding: 0 16px;
-`;
-
-const StyledDocumentFolder = styled(Modal)`
-  flex: 0 100%;
-  padding: 16px;
-  box-sizing: border-box;
-  margin-bottom: 16px;
-  width: 95vw;
-  max-width: 95vw;
-  height: 95vh;
-  max-height: 95vh;
-  backdrop-filter: blur(10px);
-  background-color: ${({ theme }) => theme.name === 'dark' ?  "rgba(0, 0, 0, 0.35)" : "rgba(255, 255, 255, 0.35)" };
-  border-radius: 20px;
-`;
-
-const StyledEditFolderTitle = styled.input`
-  background-color: transparent;
-  border: solid 1px ${({ theme }) => theme.COLORS.GREY[200]};
-  height: 40px;
-  color: inherit;
-  box-sizing: border-box;
-  font-size: 24px;
-  margin-right: 16px;
-  font-weight: bold;
-  padding: 0 8px;
-`;
-
-interface SDVCProps {
-  isActive: boolean;
-  theme: any;
-}
-
-const StyledDocumentViewControl = styled.div<SDVCProps>`
-  svg {
-    color: ${({ isActive, theme }) =>
-      isActive ? theme.COLORS.PRIMARY : 'inherit'};
-  }
-`;
-
-const StyledFolderHeader = styled.div`
-  display: flex;
-  padding: 16px 0;
   align-items: center;
-  h2 {
-    margin: 0 16px 0 0;
+  flex: 1 1;
+  div {
+    margin-bottom: 16px;
   }
 `;
-
-const StyledDroppable = styled.div``;
-
 const Index = () => {
   const [documents, setDocuments] = useState([]);
   const [documentsInFolder, setDocumentsInFolder] = useState([]);
-  const [documentTitle, setDocumentTitle] = useState('');
   const [folderName, setFolderName] = useState('');
   const [selectedView, setSelectedView] = useState('grid');
   const [folderInfo, setFolderInfo] = useState({ _id: '', name: '' });
@@ -221,12 +101,13 @@ const Index = () => {
   const { dispatchSite } = useContext(SiteContext);
   const getDocuments = () => {
     useFetch('getDocuments', {}).then(resp => {
-      setDocuments(resp);
+      const copyOfResp = [...resp];
+      copyOfResp.forEach(item => (item.folderOpen = false));
+      setDocuments(copyOfResp);
     });
   };
 
-  const createDocument = e => {
-    e.preventDefault();
+  const createDocument = documentTitle => {
     useFetch('createDocument', {
       documentTitle,
     }).then(resp => {
@@ -235,7 +116,7 @@ const Index = () => {
   };
 
   const handleDrop = result => {
-    console.log('drop');
+    console.log('drop', result.combine);
     if (result.combine) {
       dispatchSite({ type: 'SET_LOADING', payload: true });
       const droppedItem = documents.find(
@@ -265,12 +146,15 @@ const Index = () => {
   };
 
   const openFolder = (folder, index) => {
+    const copyOfDocuments = [...documents];
+    copyOfDocuments.forEach(document => (document.folderOpen = false));
+    copyOfDocuments[index].folderOpen = true;
     useFetch('getDocumentsInFolder', {
       id: folder._id,
     }).then(resp => {
       setFolderInfo(folder);
       setDocumentsInFolder(resp.documents);
-      setShowFolderModal(true);
+      setDocuments(copyOfDocuments);
     });
   };
 
@@ -282,7 +166,7 @@ const Index = () => {
     return {
       ...style,
       // cannot be 0, but make it super tiny
-      transitionDuration: `1.001s`,
+      transitionDuration: `.001s`,
     };
   };
 
@@ -323,89 +207,65 @@ const Index = () => {
   }, []);
 
   return (
-    <Layout>
-      <SEO title="Documents" />
-      <StyledInnerPage>
-        <StyledPageHeader>
-          <h1>Documents</h1>
-          <StyledListControls>
-            <StyledDocumentViewControl
-              onClick={() => setSelectedView('grid')}
-              isActive={selectedView === 'grid'}
-            >
-              <FontAwesomeIcon icon={faTh} />
-            </StyledDocumentViewControl>
-            <StyledDocumentViewControl
-              onClick={() => setSelectedView('list')}
-              isActive={selectedView === 'list'}
-              icon={faList}
-            >
-              <FontAwesomeIcon icon={faList} />
-            </StyledDocumentViewControl>
-          </StyledListControls>
-          <StyledActionsWrapper>
-            <form method="post" onSubmit={e => createDocument(e)}>
-              <StyledTextInput
-                aria-label="Document Name"
-                placeholder="Document Name"
-                value={documentTitle}
-                onChange={e => setDocumentTitle(e.target.value)}
-              />
-              <Button primary>Create Document</Button>
-            </form>
-          </StyledActionsWrapper>
-        </StyledPageHeader>
-        {selectedView === 'list' && (
+    <Layout
+      sideNavContent={
+        <>
+          <StyledDocumentHeading>Documents</StyledDocumentHeading>
           <StyledDocumentList>
-            <li className="list-header">
-              <div>Document Name</div>
-              <div>Last Modified</div>
-            </li>
-            {documents.map((document, index) => {
-              return (
-                <li
-                  onClick={() =>
-                    document.type === 'folder'
-                      ? openFolder(document, index)
-                      : router.push(`/editor/${document._id}`)
-                  }
-                  key={document._id}
-                >
-                  <div>
-                    {' '}
-                    {document.type === 'folder' ? (
-                      <FontAwesomeIcon
-                        style={{ marginRight: '8px' }}
-                        icon={faFolder}
-                      />
-                    ) : (
-                      <></>
-                    )}{' '}
-                    {document.name}
-                  </div>
-                  <div>
-                    {dayjs(document.dateModified).format('MMMM DD YYYY')}
-                  </div>
-                </li>
-              );
-            })}
-          </StyledDocumentList>
-        )}
-
-        {selectedView === 'grid' && (
-          <StyledDocumentGrid ref={documentGrid}>
             <DragDropContext onDragEnd={result => handleDrop(result)}>
               {documents.map((document, index) => {
-                if (document.type === 'document')
+                if (document.type === 'folder') {
                   return (
+                    <StyledDocumentItem key={document._id}>
+                      <StyledDocument>
+                        <div onClick={() => openFolder(document, index)}>
+                          <FontAwesomeIcon icon={faFolder} />
+                          {document.name}
+                        </div>
+                        {document.folderOpen && (
+                          <FontAwesomeIcon
+                            icon={faTrash}
+                            onClick={() => deleteFolder(document)}
+                          />
+                        )}
+                      </StyledDocument>
+                      {document.folderOpen && (
+                        <StyledFolderList>
+                          <ul>
+                            {documentsInFolder.map(folderDocument => (
+                              <li>
+                                <Link
+                                  href={`/editor/${folderDocument._id}`}
+                                  passHref
+                                >
+                                  <a>
+                                    <FontAwesomeIcon icon={faFile} />{' '}
+                                    {folderDocument.name}{' '}
+                                  </a>
+                                </Link>
+                                <FontAwesomeIcon
+                                  onClick={() =>
+                                    removeDocumentFromFolder(folderDocument._id)
+                                  }
+                                  icon={faFolderMinus}
+                                />
+                              </li>
+                            ))}
+                          </ul>
+                        </StyledFolderList>
+                      )}
+                    </StyledDocumentItem>
+                  );
+                }
+                return (
+                  <StyledDocumentItem>
                     <Droppable
                       isCombineEnabled
                       key={document._id}
-                      direction="horizontal"
                       droppableId={`drop_${document._id}`}
                     >
                       {(providedDrop, dropSnap) => (
-                        <StyledDroppable
+                        <div
                           {...providedDrop.droppableProps}
                           ref={providedDrop.innerRef}
                         >
@@ -421,155 +281,51 @@ const Index = () => {
                                   dropSnap
                                 )}
                               >
-                                <Link href={`/editor/${document._id}`} passHref>
-                                  <StyledDocumentLink>
-                                    <StyledDocument
-                                      isDragging={snapshot.isDragging}
-                                      isDraggingOver={dropSnap.isDraggingOver}
-                                    >
-                                      <StyledDocumentIconWrapper>
-                                        <FontAwesomeIcon
-                                          size="8x"
-                                          icon={faAlignLeft}
-                                        />
-                                      </StyledDocumentIconWrapper>
-                                      <span>{document.name}</span>
-                                    </StyledDocument>
-                                  </StyledDocumentLink>
-                                </Link>
+                                <StyledDocument
+                                  hasLink
+                                  isDraggingOver={dropSnap.isDraggingOver}
+                                  isDragging={snapshot.isDragging}
+                                >
+                                  <Link
+                                    href={`/editor/${document._id}`}
+                                    passHref
+                                  >
+                                    <a>
+                                      <FontAwesomeIcon icon={faFile} />
+                                      <div>
+                                        {document.name}
+                                        <StyledDateModified>
+                                          Date Modified:{' '}
+                                          {dayjs(document.dateModified).format(
+                                            'DD/MM/YYYY'
+                                          )}
+                                        </StyledDateModified>
+                                      </div>
+                                    </a>
+                                  </Link>
+                                </StyledDocument>
                               </div>
                             )}
                           </Draggable>
-                          <div style={{ height: 0 }}>
-                            {providedDrop.placeholder}
-                          </div>
-                        </StyledDroppable>
+                          <div>{providedDrop.placeholder}</div>
+                        </div>
                       )}
                     </Droppable>
-                  );
-                return (
-                  <Droppable
-                    isCombineEnabled
-                    key={document._id}
-                    droppableId={`drop_${document._id}`}
-                    direction="horizontal"
-                  >
-                    {(providedDrop, dropSnap) => (
-                      <div
-                        {...providedDrop.droppableProps}
-                        ref={providedDrop.innerRef}
-                      >
-                        <Draggable
-                          isDragDisabled
-                          draggableId={document._id}
-                          index={index}
-                        >
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              style={getStyle(
-                                provided.style,
-                                snapshot,
-                                dropSnap
-                              )}
-                            >
-                              <StyledDocument
-                                onClick={() => openFolder(document, index)}
-                                isDraggingOver={dropSnap.isDraggingOver}
-                              >
-                                <StyledFolderIconWrapper>
-                                  <FontAwesomeIcon size="8x" icon={faFolder} />
-                                </StyledFolderIconWrapper>
-                                <span>{document.name}</span>
-                              </StyledDocument>
-                              <div style={{ height: 0 }}>
-                                {providedDrop.placeholder}
-                              </div>
-                            </div>
-                          )}
-                        </Draggable>
-                      </div>
-                    )}
-                  </Droppable>
+                  </StyledDocumentItem>
                 );
               })}
             </DragDropContext>
-          </StyledDocumentGrid>
-        )}
-      </StyledInnerPage>
-      <StyledDocumentFolder
-        onCloseClick={() => {
-          setShowFolderModal(false);
-          setEditingFolder(false);
-        }}
-        show={showFolderModal}
-      >
-        <StyledDocumentFolder.Header>
-          <StyledFolderHeader>
-            {editingFolder ? (
-              <>
-                <StyledEditFolderTitle
-                  value={folderInfo.name}
-                  placeholder="Folder name"
-                  aria-label="Folder name"
-                  onChange={e =>
-                    setFolderInfo({ ...folderInfo, name: e.target.value })
-                  }
-                />
-                <Button onClick={() => updateFolder(folderInfo)} primary>
-                  Save
-                </Button>
-                <Button
-                  buttonStyle="danger"
-                  primary
-                  onClick={() => deleteFolder(folderInfo)}
-                >
-                  Delete Folder
-                </Button>
-              </>
-            ) : (
-              <>
-                <h2>{folderInfo.name}</h2>
-                <Button primary onClick={() => setEditingFolder(true)}>
-                  Edit
-                </Button>
-              </>
-            )}
-          </StyledFolderHeader>
-        </StyledDocumentFolder.Header>
-        <StyledDocumentFolder.Body>
-          <StyledDocumentGrid>
-            {documentsInFolder.map(document => (
-              <StyledDocumentWrapper>
-                <Link
-                  key={document._id}
-                  href={`/editor/${document._id}`}
-                  passHref
-                >
-                  <StyledDocumentLink>
-                    <StyledDocument>
-                      <StyledDocumentIconWrapper>
-                        <FontAwesomeIcon size="8x" icon={faAlignLeft} />
-                      </StyledDocumentIconWrapper>
-                      <span>{document.name}</span>
-                    </StyledDocument>
-                  </StyledDocumentLink>
-                </Link>
-                {editingFolder && (
-                  <StyledRemoveDocumentButton
-                    title="Remove from folder"
-                    onClick={() => removeDocumentFromFolder(document._id)}
-                  >
-                    <FontAwesomeIcon icon={faFolderMinus} />
-                  </StyledRemoveDocumentButton>
-                )}
-              </StyledDocumentWrapper>
-            ))}
-          </StyledDocumentGrid>
-        </StyledDocumentFolder.Body>
-      </StyledDocumentFolder>
+          </StyledDocumentList>
+        </>
+      }
+    >
+      <SEO title="Documents" />
+      <StyledDocumentsEmptyState>
+        <div>Choose a document or</div>
+        <Button primary onClick={() => createDocument('New document')}>
+          Create a New Document
+        </Button>
+      </StyledDocumentsEmptyState>
     </Layout>
   );
 };

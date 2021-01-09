@@ -1,11 +1,20 @@
-import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+import {
+  faCog,
+  faSignOutAlt,
+  faSpinner,
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useContext } from 'react';
+import Link from 'next/link';
+import { ReactNode, useContext } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import { SiteContext } from '../../context/site';
 import { Footer } from '../Footer';
 import { Header } from '../Header';
 import { VerticalNav } from '../VerticalNav';
+import { useFetch } from '../../hooks/useFetch';
+import { useRouter } from 'next/router';
+import { UserContext } from '../../context/user';
+import { useAuth } from '../../context/authenticaton';
 
 export const GlobalStyles = createGlobalStyle`
   body{
@@ -23,9 +32,7 @@ export const GlobalStyles = createGlobalStyle`
 `;
 
 const StyledContentWrapper = styled.div`
-  display: grid;
-  grid-template-columns:  1fr;
-  grid-gap: 0;
+  display: flex;
   flex: 1 1;
   overflow: hidden;
 `;
@@ -53,23 +60,133 @@ const StyledLoading = styled.div`
   align-items: center;
 `;
 
-const Layout = ({ children }) => {
+const StyledSideNav = styled.div`
+  width: 300px;
+  height: 100%;
+  background-color: ${({ theme }) => theme.COLORS.GREY[500]};
+  box-sizing: border-box;
+  display: flex;
+  flex-flow: column;
+`;
+
+const StyledLogo = styled.h1`
+  margin: 0 0 32px 0;
+  color: ${({ theme }) => theme.COLORS.PRIMARY};
+  font-weight: 300;
+  padding: 16px;
+  border-bottom: solid 1px ${({ theme }) => theme.COLORS.GREY[350]};
+
+  a {
+    text-decoration: none;
+  }
+`;
+
+const StyledNavFooter = styled.div`
+  padding: 16px;
+  border-top: solid 1px ${({ theme }) => theme.COLORS.GREY[350]};
+`;
+
+const StyledNavContent = styled.div`
+  flex: 1 1;
+`;
+
+const StyledUserInfo = styled.div`
+  display: flex;
+  align-items: center;
+  flex: 1 1;
+`;
+const StyledAvatar = styled.div`
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: ${({ theme }) => theme.COLORS.GREY[300]};
+  margin-right: 10px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  img {
+    height: 100%;
+    width: auto;
+  }
+`;
+
+const SettingsItem = styled.div`
+  margin: 0 16px;
+`;
+
+interface Props {
+  children: ReactNode;
+  hideSideNav?: boolean;
+  sideNavContent?: ReactNode;
+}
+
+const Layout = ({ hideSideNav = false, sideNavContent, children }: Props) => {
   const { siteState } = useContext(SiteContext);
+  const { userState } = useContext(UserContext);
+  const { user } = useAuth();
+
+  const router = useRouter();
+  const logout = () => {
+    useFetch('logout', {}).then(resp => {
+      router.push('/login');
+    });
+  };
+
   return (
     <>
       <GlobalStyles />
       <StyledWrapper>
-        <Header />
         {siteState.loading && (
           <StyledLoading>
             <FontAwesomeIcon icon={faSpinner} spin size="3x" />
           </StyledLoading>
         )}
         <StyledContentWrapper>
-          {/* <VerticalNav /> */}
+          {!hideSideNav && (
+            <StyledSideNav>
+              <>
+                <StyledLogo>
+                  <Link href="/" passHref>
+                    Fused Editor
+                  </Link>
+                </StyledLogo>
+                <StyledNavContent>{sideNavContent}</StyledNavContent>
+                <StyledNavFooter>
+                  <StyledUserInfo>
+                    {user.profilePicture && (
+                      <StyledAvatar>
+                        <img
+                          alt="Profile Image"
+                          src={
+                            process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
+                            'images/fe/ProfilePictures/' +
+                            user.id +
+                            '/' +
+                            userState.profilePicture
+                          }
+                        />
+                      </StyledAvatar>
+                    )}
+                    {user.firstName}
+                    <SettingsItem>
+                      <Link href="/settings">
+                        <a>
+                          <FontAwesomeIcon icon={faCog} />
+                        </a>
+                      </Link>
+                    </SettingsItem>
+                    <FontAwesomeIcon
+                      onClick={() => logout()}
+                      icon={faSignOutAlt}
+                    />{' '}
+                  </StyledUserInfo>
+                </StyledNavFooter>
+              </>
+            </StyledSideNav>
+          )}
           <StyledContent>{children}</StyledContent>
         </StyledContentWrapper>
-        <Footer />
       </StyledWrapper>
     </>
   );
