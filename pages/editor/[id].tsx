@@ -2,8 +2,10 @@ import { Editor } from '../../src/components/Editor';
 import { Layout } from '../../src/components/Layout';
 import { useFetch } from '../../src/hooks/useFetch';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { ProtectedRoute } from '../../src/components/ProtectedRoute/ProtectedRoute';
+import { DocumentList } from '../../src/components/DocumentList';
+import { SiteContext } from '../../src/context/site';
 
 const EditorPage = () => {
   const router = useRouter();
@@ -11,6 +13,7 @@ const EditorPage = () => {
   const [document, setDocument] = useState();
   const [status, setStatus] = useState('');
   const [statusMessage, setStatusMessage] = useState('');
+  const { siteState } = useContext(SiteContext);
   const getDocument = () => {
     useFetch('getDocument', {
       id,
@@ -26,9 +29,12 @@ const EditorPage = () => {
 
   useEffect(() => {
     getDocument();
-  }, []);
+  }, [id]);
   return (
-    <Layout>
+    <Layout
+      fullScreen={siteState.editorFullscreen}
+      sideNavContent={<DocumentList />}
+    >
       {status ? (
         <>{statusMessage}</>
       ) : (

@@ -2,6 +2,7 @@ import { createContext, ReactElement, useReducer } from 'react';
 
 const initialState = {
   loading: false,
+  editorFullscreen: false,
 };
 
 export const SiteContext = createContext({
@@ -18,6 +19,11 @@ const reducer = (state: any, action: { payload: any; type: any }) => {
       return {
         ...state,
         loading: payload,
+      };
+    case 'SET_EDITOR_FULLSCREEN':
+      return {
+        ...state,
+        editorFullscreen: payload,
       };
     default:
       return state;

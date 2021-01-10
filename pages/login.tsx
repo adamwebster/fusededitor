@@ -26,8 +26,8 @@ const StyledLoginForm = styled.form`
 
 const StyledMessage = styled.div`
   width: 100%;
-  background-color: ${({ theme }) => lighten(0.3, theme.COLORS.PRIMARY)};
-  color: ${({ theme }) => theme.COLORS.PRIMARY};
+  background-color: ${({ theme }) => lighten(0.3, theme.COLORS.DANGER)};
+  color: ${({ theme }) => theme.COLORS.DANGER};
   padding: 16px;
   text-align: center;
   box-sizing: border-box;
