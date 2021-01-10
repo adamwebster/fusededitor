@@ -1,10 +1,19 @@
-import { forwardRef, HTMLAttributes, useEffect, useRef, useState } from 'react';
+import {
+  forwardRef,
+  HTMLAttributes,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import styled from 'styled-components';
 import ReactMarkdown from 'react-markdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBold,
   faCode,
+  faCompress,
+  faExpand,
   faHeading,
   faImage,
   faItalic,
@@ -13,6 +22,9 @@ import {
 import { Modal } from '../Modal';
 import { Button } from '../Button';
 import { usePopper } from 'react-popper';
+import { SiteContext } from '../../context/site';
+import Tippy from '@tippyjs/react';
+import 'tippy.js/dist/tippy.css';
 
 const StyledPopper = styled.span`
   background-color: ${({ theme }) =>
@@ -36,7 +48,7 @@ const StyledMarkdownBlock = styled.textarea`
   color: inherit;
   font-family: inherit;
   font-size: 1rem;
-  border:none;
+  border: none;
   flex: 1 1;
   :empty:before {
     content: attr(data-ph);
@@ -128,14 +140,7 @@ interface Props extends HTMLAttributes<HTMLParagraphElement> {
 
 const MarkdownBlock = forwardRef(
   (
-    {
-      children,
-      onKeyDown,
-      onChange,
-      attachments,
-      documentID,
-      ...rest
-    }: Props,
+    { children, onKeyDown, onChange, attachments, documentID, ...rest }: Props,
     ref
   ) => {
     const [referenceElementHeadings, setReferenceElementHeadings] = useState(
@@ -143,10 +148,11 @@ const MarkdownBlock = forwardRef(
     );
 
     const [isMounted, setIsMounted] = useState(false);
-    const [content, setContent] = useState(children);
+    const [content, setContent] = useState('');
     const [preview, setPreview] = useState(false);
     const [headingsOpen, setHeadingsOpen] = useState(false);
     const [showAttachmentModal, setShowAttachmentModal] = useState(false);
+    const { dispatchSite, siteState } = useContext(SiteContext);
     const textareaRef = useRef<HTMLTextAreaElement>(
       (ref as unknown) as HTMLTextAreaElement
     );
@@ -286,6 +292,13 @@ const MarkdownBlock = forwardRef(
       };
     }, [popperElementHeadings, referenceElementHeadings]);
 
+    useEffect(() => {
+      if (children) {
+        setContent(children);
+      } else {
+        setContent('');
+      }
+    }, [children]);
     return (
       <StyledMDWrapper>
         <Modal
@@ -418,6 +431,24 @@ const MarkdownBlock = forwardRef(
             <StyledMDToolButton onClick={() => setPreview(!preview)}>
               {preview ? 'Edit' : 'Preview'}
             </StyledMDToolButton>
+            <Tippy
+              content={
+                siteState.editorFullscreen ? 'Exit Fullscreen' : 'Fullscreen'
+              }
+            >
+              <StyledMDToolButton
+                onClick={() =>
+                  dispatchSite({
+                    type: 'SET_EDITOR_FULLSCREEN',
+                    payload: !siteState.editorFullscreen,
+                  })
+                }
+              >
+                <FontAwesomeIcon
+                  icon={siteState.editorFullscreen ? faCompress : faExpand}
+                />
+              </StyledMDToolButton>
+            </Tippy>
           </>
         </StyledMarkdownToolbar>
         {!preview ? (
@@ -433,7 +464,6 @@ const MarkdownBlock = forwardRef(
         ) : (
           <StyledMarkdownPreview>{content}</StyledMarkdownPreview>
         )}
-      
       </StyledMDWrapper>
     );
   }

@@ -5,7 +5,7 @@ import {
   faTrash,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import MarkdownBlock from '../Blocks/MarkdownBlock';
 import { Button } from '../Button';
@@ -15,13 +15,13 @@ import { Modal } from '../Modal';
 import { useRouter } from 'next/router';
 import { SEO } from '../SEO';
 import { useToast } from '../Toast/ToastProvider';
+import { SiteContext } from '../../context/site';
 
 const StyledEditorWrapper = styled.div`
-  display: grid;
-  flex-flow: column;
+  display: flex;
+  flex-flow: row;
   overflow: hidden;
-  grid-template-columns: 1fr ${({ panelOpen }) =>
-      panelOpen ? '300px' : '50px'};
+
   transition: all 0.6s;
   flex: 1 1;
 `;
@@ -40,7 +40,7 @@ const StyledEditor = styled.div`
   resize: none;
   color: ${({ theme }) => theme.COLORS.GREY[50]};
   overflow: auto;
-  display:flex;
+  display: flex;
   &:focus {
     outline: none;
   }
@@ -48,6 +48,8 @@ const StyledEditor = styled.div`
 
 const StyledDocumentHeader = styled.div`
   padding: 16px;
+  background-color: ${({ theme }) => theme.COLORS.GREY[550]};
+  border-bottom: solid 1px ${({ theme }) => theme.COLORS.GREY[450]};
   display: flex;
   h2 {
     margin: 0 16px 0 0;
@@ -146,18 +148,19 @@ const Editor = ({ documentJSON }: Props) => {
   const [selectedFile, setSelectedFile] = useState('');
   const [saving, setSaving] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
+
+  const { siteState } = useContext(SiteContext);
   const editor = useRef();
   const fileUpload = useRef(null as HTMLInputElement);
   const router = useRouter();
   const toast = useToast();
 
-  const updateItem =  (e: any) => {
+  const updateItem = (e: any) => {
     const itemToUpdate = document;
     if (itemToUpdate) {
       itemToUpdate.content = e.target.value || e.target.innerHTML;
     }
   };
-
 
   const saveDocument = () => {
     setSaving(true);
@@ -299,77 +302,78 @@ const Editor = ({ documentJSON }: Props) => {
             </MarkdownBlock>
           </StyledEditor>
         </StyledDocument>
-        <Panel>
-          <FontAwesomeIcon
-            onClick={() => setPanelOpen(!panelOpen)}
-            icon={panelOpen ? faChevronCircleRight : faChevronCircleLeft}
-          />
-          {panelOpen && (
-            <>
-
-              <StyledSectionHeader>Attachments</StyledSectionHeader>
-              {!selectedFile && (
-                <Button onClick={() => fileUpload.current.click()}>
-                  Choose File
-                </Button>
-              )}
-              <form
-                method="post"
-                encType="multipart/form-data"
-                onSubmit={e => uploadImage(e)}
-              >
-                <input
-                  style={{ display: 'none' }}
-                  ref={fileUpload}
-                  type="file"
-                  name="file"
-                  onChange={e => setSelectedFile(e.target.value)}
-                />
-                {selectedFile && (
-                  <>
-                    <Button>Upload</Button>{' '}
-                    <Button onClick={() => setSelectedFile('')}>Reset</Button>
-                  </>
+        {!siteState.editorFullscreen && (
+          <Panel>
+            <FontAwesomeIcon
+              onClick={() => setPanelOpen(!panelOpen)}
+              icon={panelOpen ? faChevronCircleRight : faChevronCircleLeft}
+            />
+            {panelOpen && (
+              <>
+                <StyledSectionHeader>Attachments</StyledSectionHeader>
+                {!selectedFile && (
+                  <Button onClick={() => fileUpload.current.click()}>
+                    Choose File
+                  </Button>
                 )}
-              </form>
-              <StyledAttachmentList>
-                {document.attachments.map(attachment => {
-                  return (
-                    <StyledAttachment key={attachment}>
-                      <div className="imageWrapper">
-                        <img
-                          alt="Uploaded Image"
-                          onClick={() =>
-                            setImageModal({
-                              show: true,
-                              selectedImage:
-                                process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
-                                'images/fe/' +
-                                document._id +
-                                '/' +
-                                attachment,
-                            })
-                          }
-                          src={
-                            process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
-                            'images/fe/' +
-                            document._id +
-                            '/' +
-                            attachment
-                          }
+                <form
+                  method="post"
+                  encType="multipart/form-data"
+                  onSubmit={e => uploadImage(e)}
+                >
+                  <input
+                    style={{ display: 'none' }}
+                    ref={fileUpload}
+                    type="file"
+                    name="file"
+                    onChange={e => setSelectedFile(e.target.value)}
+                  />
+                  {selectedFile && (
+                    <>
+                      <Button>Upload</Button>{' '}
+                      <Button onClick={() => setSelectedFile('')}>Reset</Button>
+                    </>
+                  )}
+                </form>
+                <StyledAttachmentList>
+                  {document.attachments.map(attachment => {
+                    return (
+                      <StyledAttachment key={attachment}>
+                        <div className="imageWrapper">
+                          <img
+                            alt="Uploaded Image"
+                            onClick={() =>
+                              setImageModal({
+                                show: true,
+                                selectedImage:
+                                  process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
+                                  'images/fe/' +
+                                  document._id +
+                                  '/' +
+                                  attachment,
+                              })
+                            }
+                            src={
+                              process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
+                              'images/fe/' +
+                              document._id +
+                              '/' +
+                              attachment
+                            }
+                          />
+                        </div>
+                        <FontAwesomeIcon
+                          onClick={() => removeImage(attachment, document._id)}
+                          icon={faTrash}
                         />
-                      </div>
-                      <FontAwesomeIcon
-                        onClick={() => removeImage(attachment, document._id)}
-                        icon={faTrash}
-                      />
-                    </StyledAttachment>
-                  );
-                })}
-              </StyledAttachmentList>
-            </>
-          )}
-        </Panel>
+                      </StyledAttachment>
+                    );
+                  })}
+                </StyledAttachmentList>
+              </>
+            )}
+          </Panel>
+        )}
       </StyledEditorWrapper>
     </>
   );

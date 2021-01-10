@@ -24,7 +24,7 @@ export const GlobalStyles = createGlobalStyle`
     margin: 0;
     color: ${({ theme }) => theme.COLORS.GREY[50]};
     line-height: 150%;
-    background-color: ${({ theme }) => theme.COLORS.GREY[550]};
+    background-color: ${({ theme }) => theme.COLORS.GREY[600]};
   }
   a{
     color: ${({ theme }) => theme.COLORS.PRIMARY};
@@ -63,10 +63,11 @@ const StyledLoading = styled.div`
 const StyledSideNav = styled.div`
   width: 300px;
   height: 100%;
-  background-color: ${({ theme }) => theme.COLORS.GREY[500]};
+  background-color: ${({ theme }) => theme.COLORS.GREY[550]};
   box-sizing: border-box;
   display: flex;
   flex-flow: column;
+  border-right: solid 1px ${({ theme }) => theme.COLORS.GREY[450]};
 `;
 
 const StyledLogo = styled.h1`
@@ -119,9 +120,15 @@ interface Props {
   children: ReactNode;
   hideSideNav?: boolean;
   sideNavContent?: ReactNode;
+  fullScreen?: boolean;
 }
 
-const Layout = ({ hideSideNav = false, sideNavContent, children }: Props) => {
+const Layout = ({
+  hideSideNav = false,
+  fullScreen = false,
+  sideNavContent,
+  children,
+}: Props) => {
   const { siteState } = useContext(SiteContext);
   const { userState } = useContext(UserContext);
   const { user } = useAuth();
@@ -143,7 +150,7 @@ const Layout = ({ hideSideNav = false, sideNavContent, children }: Props) => {
           </StyledLoading>
         )}
         <StyledContentWrapper>
-          {!hideSideNav && (
+          {!hideSideNav && !fullScreen && (
             <StyledSideNav>
               <>
                 <StyledLogo>
