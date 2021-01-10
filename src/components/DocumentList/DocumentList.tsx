@@ -1,8 +1,14 @@
 import { useEffect, useState, useRef, useContext } from 'react';
 
 import styled, { css } from 'styled-components';
+
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import dayjs from 'dayjs';
+import { useDroppable } from '@dnd-kit/core';
+import { useDrop } from 'react-dnd';
+
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { DndProvider } from 'react-dnd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEdit,
@@ -12,9 +18,14 @@ import {
   faSave,
   faTrash,
 } from '@fortawesome/free-solid-svg-icons';
+
+import { useDrag } from 'react-dnd';
+import { CSS } from '@dnd-kit/utilities';
+
 import { SiteContext } from '../../context/site';
 import { useFetch } from '../../hooks/useFetch';
 import Link from 'next/link';
+import { stat } from 'fs';
 
 const StyledDocumentList = styled.div``;
 
@@ -104,14 +115,8 @@ const StyledFolderTools = styled.div`
 const DocumentList = () => {
   const [documents, setDocuments] = useState([]);
   const [documentsInFolder, setDocumentsInFolder] = useState([]);
-  const [folderName, setFolderName] = useState('');
-  const [selectedView, setSelectedView] = useState('grid');
   const [folderInfo, setFolderInfo] = useState({ _id: '', name: '' });
-  const [showFolderModal, setShowFolderModal] = useState(false);
-  const [editingFolder, setEditingFolder] = useState(false);
   const [folderBeingEdited, setFolderBeingEdited] = useState('');
-  const documentGrid = useRef();
-  const { dispatchSite } = useContext(SiteContext);
 
   const getDocuments = () => {
     useFetch('getDocuments', {}).then(resp => {
@@ -121,35 +126,6 @@ const DocumentList = () => {
       });
       setDocuments(copyOfResp);
     });
-  };
-
-  const handleDrop = result => {
-    if (result.combine) {
-      dispatchSite({ type: 'SET_LOADING', payload: true });
-      const droppedItem = documents.find(
-        doc => doc._id === result.combine.draggableId
-      );
-
-      if (droppedItem.type === 'folder') {
-        useFetch('addDocumentToFolder', {
-          documentID: result.draggableId,
-          id: result.combine.draggableId,
-        }).then(res => {
-          getDocuments();
-          dispatchSite({ type: 'SET_LOADING', payload: false });
-        });
-      } else {
-        useFetch('combineDocumentsIntoFolder', {
-          name: 'New folder',
-          documents: [result.draggableId, result.combine.draggableId],
-        }).then(res => {
-          if (res.status === 'saved') {
-            getDocuments();
-            dispatchSite({ type: 'SET_LOADING', payload: false });
-          }
-        });
-      }
-    }
   };
 
   const openFolder = (folder, index) => {
@@ -168,18 +144,6 @@ const DocumentList = () => {
     }
   };
 
-  const getStyle = (style, snapshot, snapshotDrop) => {
-    if (!snapshot.isDragging) return {};
-    if (!snapshot.isDropAnimating) {
-      return style;
-    }
-    return {
-      ...style,
-      // cannot be 0, but make it super tiny
-      transitionDuration: `.001s`,
-    };
-  };
-
   const updateFolder = folderInfo => {
     setFolderBeingEdited('');
     useFetch('updateFolder', {
@@ -190,8 +154,6 @@ const DocumentList = () => {
   };
 
   const deleteFolder = folderInfo => {
-    setEditingFolder(false);
-    setShowFolderModal(false);
     useFetch('deleteFolder', {
       folderInfo,
     }).then(resp => {
@@ -219,176 +181,213 @@ const DocumentList = () => {
     <>
       <StyledDocumentHeading>Documents</StyledDocumentHeading>
       <StyledDocumentList>
-        <DragDropContext onDragEnd={result => handleDrop(result)}>
+        {' '}
+        <DndProvider backend={HTML5Backend}>
           {documents.map((document, index) => {
             if (document.type === 'folder') {
               return (
-                <StyledDocumentItem
-                  onClick={() => openFolder(document, index)}
+                <FolderItem
                   key={document._id}
-                >
-                  <Droppable
-                    isCombineEnabled
-                    key={document._id}
-                    droppableId={`drop_${document._id}`}
-                  >
-                    {(providedDrop, dropSnap) => (
-                      <div
-                        {...providedDrop.droppableProps}
-                        ref={providedDrop.innerRef}
-                      >
-                        <Draggable
-                          isDragDisabled
-                          draggableId={document._id}
-                          index={index}
-                        >
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              style={getStyle(
-                                provided.draggableProps.style,
-                                snapshot,
-                                dropSnap
-                              )}
-                            >
-                              <StyledDocument
-                                isDraggingOver={dropSnap.isDraggingOver}
-                                isDragging={snapshot.isDragging}
-                              >
-                                <div>
-                                  <FontAwesomeIcon icon={faFolder} />
-                                  {document._id === folderBeingEdited ? (
-                                    <input
-                                      onChange={e =>
-                                        setFolderInfo({
-                                          ...folderInfo,
-                                          name: e.target.value,
-                                        })
-                                      }
-                                      value={folderInfo.name}
-                                    />
-                                  ) : (
-                                    document.name
-                                  )}
-                                </div>
-                              </StyledDocument>
-                            </div>
-                          )}
-                        </Draggable>
-                        <div>{providedDrop.placeholder}</div>
-                      </div>
-                    )}
-                  </Droppable>
-                  {document.folderOpen && (
-                    <StyledFolderList>
-                      <ul>
-                        {documentsInFolder.map(folderDocument => (
-                          <li key={folderDocument._id}>
-                            <Link
-                              href={`/editor/${folderDocument._id}`}
-                              passHref
-                            >
-                              <a>
-                                <FontAwesomeIcon icon={faFile} />
-                                {folderDocument.name}
-                              </a>
-                            </Link>
-                            <FontAwesomeIcon
-                              onClick={() =>
-                                removeDocumentFromFolder(folderDocument._id)
-                              }
-                              icon={faFolderMinus}
-                            />
-                          </li>
-                        ))}
-                      </ul>
-                      <StyledFolderTools>
-                        {document.folderOpen && (
-                          <>
-                            {document._id !== folderBeingEdited ? (
-                              <FontAwesomeIcon
-                                onClick={() =>
-                                  setFolderBeingEdited(document._id)
-                                }
-                                icon={faEdit}
-                              />
-                            ) : (
-                              <FontAwesomeIcon
-                                onClick={() => updateFolder(folderInfo)}
-                                icon={faSave}
-                              />
-                            )}
-                            <FontAwesomeIcon
-                              icon={faTrash}
-                              onClick={() => deleteFolder(document)}
-                            />
-                          </>
-                        )}
-                      </StyledFolderTools>
-                    </StyledFolderList>
-                  )}
-                </StyledDocumentItem>
+                  index={index}
+                  folderBeingEdited={folderBeingEdited}
+                  openFolder={() => openFolder(document, index)}
+                  folder={document}
+                  documents={document}
+                  documentsInFolder={documentsInFolder}
+                  setFolderInfo={info => setFolderInfo(info)}
+                  folderInfo={folderInfo}
+                  removeDocumentFromFolder={id => removeDocumentFromFolder(id)}
+                  setFolderBeingEdited={id => setFolderBeingEdited(id)}
+                  updateFolder={folderInfo => updateFolder(folderInfo)}
+                  deleteFolder={folder => deleteFolder(folder)}
+                  getDocuments={() => getDocuments()}
+                />
               );
             }
             return (
-              <StyledDocumentItem key={document._id}>
-                <Droppable
-                  isCombineEnabled
-                  droppableId={`drop_${document._id}`}
-                >
-                  {(providedDrop, dropSnap) => (
-                    <div
-                      {...providedDrop.droppableProps}
-                      ref={providedDrop.innerRef}
-                    >
-                      <Draggable draggableId={document._id} index={index}>
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            style={getStyle(
-                              provided.draggableProps.style,
-                              snapshot,
-                              dropSnap
-                            )}
-                          >
-                            <StyledDocument
-                              hasLink
-                              isDraggingOver={dropSnap.isDraggingOver}
-                              isDragging={snapshot.isDragging}
-                            >
-                              <Link href={`/editor/${document._id}`} passHref>
-                                <a>
-                                  <FontAwesomeIcon icon={faFile} />
-                                  <div>
-                                    {document.name}
-                                    <StyledDateModified>
-                                      Date Modified:{' '}
-                                      {dayjs(document.dateModified).format(
-                                        'DD/MM/YYYY'
-                                      )}
-                                    </StyledDateModified>
-                                  </div>
-                                </a>
-                              </Link>
-                            </StyledDocument>
-                          </div>
-                        )}
-                      </Draggable>
-                      <div>{providedDrop.placeholder}</div>
-                    </div>
-                  )}
-                </Droppable>
-              </StyledDocumentItem>
+              <DocumentItem
+                documents={documents}
+                key={document._id}
+                document={document}
+                getDocuments={() => getDocuments()}
+              />
             );
           })}
-        </DragDropContext>
+        </DndProvider>
       </StyledDocumentList>
     </>
   );
 };
 
+const FolderItem = ({
+  folder,
+  documents,
+  openFolder,
+  folderBeingEdited,
+  index,
+  documentsInFolder,
+  setFolderInfo,
+  folderInfo,
+  removeDocumentFromFolder,
+  setFolderBeingEdited,
+  updateFolder,
+  deleteFolder,
+  getDocuments,
+  ...rest
+}) => {
+  const { dispatchSite } = useContext(SiteContext);
+  const [dragging, setDragging] = useState(false);
+  const [draggingOver, setDraggingOver] = useState(false);
+
+  const handleDrop = item => {
+    useFetch('addDocumentToFolder', {
+      documentID: item.id,
+      id: folder._id,
+    }).then(res => {
+      getDocuments();
+      dispatchSite({ type: 'SET_LOADING', payload: false });
+    });
+  };
+
+  const [collectedPropsDrop, drop] = useDrop({
+    accept: 'document',
+    options: { id: folder._id },
+    drop: (item, monitor) => handleDrop(item),
+  });
+
+  return (
+    <StyledDocumentItem
+      ref={drop}
+      onClick={() => openFolder(folder, index)}
+      onDragOver={() => setDraggingOver(true)}
+      onDragLeave={() => setDraggingOver(false)}
+      {...rest}
+    >
+      <StyledDocument isDraggingOver={draggingOver} isDragging={dragging}>
+        <div>
+          <FontAwesomeIcon icon={faFolder} />
+          {folder._id === folderBeingEdited ? (
+            <input
+              onChange={e =>
+                setFolderInfo({
+                  ...folderInfo,
+                  name: e.target.value,
+                })
+              }
+              value={folderInfo.name}
+            />
+          ) : (
+            folder.name
+          )}
+        </div>
+      </StyledDocument>
+
+      {folder.folderOpen && (
+        <StyledFolderList>
+          <ul>
+            {documentsInFolder.map(folderDocument => (
+              <li key={folderDocument._id}>
+                <Link href={`/editor/${folderDocument._id}`} passHref>
+                  <a>
+                    <FontAwesomeIcon icon={faFile} />
+                    {folderDocument.name}
+                  </a>
+                </Link>
+                <FontAwesomeIcon
+                  onClick={() => removeDocumentFromFolder(folderDocument._id)}
+                  icon={faFolderMinus}
+                />
+              </li>
+            ))}
+          </ul>
+          <StyledFolderTools>
+            {folder.folderOpen && (
+              <>
+                {folder._id !== folderBeingEdited ? (
+                  <FontAwesomeIcon
+                    onClick={() => setFolderBeingEdited(folder._id)}
+                    icon={faEdit}
+                  />
+                ) : (
+                  <FontAwesomeIcon
+                    onClick={() => updateFolder(folderInfo)}
+                    icon={faSave}
+                  />
+                )}
+                <FontAwesomeIcon
+                  icon={faTrash}
+                  onClick={() => deleteFolder(folder)}
+                />
+              </>
+            )}
+          </StyledFolderTools>
+        </StyledFolderList>
+      )}
+    </StyledDocumentItem>
+  );
+};
+const DocumentItem = ({ document, documents, getDocuments, ...rest }) => {
+  const { dispatchSite } = useContext(SiteContext);
+  const [dragging, setDragging] = useState(false);
+  const [draggingOver, setDraggingOver] = useState(false);
+  const handleDrop = item => {
+    if (document._id !== item.id) {
+      dispatchSite({ type: 'SET_LOADING', payload: true });
+      useFetch('combineDocumentsIntoFolder', {
+        name: 'New folder',
+        documents: [item.id, document._id],
+      }).then(res => {
+        if (res.status === 'saved') {
+          getDocuments();
+          dispatchSite({ type: 'SET_LOADING', payload: false });
+        }
+      });
+    }
+  };
+
+  const [collectedProps, drag] = useDrag({
+    item: { id: document._id, type: 'document' },
+    begin: () => setDragging(true),
+    end: () => {
+      setDragging(false);
+      setDraggingOver(false);
+    },
+  });
+  const [collectedPropsDrop, drop] = useDrop({
+    accept: 'document',
+    options: { id: document._id },
+    drop: (item, monitor) => handleDrop(item),
+    // hover: (item, monitor) => setDraggingOver(true),
+  });
+
+  return (
+    <StyledDocumentItem
+      ref={drag}
+      onDragOver={() => setDraggingOver(true)}
+      onDragLeave={() => setDraggingOver(false)}
+      {...rest}
+    >
+      <div ref={drop}>
+        <StyledDocument
+          hasLink
+          isDraggingOver={draggingOver}
+          isDragging={dragging}
+        >
+          <Link href={`/editor/${document._id}`} passHref>
+            <a>
+              <FontAwesomeIcon icon={faFile} />
+              <div>
+                {document.name}
+                <StyledDateModified>
+                  Date Modified:{' '}
+                  {dayjs(document.dateModified).format('DD/MM/YYYY')}
+                </StyledDateModified>
+              </div>
+            </a>
+          </Link>
+        </StyledDocument>
+      </div>
+    </StyledDocumentItem>
+  );
+};
 export default DocumentList;
