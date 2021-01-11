@@ -3,6 +3,8 @@ import {
   faArrowAltCircleRight,
   faChevronCircleLeft,
   faChevronCircleRight,
+  faCog,
+  faPauseCircle,
   faPlayCircle,
   faSpinner,
   faTimes,
@@ -22,13 +24,13 @@ import { SEO } from '../SEO';
 import { useToast } from '../Toast/ToastProvider';
 import { SiteContext } from '../../context/site';
 import { lighten } from 'polished';
-import next from 'next';
+import { usePopper } from 'react-popper';
+import { TextInput } from '../TextInput';
 
 const StyledEditorWrapper = styled.div`
   display: flex;
   flex-flow: row;
   overflow: hidden;
-
   transition: all 0.6s;
   flex: 1 1;
 `;
@@ -153,20 +155,18 @@ const StyledFullScreenModal = styled.div`
   position: fixed;
   background-color: rgba(0, 0, 0, 0.8);
   display: flex;
-
   flex-flow: column;
 `;
 
 const StyledFullScreenModalImage = styled.div`
-  max-height: calc(100vh - 56px);
+  height: calc(100vh - 56px);
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   img {
+    max-height: 100%;
     max-width: 100%;
-    height: 100%;
-    display: block;
   }
 `;
 
@@ -176,10 +176,24 @@ const StyledFullScreenModalTools = styled.div`
   display: flex;
   justify-content: center;
   padding: 16px;
+  box-sizing: border-box;
   svg {
     margin: 0 8px;
   }
 `;
+
+const StyledPopper = styled.span`
+  background-color: ${({ theme }) =>
+    theme.name === 'dark' ? theme.COLORS.GREY[450] : theme.COLORS.GREY[500]};
+  padding: 16px;
+`;
+
+const StyledLabel = styled.label`
+  width: 100%;
+  display: block;
+  margin-bottom: 8px;
+`;
+
 interface Props {
   documentJSON: any;
 }
@@ -190,19 +204,32 @@ const Editor = ({ documentJSON }: Props) => {
   const [blockRef, setBlockRef] = useState(null);
   const [activeElement, setActiveElement] = useState(null);
   const [activeId, setActiveId] = useState();
-  const [slideShowPlaying, setSlideShowPlaying] = useState(false);
+  const [slideshowPlaying, setSlideshowPlaying] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showFullScreenImageModal, setShowFullScreenImageModal] = useState(
     false
   );
+  const [slideshowSettings, setSlideshowSettings] = useState({
+    speed: { inputValue: 1, value: 1000 },
+  });
   const [imageModal, setImageModal] = useState({
-    show: false,
     selectedImage: '',
     selectedImageName: '',
   });
   const [selectedFile, setSelectedFile] = useState('');
   const [saving, setSaving] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
+  const [showSlideshowSettings, setShowSlideshowSettings] = useState(false);
+  const [popperElement, setPopperElement] = useState(null);
+  const [arrowElement, setArrowElement] = useState(null);
+  const [referenceElement, setReferenceElement] = useState(null);
+  const { styles, attributes } = usePopper(referenceElement, popperElement, {
+    placement: 'top',
+    modifiers: [
+      { name: 'arrow', options: { element: arrowElement } },
+      { name: 'offset', options: { offset: [0, 18] } },
+    ],
+  });
 
   const { siteState } = useContext(SiteContext);
   const editor = useRef();
@@ -279,7 +306,6 @@ const Editor = ({ documentJSON }: Props) => {
     const currentItem = document.attachments.indexOf(
       imageModal.selectedImageName
     );
-    console.log(currentItem, document.attachments[currentItem + 1]);
     const firstItem = document.attachments[0];
     const nextImage = document.attachments[currentItem + 1];
     if (nextImage) {
@@ -338,7 +364,38 @@ const Editor = ({ documentJSON }: Props) => {
     }
   };
 
-  const slideShowPlay = () => {};
+  const handleKeydownSlideshow = e => {
+    const { keyCode } = e;
+    if (showFullScreenImageModal) {
+      switch (keyCode) {
+        case 39:
+          // Right arrow
+          e.preventDefault();
+          nextImage();
+          break;
+        case 37:
+          // Left arrow
+          e.preventDefault();
+          previousImage();
+          break;
+        case 32:
+          // Space
+          e.preventDefault();
+          setSlideshowPlaying(!slideshowPlaying);
+          break;
+        case 27:
+          // Escape
+          e.preventDefault();
+          setShowSlideshowSettings(false);
+          setSlideshowPlaying(false);
+          setShowFullScreenImageModal(false);
+          break;
+        default:
+          return false;
+      }
+    }
+  };
+
   useEffect(() => {
     setDocument(documentJSON);
   }, [documentJSON]);
@@ -360,12 +417,16 @@ const Editor = ({ documentJSON }: Props) => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (slideShowPlaying) {
+      if (slideshowPlaying) {
         nextImage();
       }
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [slideShowPlaying, imageModal]);
+    }, slideshowSettings.speed.value);
+    window.addEventListener('keydown', handleKeydownSlideshow);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('keydown', handleKeydownSlideshow);
+    };
+  }, [slideshowPlaying, imageModal, slideshowSettings]);
   return (
     <>
       <SEO title={`${document.name} | Documents`} />
@@ -386,22 +447,7 @@ const Editor = ({ documentJSON }: Props) => {
           </Button>
         </Modal.Footer>
       </Modal>
-      <StyledImageModal
-        onCloseClick={() => setImageModal({ ...imageModal, show: false })}
-        show={imageModal.show}
-      >
-        <StyledImageModal.Header>
-          <h2>Image</h2>
-        </StyledImageModal.Header>
-        <StyledImageModal.Body>
-          <Button onClick={() => setShowFullScreenImageModal(true)}>
-            Full Screen
-          </Button>
-          <div>
-            <img src={imageModal.selectedImage} />
-          </div>
-        </StyledImageModal.Body>
-      </StyledImageModal>
+
       <StyledEditorWrapper panelOpen={panelOpen}>
         <StyledDocument>
           <StyledDocumentHeader>
@@ -478,9 +524,8 @@ const Editor = ({ documentJSON }: Props) => {
                         <div className="imageWrapper">
                           <img
                             alt="Uploaded Image"
-                            onClick={() =>
+                            onClick={() => {
                               setImageModal({
-                                show: true,
                                 selectedImage:
                                   process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
                                   'images/fe/' +
@@ -488,8 +533,9 @@ const Editor = ({ documentJSON }: Props) => {
                                   '/' +
                                   attachment,
                                 selectedImageName: attachment,
-                              })
-                            }
+                              });
+                              setShowFullScreenImageModal(true);
+                            }}
                             src={
                               process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
                               'images/fe/' +
@@ -523,21 +569,74 @@ const Editor = ({ documentJSON }: Props) => {
                 icon={faTimesCircle}
                 onClick={() => {
                   setShowFullScreenImageModal(false);
-                  setSlideShowPlaying(false);
+                  setSlideshowPlaying(false);
                 }}
               />
+              {!slideshowPlaying && (
+                <>
+                  <FontAwesomeIcon
+                    icon={faArrowAltCircleLeft}
+                    onClick={() => previousImage()}
+                  />
+                  <FontAwesomeIcon
+                    icon={faArrowAltCircleRight}
+                    onClick={() => nextImage()}
+                  />
+                </>
+              )}
               <FontAwesomeIcon
-                icon={faArrowAltCircleLeft}
-                onClick={() => previousImage()}
+                icon={slideshowPlaying ? faPauseCircle : faPlayCircle}
+                onClick={() =>
+                  slideshowPlaying
+                    ? setSlideshowPlaying(false)
+                    : setSlideshowPlaying(true)
+                }
               />
-              <FontAwesomeIcon
-                icon={faArrowAltCircleRight}
-                onClick={() => nextImage()}
-              />
-              <FontAwesomeIcon
-                icon={faPlayCircle}
-                onClick={() => setSlideShowPlaying(true)}
-              />
+              {showSlideshowSettings && (
+                <StyledPopper
+                  ref={setPopperElement}
+                  style={styles.popper}
+                  {...attributes.popper}
+                >
+                  <StyledLabel htmlFor="slideShowSpeed">
+                    Slide show speed in seconds
+                  </StyledLabel>
+                  <TextInput
+                    id="slideShowSpeed"
+                    type="number"
+                    min="1"
+                    style={{ width: '100%' }}
+                    value={slideshowSettings.speed.inputValue}
+                    onChange={e => {
+                      if (e.target.value === '' || e.target.value === '0') {
+                        setSlideshowSettings({
+                          ...slideshowSettings,
+                          speed: {
+                            value: slideshowSettings.speed.value,
+                            inputValue: e.target.value,
+                          },
+                        });
+                      } else {
+                        setSlideshowSettings({
+                          ...slideshowSettings,
+                          speed: {
+                            inputValue: e.target.value,
+                            value: e.target.value * 1000,
+                          },
+                        });
+                      }
+                    }}
+                  />
+                </StyledPopper>
+              )}
+              <span ref={setReferenceElement}>
+                <FontAwesomeIcon
+                  onClick={() =>
+                    setShowSlideshowSettings(!showSlideshowSettings)
+                  }
+                  icon={faCog}
+                />
+              </span>
             </div>
           </StyledFullScreenModalTools>
         </StyledFullScreenModal>
