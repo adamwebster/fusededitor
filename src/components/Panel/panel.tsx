@@ -17,7 +17,7 @@ const StyledPanel = styled.div`
 interface Props {
   children: ReactNode;
 }
-const Panel = ({ children }: Props) => {
-  return <StyledPanel>{children}</StyledPanel>;
+const Panel = ({ children, ...rest }: Props) => {
+  return <StyledPanel {...rest}>{children}</StyledPanel>;
 };
 export default Panel;

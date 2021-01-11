@@ -134,6 +134,10 @@ const StyledSectionHeader = styled.div`
   font-weight: 300;
   text-transform: uppercase;
 `;
+
+const StyledPanel = styled(Panel)`
+  width: ${({ panelOpen }) => (panelOpen ? '300px' : 'fit-content')};
+`;
 interface Props {
   documentJSON: any;
 }
@@ -312,7 +316,7 @@ const Editor = ({ documentJSON }: Props) => {
           </StyledEditor>
         </StyledDocument>
         {!siteState.editorFullscreen && (
-          <Panel>
+          <StyledPanel panelOpen={panelOpen}>
             <FontAwesomeIcon
               onClick={() => setPanelOpen(!panelOpen)}
               icon={panelOpen ? faChevronCircleRight : faChevronCircleLeft}
@@ -381,7 +385,7 @@ const Editor = ({ documentJSON }: Props) => {
                 </StyledAttachmentList>
               </>
             )}
-          </Panel>
+          </StyledPanel>
         )}
       </StyledEditorWrapper>
     </>
