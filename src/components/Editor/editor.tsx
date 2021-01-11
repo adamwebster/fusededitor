@@ -1,7 +1,12 @@
 import {
+  faArrowAltCircleLeft,
+  faArrowAltCircleRight,
   faChevronCircleLeft,
   faChevronCircleRight,
+  faPlayCircle,
   faSpinner,
+  faTimes,
+  faTimesCircle,
   faTrash,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -17,6 +22,7 @@ import { SEO } from '../SEO';
 import { useToast } from '../Toast/ToastProvider';
 import { SiteContext } from '../../context/site';
 import { lighten } from 'polished';
+import next from 'next';
 
 const StyledEditorWrapper = styled.div`
   display: flex;
@@ -138,6 +144,42 @@ const StyledSectionHeader = styled.div`
 const StyledPanel = styled(Panel)`
   width: ${({ panelOpen }) => (panelOpen ? '300px' : 'fit-content')};
 `;
+
+const StyledFullScreenModal = styled.div`
+  width: 100vw;
+  height: 100vh;
+  left: 0;
+  top: 0;
+  position: fixed;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+
+  flex-flow: column;
+`;
+
+const StyledFullScreenModalImage = styled.div`
+  max-height: calc(100vh - 56px);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  img {
+    max-width: 100%;
+    height: 100%;
+    display: block;
+  }
+`;
+
+const StyledFullScreenModalTools = styled.div`
+  height: 40px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+  svg {
+    margin: 0 8px;
+  }
+`;
 interface Props {
   documentJSON: any;
 }
@@ -148,10 +190,15 @@ const Editor = ({ documentJSON }: Props) => {
   const [blockRef, setBlockRef] = useState(null);
   const [activeElement, setActiveElement] = useState(null);
   const [activeId, setActiveId] = useState();
+  const [slideShowPlaying, setSlideShowPlaying] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showFullScreenImageModal, setShowFullScreenImageModal] = useState(
+    false
+  );
   const [imageModal, setImageModal] = useState({
     show: false,
     selectedImage: '',
+    selectedImageName: '',
   });
   const [selectedFile, setSelectedFile] = useState('');
   const [saving, setSaving] = useState(false);
@@ -228,6 +275,70 @@ const Editor = ({ documentJSON }: Props) => {
     }
   };
 
+  const nextImage = () => {
+    const currentItem = document.attachments.indexOf(
+      imageModal.selectedImageName
+    );
+    console.log(currentItem, document.attachments[currentItem + 1]);
+    const firstItem = document.attachments[0];
+    const nextImage = document.attachments[currentItem + 1];
+    if (nextImage) {
+      setImageModal({
+        ...imageModal,
+        selectedImage:
+          process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
+          'images/fe/' +
+          document._id +
+          '/' +
+          nextImage,
+        selectedImageName: nextImage,
+      });
+    } else {
+      setImageModal({
+        ...imageModal,
+        selectedImage:
+          process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
+          'images/fe/' +
+          document._id +
+          '/' +
+          firstItem,
+        selectedImageName: firstItem,
+      });
+    }
+  };
+
+  const previousImage = () => {
+    const currentItem = document.attachments.indexOf(
+      imageModal.selectedImageName
+    );
+    const lastItem = document.attachments[document.attachments.length - 1];
+    const previousImage = document.attachments[currentItem - 1];
+    if (previousImage) {
+      setImageModal({
+        ...imageModal,
+        selectedImage:
+          process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
+          'images/fe/' +
+          document._id +
+          '/' +
+          previousImage,
+        selectedImageName: previousImage,
+      });
+    } else {
+      setImageModal({
+        ...imageModal,
+        selectedImage:
+          process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
+          'images/fe/' +
+          document._id +
+          '/' +
+          lastItem,
+        selectedImageName: lastItem,
+      });
+    }
+  };
+
+  const slideShowPlay = () => {};
   useEffect(() => {
     setDocument(documentJSON);
   }, [documentJSON]);
@@ -245,7 +356,16 @@ const Editor = ({ documentJSON }: Props) => {
     return () => {
       window.removeEventListener('keydown', handleKeydown);
     };
-  }, []);
+  }, [document]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (slideShowPlaying) {
+        nextImage();
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [slideShowPlaying, imageModal]);
   return (
     <>
       <SEO title={`${document.name} | Documents`} />
@@ -274,6 +394,9 @@ const Editor = ({ documentJSON }: Props) => {
           <h2>Image</h2>
         </StyledImageModal.Header>
         <StyledImageModal.Body>
+          <Button onClick={() => setShowFullScreenImageModal(true)}>
+            Full Screen
+          </Button>
           <div>
             <img src={imageModal.selectedImage} />
           </div>
@@ -364,6 +487,7 @@ const Editor = ({ documentJSON }: Props) => {
                                   document._id +
                                   '/' +
                                   attachment,
+                                selectedImageName: attachment,
                               })
                             }
                             src={
@@ -388,6 +512,36 @@ const Editor = ({ documentJSON }: Props) => {
           </StyledPanel>
         )}
       </StyledEditorWrapper>
+      {showFullScreenImageModal && (
+        <StyledFullScreenModal>
+          <StyledFullScreenModalImage>
+            <img src={imageModal.selectedImage} />
+          </StyledFullScreenModalImage>
+          <StyledFullScreenModalTools>
+            <div>
+              <FontAwesomeIcon
+                icon={faTimesCircle}
+                onClick={() => {
+                  setShowFullScreenImageModal(false);
+                  setSlideShowPlaying(false);
+                }}
+              />
+              <FontAwesomeIcon
+                icon={faArrowAltCircleLeft}
+                onClick={() => previousImage()}
+              />
+              <FontAwesomeIcon
+                icon={faArrowAltCircleRight}
+                onClick={() => nextImage()}
+              />
+              <FontAwesomeIcon
+                icon={faPlayCircle}
+                onClick={() => setSlideShowPlaying(true)}
+              />
+            </div>
+          </StyledFullScreenModalTools>
+        </StyledFullScreenModal>
+      )}
     </>
   );
 };
