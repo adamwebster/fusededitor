@@ -36,6 +36,7 @@ const StyledDocumentItem = styled.div`
   }
 `;
 const StyledDocument = styled.div`
+  box-sizing: border-box;
   svg {
     margin-right: 16px;
   }
@@ -59,12 +60,12 @@ const StyledDocument = styled.div`
   ${({ theme, isDraggingOver, isDragging }) =>
     isDraggingOver &&
     css`
-      border: solid 1px ${theme.COLORS.PRIMARY};
+      outline: solid 1px ${theme.COLORS.PRIMARY};
     `};
   ${({ theme, isDraggingOver, isDragging }) =>
     isDragging &&
     css`
-      border: solid 1px ${theme.COLORS.GREY[300]};
+      // outline: solid 1px ${theme.COLORS.GREY[300]};
     `};
 `;
 
@@ -237,7 +238,6 @@ const FolderItem = ({
 }) => {
   const { dispatchSite } = useContext(SiteContext);
   const [dragging, setDragging] = useState(false);
-  const [draggingOver, setDraggingOver] = useState(false);
 
   const handleDrop = item => {
     useFetch('addDocumentToFolder', {
@@ -249,21 +249,22 @@ const FolderItem = ({
     });
   };
 
-  const [collectedPropsDrop, drop] = useDrop({
+  const [{ isActive }, drop] = useDrop({
     accept: 'document',
     options: { id: folder._id },
     drop: (item, monitor) => handleDrop(item),
+    collect: monitor => ({
+      isActive: monitor.canDrop() && monitor.isOver(),
+    }),
   });
 
   return (
     <StyledDocumentItem
       ref={drop}
       onClick={() => openFolder(folder, index)}
-      onDragOver={() => setDraggingOver(true)}
-      onDragLeave={() => setDraggingOver(false)}
       {...rest}
     >
-      <StyledDocument isDraggingOver={draggingOver} isDragging={dragging}>
+      <StyledDocument isDraggingOver={isActive} isDragging={dragging}>
         <div>
           <FontAwesomeIcon icon={faFolder} />
           {folder._id === folderBeingEdited ? (
@@ -329,7 +330,6 @@ const FolderItem = ({
 const DocumentItem = ({ document, documents, getDocuments, ...rest }) => {
   const { dispatchSite } = useContext(SiteContext);
   const [dragging, setDragging] = useState(false);
-  const [draggingOver, setDraggingOver] = useState(false);
   const handleDrop = item => {
     if (document._id !== item.id) {
       dispatchSite({ type: 'SET_LOADING', payload: true });
@@ -350,29 +350,21 @@ const DocumentItem = ({ document, documents, getDocuments, ...rest }) => {
     begin: () => setDragging(true),
     end: () => {
       setDragging(false);
-      setDraggingOver(false);
     },
   });
-  const [collectedPropsDrop, drop] = useDrop({
+  const [{ isActive }, drop] = useDrop({
     accept: 'document',
     options: { id: document._id },
     drop: (item, monitor) => handleDrop(item),
-    // hover: (item, monitor) => setDraggingOver(true),
+    collect: monitor => ({
+      isActive: monitor.canDrop() && monitor.isOver(),
+    }),
   });
 
   return (
-    <StyledDocumentItem
-      ref={drag}
-      onDragOver={() => setDraggingOver(true)}
-      onDragLeave={() => setDraggingOver(false)}
-      {...rest}
-    >
+    <StyledDocumentItem ref={drag} {...rest}>
       <div ref={drop}>
-        <StyledDocument
-          hasLink
-          isDraggingOver={draggingOver}
-          isDragging={dragging}
-        >
+        <StyledDocument hasLink isDraggingOver={isActive} isDragging={dragging}>
           <Link href={`/editor/${document._id}`} passHref>
             <a>
               <FontAwesomeIcon icon={faFile} />
