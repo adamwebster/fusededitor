@@ -16,6 +16,7 @@ import { useRouter } from 'next/router';
 import { SEO } from '../SEO';
 import { useToast } from '../Toast/ToastProvider';
 import { SiteContext } from '../../context/site';
+import { lighten } from 'polished';
 
 const StyledEditorWrapper = styled.div`
   display: flex;
@@ -48,7 +49,10 @@ const StyledEditor = styled.div`
 
 const StyledDocumentHeader = styled.div`
   padding: 16px;
-  background-color: ${({ theme }) => theme.COLORS.GREY[550]};
+  background-color: ${({ theme }) =>
+    theme.name === 'dark'
+      ? theme.COLORS.GREY[550]
+      : lighten(0.05, theme.COLORS.GREY[550])};
   border-bottom: solid 1px ${({ theme }) => theme.COLORS.GREY[450]};
   display: flex;
   h2 {
@@ -287,7 +291,12 @@ const Editor = ({ documentJSON }: Props) => {
             <Button primary disabled={saving} onClick={() => saveDocument()}>
               {saving ? <FontAwesomeIcon icon={faSpinner} spin /> : 'Save'}
             </Button>
-            <Button onClick={() => setShowDeleteModal(true)}>Delete</Button>
+            <Button
+              buttonStyle="danger"
+              onClick={() => setShowDeleteModal(true)}
+            >
+              Delete
+            </Button>
           </StyledDocumentHeader>
           <StyledEditor ref={editor}>
             <MarkdownBlock

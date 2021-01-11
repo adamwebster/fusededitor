@@ -62,10 +62,11 @@ const StyledMarkdownBlock = styled.textarea`
 const StyledMarkdownToolbar = styled.div`
   display: flex;
   height: 24px;
-  background-color: ${({ theme }) => theme.COLORS.GREY[500]};
+  background-color: ${({ theme }) => theme.COLORS.GREY[600]};
   padding: 16px;
   color: ${({ theme }) => theme.COLORS.GREY[200]};
   flex-wrap: wrap;
+  border-bottom: solid 1px ${({ theme }) => theme.COLORS.GREY[450]};
 `;
 
 const StyledMDToolButton = styled.button`

@@ -15,6 +15,7 @@ import { useFetch } from '../../hooks/useFetch';
 import { useRouter } from 'next/router';
 import { UserContext } from '../../context/user';
 import { useAuth } from '../../context/authenticaton';
+import { lighten } from 'polished';
 
 export const GlobalStyles = createGlobalStyle`
   body{
@@ -63,7 +64,10 @@ const StyledLoading = styled.div`
 const StyledSideNav = styled.div`
   width: 300px;
   height: 100%;
-  background-color: ${({ theme }) => theme.COLORS.GREY[550]};
+  background-color: ${({ theme }) =>
+    theme.name === 'dark'
+      ? theme.COLORS.GREY[550]
+      : lighten(0.05, theme.COLORS.GREY[550])};
   box-sizing: border-box;
   display: flex;
   flex-flow: column;

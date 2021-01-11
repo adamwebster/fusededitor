@@ -1,6 +1,6 @@
 import { ButtonHTMLAttributes, ReactElement, ReactNode } from 'react';
 import styled, { css } from 'styled-components';
-import { darken } from 'polished';
+import { darken, lighten } from 'polished';
 
 const buttonBGColor = (theme, buttonStyle) => {
   switch (buttonStyle) {
@@ -16,25 +16,23 @@ const buttonTextColor = (theme, buttonStyle) => {
     case 'danger':
       return theme.COLORS.WHITE;
     default:
-      
-      const value = theme.name === 'dark'
-      ? darken(0.5, theme.COLORS.PRIMARY)
-      : theme.COLORS.GREY[600]
+      const value =
+        theme.name === 'dark'
+          ? darken(0.5, theme.COLORS.PRIMARY)
+          : theme.COLORS.GREY[600];
       return value;
   }
 };
 const StyledButton = styled.button`
-  border: ${({ primary, theme }) =>
-    primary ? 'none' : `solid 1px ${theme.COLORS.PRIMARY}`};
+  border: ${({ primary, theme, buttonStyle }) =>
+    primary ? 'none' : `solid 1px ${buttonBGColor(theme, buttonStyle)}`};
   background-color: ${({ primary, theme, buttonStyle }) =>
     primary ? buttonBGColor(theme, buttonStyle) : 'transparent'};
   border-radius: 2px;
   padding: 8px 16px;
   height: 40px;
-  color: ${({ primary, theme, buttonStyle}) =>
-    primary
-      ? buttonTextColor(theme, buttonStyle)
-      : theme.COLORS.PRIMARY};
+  color: ${({ primary, theme, buttonStyle }) =>
+    primary ? buttonTextColor(theme, buttonStyle) : theme.COLORS.GREY[100]};
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.2s;
@@ -50,7 +48,7 @@ const StyledButton = styled.button`
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: string | ReactElement | ReactNode;
   primary?: boolean;
-  buttonStyle?: string;
+  buttonStyle?: 'danger' | 'default';
 }
 
 const Button = ({ children, primary, buttonStyle, ...rest }: Props) => (
