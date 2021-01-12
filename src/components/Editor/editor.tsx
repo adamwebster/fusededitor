@@ -7,7 +7,6 @@ import {
   faPauseCircle,
   faPlayCircle,
   faSpinner,
-  faTimes,
   faTimesCircle,
   faTrash,
 } from '@fortawesome/free-solid-svg-icons';
@@ -80,22 +79,6 @@ const StyledDocumentTitle = styled.input`
   flex: 1 1;
   -webkit-appearance: none;
   min-width: 100px;
-`;
-
-const StyledBlockGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: 32px;
-  grid-gap: 16px;
-  button {
-    align-items: center;
-    display: flex;
-    justify-content: center;
-    background-color: transparent;
-    border: none;
-    color: inherit;
-    cursor: pointer;
-  }
 `;
 
 const StyledAttachmentList = styled.div`
@@ -220,10 +203,6 @@ interface Props {
 
 const Editor = ({ documentJSON }: Props) => {
   const [document, setDocument] = useState(documentJSON);
-  const [autoFocus, setAutoFocus] = useState(false);
-  const [blockRef, setBlockRef] = useState(null);
-  const [activeElement, setActiveElement] = useState(null);
-  const [activeId, setActiveId] = useState();
   const [slideshowPlaying, setSlideshowPlaying] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showFullScreenImageModal, setShowFullScreenImageModal] = useState(
@@ -240,9 +219,9 @@ const Editor = ({ documentJSON }: Props) => {
   const [saving, setSaving] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const [showSlideshowSettings, setShowSlideshowSettings] = useState(false);
-  const [popperElement, setPopperElement] = useState(null);
+  const [popperElement, setPopperElement] = useState<HTMLSpanElement>(null as unknown as HTMLSpanElement);
   const [arrowElement, setArrowElement] = useState(null);
-  const [referenceElement, setReferenceElement] = useState(null);
+  const [referenceElement, setReferenceElement] = useState<HTMLSpanElement>(null as unknown as HTMLSpanElement);
   const [dragOverUpload, setDragOverUpload] = useState(false);
   const { styles, attributes } = usePopper(referenceElement, popperElement, {
     placement: 'top',
@@ -253,8 +232,8 @@ const Editor = ({ documentJSON }: Props) => {
   });
 
   const { siteState } = useContext(SiteContext);
-  const editor = useRef();
-  const fileUpload = useRef((null as unknown) as HTMLInputElement);
+  const editor = useRef<HTMLDivElement>(null as unknown as HTMLDivElement);
+  const fileUpload = useRef<HTMLInputElement>((null as unknown) as HTMLInputElement);
   const router = useRouter();
   const toast = useToast();
 
@@ -282,7 +261,11 @@ const Editor = ({ documentJSON }: Props) => {
     };
     let fileList: any = [];
     if (type != 'dragAndDrop') {
-      Array.from(fileUpload.current.files).forEach(file => fileList.push(file));
+      if (fileUpload.current.files) {
+        Array.from(fileUpload.current.files).forEach(file =>
+          fileList.push(file)
+        );
+      }
     } else {
       fileList = [...e.dataTransfer.files];
     }
@@ -427,12 +410,7 @@ const Editor = ({ documentJSON }: Props) => {
     setDocument(documentJSON);
   }, [documentJSON]);
 
-  useEffect(() => {
-    if (blockRef && autoFocus) {
-      blockRef.focus();
-    }
-  }, [blockRef]);
-
+  
   useEffect(() => {
     if (process.browser) {
       window.addEventListener('keydown', handleKeydown);
@@ -475,7 +453,7 @@ const Editor = ({ documentJSON }: Props) => {
         </Modal.Footer>
       </Modal>
 
-      <StyledEditorWrapper panelOpen={panelOpen}>
+      <StyledEditorWrapper>
         <StyledDocument>
           <StyledDocumentHeader>
             <StyledDocumentTitle
@@ -501,9 +479,7 @@ const Editor = ({ documentJSON }: Props) => {
           <StyledEditor ref={editor}>
             <MarkdownBlock
               attachments={document.attachments}
-              onFocus={e => {
-                setActiveElement(e.target);
-              }}
+           
               documentID={document._id}
               onChange={e => updateItem(e)}
             >
@@ -634,7 +610,7 @@ const Editor = ({ documentJSON }: Props) => {
               />
               {showSlideshowSettings && (
                 <StyledPopper
-                  ref={setPopperElement}
+                  ref={(ref:HTMLSpanElement) => setPopperElement(ref)}
                   style={styles.popper}
                   {...attributes.popper}
                 >
@@ -648,7 +624,10 @@ const Editor = ({ documentJSON }: Props) => {
                     style={{ width: '100%' }}
                     value={slideshowSettings.speed.inputValue}
                     onChange={(e: { target: { value: number } }) => {
-                      if (e.target.value.toString() === '' || e.target.value.toString() === '0') {
+                      if (
+                        e.target.value.toString() === '' ||
+                        e.target.value.toString() === '0'
+                      ) {
                         setSlideshowSettings({
                           ...slideshowSettings,
                           speed: {
@@ -669,7 +648,7 @@ const Editor = ({ documentJSON }: Props) => {
                   />
                 </StyledPopper>
               )}
-              <span ref={setReferenceElement}>
+              <span ref={(ref:HTMLSpanElement) => setReferenceElement(ref)}>
                 <FontAwesomeIcon
                   onClick={() =>
                     setShowSlideshowSettings(!showSlideshowSettings)
