@@ -3,10 +3,11 @@ import { createContext, ReactElement, useReducer } from 'react';
 const initialState = {
   loading: false,
   editorFullscreen: false,
+  showMobileMenu: false
 };
 
 interface dispatchValuesProps {
-  type?: 'SET_LOADING' | 'SET_EDITOR_FULLSCREEN';
+  type?: 'SET_LOADING' | 'SET_EDITOR_FULLSCREEN' | 'SET_SHOW_MOBILE_MENU';
   payload?: boolean,
 }
 
@@ -30,6 +31,11 @@ const reducer = (state: any, action: any) => {
         ...state,
         editorFullscreen: payload,
       };
+    case 'SET_SHOW_MOBILE_MENU':
+      return {
+        ...state,
+        showMobileMenu: payload,
+      }
     default:
       return state;
   }

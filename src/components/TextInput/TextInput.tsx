@@ -10,6 +10,8 @@ const StyledInput = styled.input`
   box-sizing: border-box;
   color: inherit;
   padding: 0 8px;
+  -webkit-appearance: none;
+  border-radius: 2px;
 `;
 
 const TextInput = ({ ...rest }) => {

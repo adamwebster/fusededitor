@@ -18,17 +18,28 @@ import { useAuth } from '../../context/authenticaton';
 import { lighten } from 'polished';
 
 export const GlobalStyles = createGlobalStyle`
+html{
+  height: 100%;
+
+}
   body{
     font-family: "Helvetica Neue", san-serif;
     font-size: 100%;
     padding: 0;
     margin: 0;
+    min-height: -webkit-fill-available;
     color: ${({ theme }: any) => theme.COLORS.GREY[50]};
     line-height: 150%;
     background-color: ${({ theme }: any) => theme.COLORS.GREY[600]};
+    height: 100%;
+
   }
   a{
     color: ${({ theme }: any) => theme.COLORS.PRIMARY};
+  }
+
+  #__next{
+    height: 100%;
   }
 `;
 
@@ -36,6 +47,9 @@ const StyledContentWrapper = styled.div`
   display: flex;
   flex: 1 1;
   overflow: hidden;
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
 const StyledContent = styled.main`
@@ -43,12 +57,16 @@ const StyledContent = styled.main`
   box-sizing: border-box;
   display: flex;
   overflow: hidden;
+  @media (max-width: 768px) {
+    flex: 1 1;
+  }
 `;
 
 const StyledWrapper = styled.div`
   display: flex;
   flex-flow: column;
-  height: 100vh;
+  height: 100%;
+
 `;
 
 const StyledLoading = styled.div`
@@ -73,6 +91,13 @@ const StyledSideNav = styled.div`
   display: flex;
   flex-flow: column;
   border-right: solid 1px ${({ theme }) => theme.COLORS.GREY[450]};
+  @media (max-width: 768px) {
+    width: 100%;
+    flex-direction: row;
+    height: fit-content;
+    border-bottom: solid 1px ${({ theme }) => theme.COLORS.GREY[450]};
+    border-right:  none;
+  }
 `;
 
 const StyledLogo = styled.h1`
@@ -85,11 +110,18 @@ const StyledLogo = styled.h1`
   a {
     text-decoration: none;
   }
+  @media (max-width: 768px) {
+    border-bottom:none;
+    margin-bottom: 0;
+  }
 `;
 
 const StyledNavFooter = styled.div`
   padding: 16px;
   border-top: solid 1px ${({ theme }) => theme.COLORS.GREY[350]};
+  @media (max-width: 768px) {
+    border-top:none;
+  }
 `;
 
 const StyledNavContent = styled.div`

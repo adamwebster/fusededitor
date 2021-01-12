@@ -54,7 +54,7 @@ const DocumentItem = ({ document, documents, getDocuments, ...rest }: Props) => 
   return (
     <StyledDocumentItem ref={drag} {...rest}>
       <div ref={drop}>
-        <StyledDocument hasLink isDraggingOver={isActive} isDragging={dragging}>
+        <StyledDocument onClick={() => dispatchSite({type: 'SET_SHOW_MOBILE_MENU', payload: false})} hasLink isDraggingOver={isActive} isDragging={dragging}>
           <Link href={`/editor/${document._id}`} passHref>
             <a>
               <FontAwesomeIcon icon={faFile} />

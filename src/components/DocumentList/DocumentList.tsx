@@ -1,17 +1,25 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
 import { useFetch } from '../../hooks/useFetch';
-import { StyledDocumentHeading, StyledDocumentList } from './styles';
+import {
+  StyledDocumentHeading,
+  StyledDocumentList,
+  StyledDocumentMobileItems as StyledDocumentMobileItems,
+} from './styles';
 import FolderItem from './FolderItem';
 import DocumentItem from './DocumentItem';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBars, faCopy } from '@fortawesome/free-solid-svg-icons';
+import { SiteContext } from '../../context/site';
 
 const DocumentList = () => {
   const [documents, setDocuments] = useState<Array<any>>([]);
   const [documentsInFolder, setDocumentsInFolder] = useState([]);
   const [folderInfo, setFolderInfo] = useState({ _id: '', name: '' });
   const [folderBeingEdited, setFolderBeingEdited] = useState('');
-
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const {siteState, dispatchSite} = useContext(SiteContext);
   const getDocuments = () => {
     useFetch('getDocuments', {}).then(resp => {
       const copyOfResp = [...resp];
@@ -22,7 +30,7 @@ const DocumentList = () => {
     });
   };
 
-  const openFolder = (folder:any, index: number) => {
+  const openFolder = (folder: any, index: number) => {
     if (!folder.folderOpen) {
       const copyOfDocuments = [...documents];
       copyOfDocuments.forEach(document => (document.folderOpen = false));
@@ -38,7 +46,7 @@ const DocumentList = () => {
     }
   };
 
-  const updateFolder = (folderInfo:any) => {
+  const updateFolder = (folderInfo: any) => {
     setFolderBeingEdited('');
     useFetch('updateFolder', {
       folderInfo,
@@ -47,7 +55,7 @@ const DocumentList = () => {
     });
   };
 
-  const deleteFolder = (folderInfo:any) => {
+  const deleteFolder = (folderInfo: any) => {
     useFetch('deleteFolder', {
       folderInfo,
     }).then(resp => {
@@ -55,7 +63,7 @@ const DocumentList = () => {
     });
   };
 
-  const removeDocumentFromFolder = (documentID:any) => {
+  const removeDocumentFromFolder = (documentID: any) => {
     useFetch('removeDocumentFromFolder', {
       documentID,
     }).then(() => {
@@ -73,8 +81,11 @@ const DocumentList = () => {
   }, []);
   return (
     <>
-      <StyledDocumentHeading>Documents</StyledDocumentHeading>
-      <StyledDocumentList>
+      <StyledDocumentMobileItems>
+        <FontAwesomeIcon onClick={() => dispatchSite({type: 'SET_SHOW_MOBILE_MENU', payload: !siteState.showMobileMenu})} icon={faBars} />
+      </StyledDocumentMobileItems>
+      <StyledDocumentList showMobileMenu={siteState.showMobileMenu}>
+        <StyledDocumentHeading>Documents</StyledDocumentHeading>
         <DndProvider backend={HTML5Backend}>
           {documents.map((document, index) => {
             if (document.type === 'folder') {
@@ -87,12 +98,14 @@ const DocumentList = () => {
                   folder={document}
                   documents={document}
                   documentsInFolder={documentsInFolder}
-                  setFolderInfo={(info:any) => setFolderInfo(info)}
+                  setFolderInfo={(info: any) => setFolderInfo(info)}
                   folderInfo={folderInfo}
-                  removeDocumentFromFolder={(id:any) => removeDocumentFromFolder(id)}
-                  setFolderBeingEdited={(id:any) => setFolderBeingEdited(id)}
-                  updateFolder={(folderInfo:any) => updateFolder(folderInfo)}
-                  deleteFolder={(folder:any) => deleteFolder(folder)}
+                  removeDocumentFromFolder={(id: any) =>
+                    removeDocumentFromFolder(id)
+                  }
+                  setFolderBeingEdited={(id: any) => setFolderBeingEdited(id)}
+                  updateFolder={(folderInfo: any) => updateFolder(folderInfo)}
+                  deleteFolder={(folder: any) => deleteFolder(folder)}
                   getDocuments={() => getDocuments()}
                 />
               );

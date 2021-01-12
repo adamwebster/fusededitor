@@ -1,19 +1,40 @@
+import { lighten } from 'polished';
 import styled, { css } from 'styled-components';
 
-export const StyledDocumentList = styled.div` 
+interface StyledDocumentListProps {
+  showMobileMenu?: boolean,
+}
+export const StyledDocumentList = styled.div<StyledDocumentListProps>` 
   overflow: auto;
+  @media (max-width: 768px) {
+    display:${({ showMobileMenu }) => showMobileMenu ? 'block' : 'none'};
+  position: absolute;
+  left:0;
+  background-color: ${({ theme }) =>
+    theme.name === 'dark'
+      ? theme.COLORS.GREY[550]
+      : lighten(0.05, theme.COLORS.GREY[550])};
+        border-top: solid 1px ${({ theme }) => theme.COLORS.GREY[350]};
+        border-bottom: solid 1px ${({ theme }) => theme.COLORS.GREY[350]};
+
+        height: 296px;
+    top: 64px;
+    width: 100%;
+  }
+
 `;
 
 export const StyledDocumentItem = styled.div`
   border-bottom: solid 1px ${({ theme }) => theme.COLORS.GREY[350]};
   &:last-child {
     border-bottom: none;
+    
   } 
 `;
 
 interface StyledDocumentProp {
-  hasLink?:boolean;
-  isDraggingOver?:boolean;
+  hasLink?: boolean;
+  isDraggingOver?: boolean;
   isDragging?: boolean;
 
 }
@@ -33,8 +54,8 @@ export const StyledDocument = styled.div<StyledDocumentProp>`
     display: flex;
     align-items: center;
     ${({ hasLink }) =>
-      hasLink &&
-      css`
+    hasLink &&
+    css`
         padding: 16px;
       `}
   }
@@ -86,6 +107,9 @@ export const StyledDocumentHeading = styled.h2`
   padding: 0 16px 16px 16px;
   font-weight: 200;
   margin: 0;
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
 `;
 
 export const StyledFolderTools = styled.div`
@@ -95,3 +119,14 @@ export const StyledFolderTools = styled.div`
     margin-right: 16px;
   }
 `;
+
+export const StyledDocumentMobileItems = styled.div`
+  display: none;
+  @media (max-width: 768px) {
+    display: flex;
+justify-content: flex-end;
+align-items: center;
+flex: 1 1;
+
+  }
+`

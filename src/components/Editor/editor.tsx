@@ -135,7 +135,7 @@ const StyledPanel = styled(Panel)`
 
 const StyledFullScreenModal = styled.div`
   width: 100vw;
-  height: 100vh;
+  height: 100%;
   left: 0;
   top: 0;
   position: fixed;
@@ -145,7 +145,7 @@ const StyledFullScreenModal = styled.div`
 `;
 
 const StyledFullScreenModalImage = styled.div`
-  height: calc(100vh - 56px);
+  height: calc(100% - 56px);
   width: 100%;
   display: flex;
   justify-content: center;
