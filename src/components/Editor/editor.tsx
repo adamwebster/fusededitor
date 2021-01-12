@@ -1,7 +1,14 @@
 import {
+  faArrowAltCircleLeft,
+  faArrowAltCircleRight,
   faChevronCircleLeft,
   faChevronCircleRight,
+  faCog,
+  faPauseCircle,
+  faPlayCircle,
   faSpinner,
+  faTimes,
+  faTimesCircle,
   faTrash,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -16,12 +23,14 @@ import { useRouter } from 'next/router';
 import { SEO } from '../SEO';
 import { useToast } from '../Toast/ToastProvider';
 import { SiteContext } from '../../context/site';
+import { lighten } from 'polished';
+import { usePopper } from 'react-popper';
+import { TextInput } from '../TextInput';
 
 const StyledEditorWrapper = styled.div`
   display: flex;
   flex-flow: row;
   overflow: hidden;
-
   transition: all 0.6s;
   flex: 1 1;
 `;
@@ -48,7 +57,10 @@ const StyledEditor = styled.div`
 
 const StyledDocumentHeader = styled.div`
   padding: 16px;
-  background-color: ${({ theme }) => theme.COLORS.GREY[550]};
+  background-color: ${({ theme }) =>
+    theme.name === 'dark'
+      ? theme.COLORS.GREY[550]
+      : lighten(0.05, theme.COLORS.GREY[550])};
   border-bottom: solid 1px ${({ theme }) => theme.COLORS.GREY[450]};
   display: flex;
   h2 {
@@ -130,6 +142,70 @@ const StyledSectionHeader = styled.div`
   font-weight: 300;
   text-transform: uppercase;
 `;
+
+const StyledPanel = styled(Panel)`
+  width: ${({ panelOpen }) => (panelOpen ? '300px' : 'fit-content')};
+`;
+
+const StyledFullScreenModal = styled.div`
+  width: 100vw;
+  height: 100vh;
+  left: 0;
+  top: 0;
+  position: fixed;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-flow: column;
+`;
+
+const StyledFullScreenModalImage = styled.div`
+  height: calc(100vh - 56px);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  img {
+    max-height: 100%;
+    max-width: 100%;
+  }
+`;
+
+const StyledFullScreenModalTools = styled.div`
+  height: 40px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+  svg {
+    margin: 0 8px;
+  }
+`;
+
+const StyledPopper = styled.span`
+  background-color: ${({ theme }) =>
+    theme.name === 'dark' ? theme.COLORS.GREY[450] : theme.COLORS.GREY[500]};
+  padding: 16px;
+`;
+
+const StyledLabel = styled.label`
+  width: 100%;
+  display: block;
+  margin-bottom: 8px;
+`;
+
+const StyledDragAndDropUpload = styled.div`
+  padding: 16px;
+  flex: 1 1;
+  border: dashed 1px
+    ${({ theme, isDraggingOver }) =>
+      isDraggingOver ? theme.COLORS.PRIMARY : theme.COLORS.GREY[350]};
+  display: flex;
+  justify-content: center;
+  color: ${({ theme }) => theme.COLORS.GREY[350]};
+  text-transform: uppercase;
+`;
+
 interface Props {
   documentJSON: any;
 }
@@ -140,14 +216,33 @@ const Editor = ({ documentJSON }: Props) => {
   const [blockRef, setBlockRef] = useState(null);
   const [activeElement, setActiveElement] = useState(null);
   const [activeId, setActiveId] = useState();
+  const [slideshowPlaying, setSlideshowPlaying] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showFullScreenImageModal, setShowFullScreenImageModal] = useState(
+    false
+  );
+  const [slideshowSettings, setSlideshowSettings] = useState({
+    speed: { inputValue: 1, value: 1000 },
+  });
   const [imageModal, setImageModal] = useState({
-    show: false,
     selectedImage: '',
+    selectedImageName: '',
   });
   const [selectedFile, setSelectedFile] = useState('');
   const [saving, setSaving] = useState(false);
-  const [panelOpen, setPanelOpen] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(true);
+  const [showSlideshowSettings, setShowSlideshowSettings] = useState(false);
+  const [popperElement, setPopperElement] = useState(null);
+  const [arrowElement, setArrowElement] = useState(null);
+  const [referenceElement, setReferenceElement] = useState(null);
+  const [dragOverUpload, setDragOverUpload] = useState(false);
+  const { styles, attributes } = usePopper(referenceElement, popperElement, {
+    placement: 'top',
+    modifiers: [
+      { name: 'arrow', options: { element: arrowElement } },
+      { name: 'offset', options: { offset: [0, 18] } },
+    ],
+  });
 
   const { siteState } = useContext(SiteContext);
   const editor = useRef();
@@ -172,16 +267,22 @@ const Editor = ({ documentJSON }: Props) => {
     });
   };
 
-  const uploadImage = e => {
+  const uploadImages = (e, type = 'dragAndDrop') => {
     e.preventDefault();
     const obj = {
       _id: document._id,
     };
-
+    let fileList = [];
+    if (type != 'dragAndDrop') {
+      Array.from(fileUpload.current.files).forEach(file => fileList.push(file));
+    } else {
+      fileList = [...e.dataTransfer.files];
+    }
     const formData = new FormData();
-    formData.append('file', fileUpload.current.files[0]);
+    fileList.map(file => formData.append('image', file));
     formData.append('documentInfo', JSON.stringify(obj));
-    useFetchFileUpload('uploadImage', formData).then(resp => {
+    console.log(formData);
+    useFetchFileUpload('uploadMultipleImages', formData).then(resp => {
       if (resp.attachments) {
         setDocument({ ...document, attachments: resp.attachments });
       }
@@ -220,6 +321,100 @@ const Editor = ({ documentJSON }: Props) => {
     }
   };
 
+  const nextImage = () => {
+    const currentItem = document.attachments.indexOf(
+      imageModal.selectedImageName
+    );
+    const firstItem = document.attachments[0];
+    const nextImage = document.attachments[currentItem + 1];
+    if (nextImage) {
+      setImageModal({
+        ...imageModal,
+        selectedImage:
+          process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
+          'images/fe/' +
+          document._id +
+          '/' +
+          nextImage,
+        selectedImageName: nextImage,
+      });
+    } else {
+      setImageModal({
+        ...imageModal,
+        selectedImage:
+          process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
+          'images/fe/' +
+          document._id +
+          '/' +
+          firstItem,
+        selectedImageName: firstItem,
+      });
+    }
+  };
+
+  const previousImage = () => {
+    const currentItem = document.attachments.indexOf(
+      imageModal.selectedImageName
+    );
+    const lastItem = document.attachments[document.attachments.length - 1];
+    const previousImage = document.attachments[currentItem - 1];
+    if (previousImage) {
+      setImageModal({
+        ...imageModal,
+        selectedImage:
+          process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
+          'images/fe/' +
+          document._id +
+          '/' +
+          previousImage,
+        selectedImageName: previousImage,
+      });
+    } else {
+      setImageModal({
+        ...imageModal,
+        selectedImage:
+          process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
+          'images/fe/' +
+          document._id +
+          '/' +
+          lastItem,
+        selectedImageName: lastItem,
+      });
+    }
+  };
+
+  const handleKeydownSlideshow = e => {
+    const { keyCode } = e;
+    if (showFullScreenImageModal) {
+      switch (keyCode) {
+        case 39:
+          // Right arrow
+          e.preventDefault();
+          nextImage();
+          break;
+        case 37:
+          // Left arrow
+          e.preventDefault();
+          previousImage();
+          break;
+        case 32:
+          // Space
+          e.preventDefault();
+          setSlideshowPlaying(!slideshowPlaying);
+          break;
+        case 27:
+          // Escape
+          e.preventDefault();
+          setShowSlideshowSettings(false);
+          setSlideshowPlaying(false);
+          setShowFullScreenImageModal(false);
+          break;
+        default:
+          return false;
+      }
+    }
+  };
+
   useEffect(() => {
     setDocument(documentJSON);
   }, [documentJSON]);
@@ -237,7 +432,20 @@ const Editor = ({ documentJSON }: Props) => {
     return () => {
       window.removeEventListener('keydown', handleKeydown);
     };
-  }, []);
+  }, [document]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (slideshowPlaying) {
+        nextImage();
+      }
+    }, slideshowSettings.speed.value);
+    window.addEventListener('keydown', handleKeydownSlideshow);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('keydown', handleKeydownSlideshow);
+    };
+  }, [slideshowPlaying, imageModal, slideshowSettings]);
   return (
     <>
       <SEO title={`${document.name} | Documents`} />
@@ -258,19 +466,7 @@ const Editor = ({ documentJSON }: Props) => {
           </Button>
         </Modal.Footer>
       </Modal>
-      <StyledImageModal
-        onCloseClick={() => setImageModal({ ...imageModal, show: false })}
-        show={imageModal.show}
-      >
-        <StyledImageModal.Header>
-          <h2>Image</h2>
-        </StyledImageModal.Header>
-        <StyledImageModal.Body>
-          <div>
-            <img src={imageModal.selectedImage} />
-          </div>
-        </StyledImageModal.Body>
-      </StyledImageModal>
+
       <StyledEditorWrapper panelOpen={panelOpen}>
         <StyledDocument>
           <StyledDocumentHeader>
@@ -287,7 +483,12 @@ const Editor = ({ documentJSON }: Props) => {
             <Button primary disabled={saving} onClick={() => saveDocument()}>
               {saving ? <FontAwesomeIcon icon={faSpinner} spin /> : 'Save'}
             </Button>
-            <Button onClick={() => setShowDeleteModal(true)}>Delete</Button>
+            <Button
+              buttonStyle="danger"
+              onClick={() => setShowDeleteModal(true)}
+            >
+              Delete
+            </Button>
           </StyledDocumentHeader>
           <StyledEditor ref={editor}>
             <MarkdownBlock
@@ -303,7 +504,7 @@ const Editor = ({ documentJSON }: Props) => {
           </StyledEditor>
         </StyledDocument>
         {!siteState.editorFullscreen && (
-          <Panel>
+          <StyledPanel panelOpen={panelOpen}>
             <FontAwesomeIcon
               onClick={() => setPanelOpen(!panelOpen)}
               icon={panelOpen ? faChevronCircleRight : faChevronCircleLeft}
@@ -311,20 +512,33 @@ const Editor = ({ documentJSON }: Props) => {
             {panelOpen && (
               <>
                 <StyledSectionHeader>Attachments</StyledSectionHeader>
+                <StyledDragAndDropUpload
+                  onDragOver={e => setDragOverUpload(true)}
+                  onDrop={e => {
+                    uploadImages(e);
+                    setDragOverUpload(false);
+                  }}
+                  isDraggingOver={dragOverUpload}
+                  onDragLeave={() => setDragOverUpload(false)}
+                >
+                  Drop Files Here...
+                </StyledDragAndDropUpload>
+                <p>Or</p>
                 {!selectedFile && (
                   <Button onClick={() => fileUpload.current.click()}>
-                    Choose File
+                    Choose Files
                   </Button>
                 )}
                 <form
                   method="post"
                   encType="multipart/form-data"
-                  onSubmit={e => uploadImage(e)}
+                  onSubmit={e => uploadImages(e, 'manual')}
                 >
                   <input
                     style={{ display: 'none' }}
                     ref={fileUpload}
                     type="file"
+                    multiple
                     name="file"
                     onChange={e => setSelectedFile(e.target.value)}
                   />
@@ -342,17 +556,18 @@ const Editor = ({ documentJSON }: Props) => {
                         <div className="imageWrapper">
                           <img
                             alt="Uploaded Image"
-                            onClick={() =>
+                            onClick={() => {
                               setImageModal({
-                                show: true,
                                 selectedImage:
                                   process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
                                   'images/fe/' +
                                   document._id +
                                   '/' +
                                   attachment,
-                              })
-                            }
+                                selectedImageName: attachment,
+                              });
+                              setShowFullScreenImageModal(true);
+                            }}
                             src={
                               process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
                               'images/fe/' +
@@ -372,9 +587,92 @@ const Editor = ({ documentJSON }: Props) => {
                 </StyledAttachmentList>
               </>
             )}
-          </Panel>
+          </StyledPanel>
         )}
       </StyledEditorWrapper>
+      {showFullScreenImageModal && (
+        <StyledFullScreenModal>
+          <StyledFullScreenModalImage>
+            <img src={imageModal.selectedImage} />
+          </StyledFullScreenModalImage>
+          <StyledFullScreenModalTools>
+            <div>
+              <FontAwesomeIcon
+                icon={faTimesCircle}
+                onClick={() => {
+                  setShowFullScreenImageModal(false);
+                  setSlideshowPlaying(false);
+                }}
+              />
+              {!slideshowPlaying && (
+                <>
+                  <FontAwesomeIcon
+                    icon={faArrowAltCircleLeft}
+                    onClick={() => previousImage()}
+                  />
+                  <FontAwesomeIcon
+                    icon={faArrowAltCircleRight}
+                    onClick={() => nextImage()}
+                  />
+                </>
+              )}
+              <FontAwesomeIcon
+                icon={slideshowPlaying ? faPauseCircle : faPlayCircle}
+                onClick={() =>
+                  slideshowPlaying
+                    ? setSlideshowPlaying(false)
+                    : setSlideshowPlaying(true)
+                }
+              />
+              {showSlideshowSettings && (
+                <StyledPopper
+                  ref={setPopperElement}
+                  style={styles.popper}
+                  {...attributes.popper}
+                >
+                  <StyledLabel htmlFor="slideShowSpeed">
+                    Slide show speed in seconds
+                  </StyledLabel>
+                  <TextInput
+                    id="slideShowSpeed"
+                    type="number"
+                    min="1"
+                    style={{ width: '100%' }}
+                    value={slideshowSettings.speed.inputValue}
+                    onChange={e => {
+                      if (e.target.value === '' || e.target.value === '0') {
+                        setSlideshowSettings({
+                          ...slideshowSettings,
+                          speed: {
+                            value: slideshowSettings.speed.value,
+                            inputValue: e.target.value,
+                          },
+                        });
+                      } else {
+                        setSlideshowSettings({
+                          ...slideshowSettings,
+                          speed: {
+                            inputValue: e.target.value,
+                            value: e.target.value * 1000,
+                          },
+                        });
+                      }
+                    }}
+                  />
+                </StyledPopper>
+              )}
+              <span ref={setReferenceElement}>
+                <FontAwesomeIcon
+                  onClick={() =>
+                    setShowSlideshowSettings(!showSlideshowSettings)
+                  }
+                  icon={faCog}
+                />
+              </span>
+            </div>
+          </StyledFullScreenModalTools>
+        </StyledFullScreenModal>
+      )}
     </>
   );
 };
