@@ -230,7 +230,7 @@ const Editor = ({ documentJSON }: Props) => {
   });
   const [selectedFile, setSelectedFile] = useState('');
   const [saving, setSaving] = useState(false);
-  const [panelOpen, setPanelOpen] = useState(true);
+  const [panelOpen, setPanelOpen] = useState(false);
   const [showSlideshowSettings, setShowSlideshowSettings] = useState(false);
   const [popperElement, setPopperElement] = useState(null);
   const [arrowElement, setArrowElement] = useState(null);
