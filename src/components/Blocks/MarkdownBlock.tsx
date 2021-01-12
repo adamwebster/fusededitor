@@ -143,8 +143,8 @@ const StyledToolbarSpace = styled.div`
 
 interface Props extends HTMLAttributes<HTMLParagraphElement> {
   children: string;
-  onKeyDown?: (e) => void;
-  onChange?: (e) => void;
+  onKeyDown?: (e:any) => void;
+  onChange?: (e:any) => void;
 
   attachments?: any;
   documentID: string;
@@ -185,7 +185,7 @@ const MarkdownBlock = forwardRef(
       }
     );
 
-    const handleKeyDown = e => {
+    const handleKeyDown = (e:any) => {
       if (onKeyDown) {
         onKeyDown(e);
       }
@@ -198,7 +198,7 @@ const MarkdownBlock = forwardRef(
       };
     }, []);
 
-    const handleChange = e => {
+    const handleChange = (e:any) => {
       setContent(e.target.value);
       wordCounter();
       if (onChange) {
@@ -206,7 +206,7 @@ const MarkdownBlock = forwardRef(
       }
     };
 
-    const wrapText = (openTag, closeTag) => {
+    const wrapText = (openTag: string, closeTag: string) => {
       const textarea = textareaRef.current;
       const len = textarea.value.length;
       const start = textarea.selectionStart;
@@ -232,7 +232,7 @@ const MarkdownBlock = forwardRef(
       textarea.setSelectionRange(end + openTag.length, end + openTag.length);
     };
 
-    const addImageToContent = url => {
+    const addImageToContent = (url:string) => {
       const textarea = textareaRef.current;
       const len = textarea.value.length;
       const start = textarea.selectionStart;
@@ -259,7 +259,7 @@ const MarkdownBlock = forwardRef(
       setShowAttachmentModal(false);
     };
 
-    const WrapTextHeaders = (openTag, closeTag) => {
+    const WrapTextHeaders = (openTag:string, closeTag:string) => {
       wrapText(openTag, closeTag);
       setHeadingsOpen(false);
     };
@@ -288,7 +288,7 @@ const MarkdownBlock = forwardRef(
       return false;
     };
 
-    const handleBodyClick = e => {
+    const handleBodyClick = (e:any) => {
       const childOfButton = checkIfParent(e.target, referenceElementHeadings);
       if (popperElementHeadings) {
         if (!childOfButton && e.target !== referenceElementHeadings) {
@@ -297,7 +297,7 @@ const MarkdownBlock = forwardRef(
       }
     };
 
-    const isWord = (str) => {
+    const isWord = (str:string) => {
       let alphaNumericFound = false;
       for (let i = 0; i < str.length; i++) {
         let code = str.charCodeAt(i);
@@ -355,7 +355,7 @@ const MarkdownBlock = forwardRef(
           </Modal.Header>
           <Modal.Body>
             <StyledAttachmentGrid>
-              {attachments.map(attachment => (
+              {attachments.map((attachment:any) => (
                 <div key={attachment} className="imageWrapper">
                   <img
                     onClick={() =>
@@ -500,7 +500,6 @@ const MarkdownBlock = forwardRef(
           <StyledMarkdownBlock
             aria-label="Markdown Editor"
             ref={textareaRef}
-            placeHolder="Start typing"
             onChange={e => handleChange(e)}
             onKeyDown={e => handleKeyDown(e)}
             {...rest}

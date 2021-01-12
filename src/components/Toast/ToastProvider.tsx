@@ -114,22 +114,22 @@ export const ToastProvider = ({
 
 export const useToast = (): {
   addInfo: (
-    title: string,
+    title: string | null,
     content?: string | undefined,
     options?: Options | undefined
   ) => void;
   addSuccess: (
-    title: string,
+    title: string | null,
     content?: string | undefined,
     options?: Options | undefined
   ) => void;
   addWarning: (
-    title: string,
+    title: string | null,
     content?: string | undefined,
     options?: Options | undefined
   ) => void;
   addDanger: (
-    title: string,
+    title: string | null,
     content?: string | undefined,
     options?: Options | undefined
   ) => void;

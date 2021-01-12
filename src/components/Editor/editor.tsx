@@ -143,8 +143,11 @@ const StyledSectionHeader = styled.div`
   text-transform: uppercase;
 `;
 
+interface SPProps {
+  panelOpen: boolean;
+}
 const StyledPanel = styled(Panel)`
-  width: ${({ panelOpen }) => (panelOpen ? '300px' : 'fit-content')};
+  width: ${({ panelOpen }: SPProps) => (panelOpen ? '300px' : 'fit-content')};
 `;
 
 const StyledFullScreenModal = styled.div`
@@ -194,11 +197,16 @@ const StyledLabel = styled.label`
   margin-bottom: 8px;
 `;
 
+interface StyledDragAndDropUploadProps {
+  isDraggingOver: boolean;
+  theme: any;
+}
+
 const StyledDragAndDropUpload = styled.div`
   padding: 16px;
   flex: 1 1;
   border: dashed 1px
-    ${({ theme, isDraggingOver }) =>
+    ${({ theme, isDraggingOver }: StyledDragAndDropUploadProps) =>
       isDraggingOver ? theme.COLORS.PRIMARY : theme.COLORS.GREY[350]};
   display: flex;
   justify-content: center;
@@ -246,7 +254,7 @@ const Editor = ({ documentJSON }: Props) => {
 
   const { siteState } = useContext(SiteContext);
   const editor = useRef();
-  const fileUpload = useRef(null as HTMLInputElement);
+  const fileUpload = useRef((null as unknown) as HTMLInputElement);
   const router = useRouter();
   const toast = useToast();
 
@@ -267,19 +275,19 @@ const Editor = ({ documentJSON }: Props) => {
     });
   };
 
-  const uploadImages = (e, type = 'dragAndDrop') => {
+  const uploadImages = (e: any, type = 'dragAndDrop') => {
     e.preventDefault();
     const obj = {
       _id: document._id,
     };
-    let fileList = [];
+    let fileList: any = [];
     if (type != 'dragAndDrop') {
       Array.from(fileUpload.current.files).forEach(file => fileList.push(file));
     } else {
       fileList = [...e.dataTransfer.files];
     }
     const formData = new FormData();
-    fileList.map(file => formData.append('image', file));
+    fileList.map((file: any) => formData.append('image', file));
     formData.append('documentInfo', JSON.stringify(obj));
     console.log(formData);
     useFetchFileUpload('uploadMultipleImages', formData).then(resp => {
@@ -295,7 +303,7 @@ const Editor = ({ documentJSON }: Props) => {
     });
   };
 
-  const removeImage = (image, documentID) => {
+  const removeImage = (image: string, documentID: string) => {
     useFetch('removeImage', { image, documentID }).then(resp => {
       setDocument({ ...document, attachments: resp.attachments });
     });
@@ -309,7 +317,7 @@ const Editor = ({ documentJSON }: Props) => {
     router.push('/');
   };
 
-  const handleKeydown = e => {
+  const handleKeydown = (e: any) => {
     const { keyCode, metaKey, ctrlKey } = e;
     switch (keyCode) {
       case 83:
@@ -383,7 +391,7 @@ const Editor = ({ documentJSON }: Props) => {
     }
   };
 
-  const handleKeydownSlideshow = e => {
+  const handleKeydownSlideshow = (e: any) => {
     const { keyCode } = e;
     if (showFullScreenImageModal) {
       switch (keyCode) {
@@ -550,7 +558,7 @@ const Editor = ({ documentJSON }: Props) => {
                   )}
                 </form>
                 <StyledAttachmentList>
-                  {document.attachments.map(attachment => {
+                  {document.attachments.map((attachment: any) => {
                     return (
                       <StyledAttachment key={attachment}>
                         <div className="imageWrapper">
@@ -639,8 +647,8 @@ const Editor = ({ documentJSON }: Props) => {
                     min="1"
                     style={{ width: '100%' }}
                     value={slideshowSettings.speed.inputValue}
-                    onChange={e => {
-                      if (e.target.value === '' || e.target.value === '0') {
+                    onChange={(e: { target: { value: number } }) => {
+                      if (e.target.value.toString() === '' || e.target.value.toString() === '0') {
                         setSlideshowSettings({
                           ...slideshowSettings,
                           speed: {
