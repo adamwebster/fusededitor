@@ -63,6 +63,7 @@ const StyledLoading = styled.div`
 
 const StyledSideNav = styled.div`
   width: 300px;
+  min-width:300px;
   height: 100%;
   background-color: ${({ theme }) =>
     theme.name === 'dark'
@@ -93,6 +94,9 @@ const StyledNavFooter = styled.div`
 
 const StyledNavContent = styled.div`
   flex: 1 1;
+  display:flex;
+  flex-flow: column;
+  overflow: hidden;
 `;
 
 const StyledUserInfo = styled.div`

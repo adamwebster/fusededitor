@@ -75,7 +75,6 @@ const DocumentList = () => {
     <>
       <StyledDocumentHeading>Documents</StyledDocumentHeading>
       <StyledDocumentList>
-        {' '}
         <DndProvider backend={HTML5Backend}>
           {documents.map((document, index) => {
             if (document.type === 'folder') {

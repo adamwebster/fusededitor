@@ -1,6 +1,8 @@
 import styled, { css } from 'styled-components';
 
-export const StyledDocumentList = styled.div``;
+export const StyledDocumentList = styled.div` 
+  overflow: auto;
+`;
 
 export const StyledDocumentItem = styled.div`
   border-bottom: solid 1px ${({ theme }) => theme.COLORS.GREY[350]};
