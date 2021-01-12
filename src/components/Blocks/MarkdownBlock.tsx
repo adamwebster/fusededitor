@@ -69,6 +69,17 @@ const StyledMarkdownToolbar = styled.div`
   border-bottom: solid 1px ${({ theme }) => theme.COLORS.GREY[450]};
 `;
 
+const StyledMarkdownInfo = styled.div`
+  display: flex;
+  height: 24px;
+  background-color: ${({ theme }) => theme.COLORS.GREY[600]};
+  padding: 16px;
+  color: ${({ theme }) => theme.COLORS.GREY[200]};
+  flex-wrap: wrap;
+  border-top: solid 1px ${({ theme }) => theme.COLORS.GREY[450]};
+`;
+
+
 const StyledMDToolButton = styled.button`
   background-color: transparent;
   border: none;
@@ -153,6 +164,7 @@ const MarkdownBlock = forwardRef(
     const [preview, setPreview] = useState(false);
     const [headingsOpen, setHeadingsOpen] = useState(false);
     const [showAttachmentModal, setShowAttachmentModal] = useState(false);
+    const [wordCount, setWordCount] = useState(0);
     const { dispatchSite, siteState } = useContext(SiteContext);
     const textareaRef = useRef<HTMLTextAreaElement>(
       (ref as unknown) as HTMLTextAreaElement
@@ -188,6 +200,7 @@ const MarkdownBlock = forwardRef(
 
     const handleChange = e => {
       setContent(e.target.value);
+      wordCounter();
       if (onChange) {
         onChange(e);
       }
@@ -283,6 +296,33 @@ const MarkdownBlock = forwardRef(
         }
       }
     };
+
+    const isWord = (str) => {
+      let alphaNumericFound = false;
+      for (let i = 0; i < str.length; i++) {
+        let code = str.charCodeAt(i);
+        if ((code > 47 && code < 58) || // numeric (0-9)
+            (code > 64 && code < 91) || // upper alpha (A-Z)
+            (code > 96 && code < 123)) { // lower alpha (a-z)
+          alphaNumericFound = true;
+          return alphaNumericFound;
+        }
+      }
+      return alphaNumericFound;
+    }
+
+    const wordCounter = () => {
+      let text = textareaRef.current.value.split(' ');
+      console.log(textareaRef)
+      let wordCountNumber = 0;
+      for (var i = 0; i < text.length; i++) {
+        if (text[i] !== ' ' && isWord(text[i])) {
+          wordCountNumber++;
+        }
+      }
+      setWordCount(wordCountNumber);
+    };
+
     useEffect(() => {
       if (process.browser) {
         window.addEventListener('keydown', handleWindowKeydown);
@@ -300,6 +340,10 @@ const MarkdownBlock = forwardRef(
         setContent('');
       }
     }, [children]);
+
+    useEffect(() => {
+      wordCounter();
+    },[textareaRef, content])
     return (
       <StyledMDWrapper>
         <Modal
@@ -465,6 +509,7 @@ const MarkdownBlock = forwardRef(
         ) : (
           <StyledMarkdownPreview>{content}</StyledMarkdownPreview>
         )}
+        <StyledMarkdownInfo>Word Count: {wordCount}</StyledMarkdownInfo>
       </StyledMDWrapper>
     );
   }
