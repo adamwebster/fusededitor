@@ -194,6 +194,18 @@ const StyledLabel = styled.label`
   margin-bottom: 8px;
 `;
 
+const StyledDragAndDropUpload = styled.div`
+  padding: 16px;
+  flex: 1 1;
+  border: dashed 1px
+    ${({ theme, isDraggingOver }) =>
+      isDraggingOver ? theme.COLORS.PRIMARY : theme.COLORS.GREY[350]};
+  display: flex;
+  justify-content: center;
+  color: ${({ theme }) => theme.COLORS.GREY[350]};
+  text-transform: uppercase;
+`;
+
 interface Props {
   documentJSON: any;
 }
@@ -218,11 +230,12 @@ const Editor = ({ documentJSON }: Props) => {
   });
   const [selectedFile, setSelectedFile] = useState('');
   const [saving, setSaving] = useState(false);
-  const [panelOpen, setPanelOpen] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(true);
   const [showSlideshowSettings, setShowSlideshowSettings] = useState(false);
   const [popperElement, setPopperElement] = useState(null);
   const [arrowElement, setArrowElement] = useState(null);
   const [referenceElement, setReferenceElement] = useState(null);
+  const [dragOverUpload, setDragOverUpload] = useState(false);
   const { styles, attributes } = usePopper(referenceElement, popperElement, {
     placement: 'top',
     modifiers: [
@@ -254,16 +267,22 @@ const Editor = ({ documentJSON }: Props) => {
     });
   };
 
-  const uploadImage = e => {
+  const uploadImages = (e, type = 'dragAndDrop') => {
     e.preventDefault();
     const obj = {
       _id: document._id,
     };
-
+    let fileList = [];
+    if (type != 'dragAndDrop') {
+      Array.from(fileUpload.current.files).forEach(file => fileList.push(file));
+    } else {
+      fileList = [...e.dataTransfer.files];
+    }
     const formData = new FormData();
-    formData.append('file', fileUpload.current.files[0]);
+    fileList.map(file => formData.append('image', file));
     formData.append('documentInfo', JSON.stringify(obj));
-    useFetchFileUpload('uploadImage', formData).then(resp => {
+    console.log(formData);
+    useFetchFileUpload('uploadMultipleImages', formData).then(resp => {
       if (resp.attachments) {
         setDocument({ ...document, attachments: resp.attachments });
       }
@@ -493,20 +512,33 @@ const Editor = ({ documentJSON }: Props) => {
             {panelOpen && (
               <>
                 <StyledSectionHeader>Attachments</StyledSectionHeader>
+                <StyledDragAndDropUpload
+                  onDragOver={e => setDragOverUpload(true)}
+                  onDrop={e => {
+                    uploadImages(e);
+                    setDragOverUpload(false);
+                  }}
+                  isDraggingOver={dragOverUpload}
+                  onDragLeave={() => setDragOverUpload(false)}
+                >
+                  Drop Files Here...
+                </StyledDragAndDropUpload>
+                <p>Or</p>
                 {!selectedFile && (
                   <Button onClick={() => fileUpload.current.click()}>
-                    Choose File
+                    Choose Files
                   </Button>
                 )}
                 <form
                   method="post"
                   encType="multipart/form-data"
-                  onSubmit={e => uploadImage(e)}
+                  onSubmit={e => uploadImages(e, 'manual')}
                 >
                   <input
                     style={{ display: 'none' }}
                     ref={fileUpload}
                     type="file"
+                    multiple
                     name="file"
                     onChange={e => setSelectedFile(e.target.value)}
                   />
