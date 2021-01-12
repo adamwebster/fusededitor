@@ -7,7 +7,7 @@ import FolderItem from './FolderItem';
 import DocumentItem from './DocumentItem';
 
 const DocumentList = () => {
-  const [documents, setDocuments] = useState([]);
+  const [documents, setDocuments] = useState<Array<any>>([]);
   const [documentsInFolder, setDocumentsInFolder] = useState([]);
   const [folderInfo, setFolderInfo] = useState({ _id: '', name: '' });
   const [folderBeingEdited, setFolderBeingEdited] = useState('');
@@ -22,7 +22,7 @@ const DocumentList = () => {
     });
   };
 
-  const openFolder = (folder, index) => {
+  const openFolder = (folder:any, index: number) => {
     if (!folder.folderOpen) {
       const copyOfDocuments = [...documents];
       copyOfDocuments.forEach(document => (document.folderOpen = false));
@@ -38,7 +38,7 @@ const DocumentList = () => {
     }
   };
 
-  const updateFolder = folderInfo => {
+  const updateFolder = (folderInfo:any) => {
     setFolderBeingEdited('');
     useFetch('updateFolder', {
       folderInfo,
@@ -47,7 +47,7 @@ const DocumentList = () => {
     });
   };
 
-  const deleteFolder = folderInfo => {
+  const deleteFolder = (folderInfo:any) => {
     useFetch('deleteFolder', {
       folderInfo,
     }).then(resp => {
@@ -55,7 +55,7 @@ const DocumentList = () => {
     });
   };
 
-  const removeDocumentFromFolder = documentID => {
+  const removeDocumentFromFolder = (documentID:any) => {
     useFetch('removeDocumentFromFolder', {
       documentID,
     }).then(() => {
@@ -88,12 +88,12 @@ const DocumentList = () => {
                   folder={document}
                   documents={document}
                   documentsInFolder={documentsInFolder}
-                  setFolderInfo={info => setFolderInfo(info)}
+                  setFolderInfo={(info:any) => setFolderInfo(info)}
                   folderInfo={folderInfo}
-                  removeDocumentFromFolder={id => removeDocumentFromFolder(id)}
-                  setFolderBeingEdited={id => setFolderBeingEdited(id)}
-                  updateFolder={folderInfo => updateFolder(folderInfo)}
-                  deleteFolder={folder => deleteFolder(folder)}
+                  removeDocumentFromFolder={(id:any) => removeDocumentFromFolder(id)}
+                  setFolderBeingEdited={(id:any) => setFolderBeingEdited(id)}
+                  updateFolder={(folderInfo:any) => updateFolder(folderInfo)}
+                  deleteFolder={(folder:any) => deleteFolder(folder)}
                   getDocuments={() => getDocuments()}
                 />
               );

@@ -20,7 +20,7 @@ const StyledDocumentsEmptyState = styled.div`
 const Index = () => {
   const router = useRouter();
 
-  const createDocument = documentTitle => {
+  const createDocument = (documentTitle: string) => {
     useFetch('createDocument', {
       documentTitle,
     }).then(resp => {

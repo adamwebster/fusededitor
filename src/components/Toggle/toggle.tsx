@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-const StyledToggle = styled.div`
+const StyledToggle = styled.div<Props>`
   height: 16px;
   width: 32px;
   border: solid 1px
@@ -31,10 +31,10 @@ interface Props {
   checked: boolean;
 }
 
-const Toggle = ({ checked, ...rest }) => {
+const Toggle = ({ checked, ...rest }:Props) => {
   return (
     <StyledToggle tabIndex={0} checked={checked} {...rest}>
-      <StyledToggleSwitch active={checked} />
+      <StyledToggleSwitch />
     </StyledToggle>
   );
 };

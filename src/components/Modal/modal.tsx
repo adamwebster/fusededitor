@@ -35,7 +35,7 @@ interface Props {
 
 const Modal = ({ show, children, onCloseClick, ...rest }: Props) => {
   const [modalShown, setModalShown] = useState(show);
-  const overlay = useRef();
+  const overlay = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     setModalShown(show);
   }, [show]);
@@ -44,7 +44,7 @@ const Modal = ({ show, children, onCloseClick, ...rest }: Props) => {
     onCloseClick,
   };
 
-  const handleClose = e => {
+  const handleClose = (e:any) => {
     if (e.target === overlay.current) {
       onCloseClick();
     }
@@ -81,8 +81,11 @@ const StyledCloseButton = styled.button`
 const StyledModalHeaderContent = styled.div`
   flex: 1 1;
 `;
-const ModalHeader = ({ children }) => {
-  const { modalState, dispatch } = useContext(ModalContext);
+interface ModalHeaderProps {
+  children: ReactNode;
+}
+const ModalHeader = ({ children }:ModalHeaderProps) => {
+  const { modalState }:any = useContext(ModalContext);
   return (
     <StyledModalHeader>
       <StyledModalHeaderContent>{children}</StyledModalHeaderContent>

@@ -1,8 +1,8 @@
-import { ButtonHTMLAttributes, ReactElement, ReactNode } from 'react';
+import { ButtonHTMLAttributes, HTMLAttributes, ReactElement, ReactNode } from 'react';
 import styled, { css } from 'styled-components';
 import { darken, lighten } from 'polished';
 
-const buttonBGColor = (theme, buttonStyle) => {
+const buttonBGColor = (theme: any, buttonStyle: string | undefined) => {
   switch (buttonStyle) {
     case 'danger':
       return theme.COLORS.DANGER;
@@ -11,7 +11,7 @@ const buttonBGColor = (theme, buttonStyle) => {
   }
 };
 
-const buttonTextColor = (theme, buttonStyle) => {
+const buttonTextColor = (theme: any, buttonStyle: string | undefined) => {
   switch (buttonStyle) {
     case 'danger':
       return theme.COLORS.WHITE;
@@ -23,7 +23,12 @@ const buttonTextColor = (theme, buttonStyle) => {
       return value;
   }
 };
-const StyledButton = styled.button`
+
+interface StyledButtonProps extends HTMLAttributes<HTMLButtonElement> {
+  primary?: boolean,
+  buttonStyle?: 'danger' | 'default';
+}
+const StyledButton = styled.button<StyledButtonProps>`
   border: ${({ primary, theme, buttonStyle }) =>
     primary ? 'none' : `solid 1px ${buttonBGColor(theme, buttonStyle)}`};
   background-color: ${({ primary, theme, buttonStyle }) =>

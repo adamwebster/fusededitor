@@ -43,7 +43,7 @@ const Settings = () => {
   const [userProfile, setUserProfile] = useState<any>({});
   const { user } = useAuth();
   const { dispatchUser, userState } = useContext(UserContext);
-  const updateProfilePicture = e => {
+  const updateProfilePicture = (e: any) => {
     e.preventDefault();
     const obj = {
       firstName: user.firstName,
@@ -51,7 +51,9 @@ const Settings = () => {
     };
 
     const formData = new FormData();
-    formData.append('file', fileUpload.current.files[0]);
+    if (fileUpload.current.files) {
+      formData.append('file', fileUpload.current.files[0]);
+    }
     formData.append('userData', JSON.stringify(obj));
     useFetchFileUpload('updateUser', formData).then(resp => {
       setSelectedFile('');

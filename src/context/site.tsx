@@ -5,9 +5,14 @@ const initialState = {
   editorFullscreen: false,
 };
 
+interface dispatchValuesProps {
+  type: 'SET_LOADING' | 'SET_EDITOR_FULLSCREEN';
+  payload: boolean,
+}
+
 export const SiteContext = createContext({
   siteState: initialState,
-  dispatchSite: (value: any) => value,
+  dispatchSite: (value: dispatchValuesProps) => value,
 });
 
 export const SiteConsumer = SiteContext.Consumer;

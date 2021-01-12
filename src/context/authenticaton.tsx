@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, useEffect } from 'react';
+import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import Router, { useRouter } from 'next/router';
 import { useFetch } from '../hooks/useFetch';
 import { UserContext } from './user';
@@ -21,7 +21,10 @@ const AuthContext = createContext<Props>({
   loading: true,
 });
 
-export const AuthProvider = ({ children }) => {
+interface AuthProps {
+  children: ReactNode,
+}
+export const AuthProvider = ({ children }:AuthProps) => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [user, setUser] = useState({
     id: '',

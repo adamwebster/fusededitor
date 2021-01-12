@@ -219,9 +219,13 @@ const Editor = ({ documentJSON }: Props) => {
   const [saving, setSaving] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const [showSlideshowSettings, setShowSlideshowSettings] = useState(false);
-  const [popperElement, setPopperElement] = useState<HTMLSpanElement>(null as unknown as HTMLSpanElement);
+  const [popperElement, setPopperElement] = useState<HTMLSpanElement>(
+    (null as unknown) as HTMLSpanElement
+  );
   const [arrowElement, setArrowElement] = useState(null);
-  const [referenceElement, setReferenceElement] = useState<HTMLSpanElement>(null as unknown as HTMLSpanElement);
+  const [referenceElement, setReferenceElement] = useState<HTMLSpanElement>(
+    (null as unknown) as HTMLSpanElement
+  );
   const [dragOverUpload, setDragOverUpload] = useState(false);
   const { styles, attributes } = usePopper(referenceElement, popperElement, {
     placement: 'top',
@@ -231,9 +235,11 @@ const Editor = ({ documentJSON }: Props) => {
     ],
   });
 
-  const { siteState } = useContext(SiteContext);
-  const editor = useRef<HTMLDivElement>(null as unknown as HTMLDivElement);
-  const fileUpload = useRef<HTMLInputElement>((null as unknown) as HTMLInputElement);
+  const { siteState, dispatchSite } = useContext(SiteContext);
+  const editor = useRef<HTMLDivElement>((null as unknown) as HTMLDivElement);
+  const fileUpload = useRef<HTMLInputElement>(
+    (null as unknown) as HTMLInputElement
+  );
   const router = useRouter();
   const toast = useToast();
 
@@ -256,6 +262,7 @@ const Editor = ({ documentJSON }: Props) => {
 
   const uploadImages = (e: any, type = 'dragAndDrop') => {
     e.preventDefault();
+    dispatchSite({ type: 'SET_LOADING', payload: true });
     const obj = {
       _id: document._id,
     };
@@ -272,7 +279,6 @@ const Editor = ({ documentJSON }: Props) => {
     const formData = new FormData();
     fileList.map((file: any) => formData.append('image', file));
     formData.append('documentInfo', JSON.stringify(obj));
-    console.log(formData);
     useFetchFileUpload('uploadMultipleImages', formData).then(resp => {
       if (resp.attachments) {
         setDocument({ ...document, attachments: resp.attachments });
@@ -282,6 +288,7 @@ const Editor = ({ documentJSON }: Props) => {
           toast.addDanger(null, resp.message);
         }
       }
+      dispatchSite({ type: 'SET_LOADING', payload: false });
       setSelectedFile('');
     });
   };
@@ -410,7 +417,6 @@ const Editor = ({ documentJSON }: Props) => {
     setDocument(documentJSON);
   }, [documentJSON]);
 
-  
   useEffect(() => {
     if (process.browser) {
       window.addEventListener('keydown', handleKeydown);
@@ -479,7 +485,6 @@ const Editor = ({ documentJSON }: Props) => {
           <StyledEditor ref={editor}>
             <MarkdownBlock
               attachments={document.attachments}
-           
               documentID={document._id}
               onChange={e => updateItem(e)}
             >
@@ -610,7 +615,7 @@ const Editor = ({ documentJSON }: Props) => {
               />
               {showSlideshowSettings && (
                 <StyledPopper
-                  ref={(ref:HTMLSpanElement) => setPopperElement(ref)}
+                  ref={(ref: HTMLSpanElement) => setPopperElement(ref)}
                   style={styles.popper}
                   {...attributes.popper}
                 >
@@ -648,7 +653,7 @@ const Editor = ({ documentJSON }: Props) => {
                   />
                 </StyledPopper>
               )}
-              <span ref={(ref:HTMLSpanElement) => setReferenceElement(ref)}>
+              <span ref={(ref: HTMLSpanElement) => setReferenceElement(ref)}>
                 <FontAwesomeIcon
                   onClick={() =>
                     setShowSlideshowSettings(!showSlideshowSettings)

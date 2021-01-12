@@ -23,12 +23,12 @@ export const GlobalStyles = createGlobalStyle`
     font-size: 100%;
     padding: 0;
     margin: 0;
-    color: ${({ theme }) => theme.COLORS.GREY[50]};
+    color: ${({ theme }: any) => theme.COLORS.GREY[50]};
     line-height: 150%;
-    background-color: ${({ theme }) => theme.COLORS.GREY[600]};
+    background-color: ${({ theme }: any) => theme.COLORS.GREY[600]};
   }
   a{
-    color: ${({ theme }) => theme.COLORS.PRIMARY};
+    color: ${({ theme }: any) => theme.COLORS.PRIMARY};
   }
 `;
 

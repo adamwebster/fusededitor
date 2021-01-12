@@ -3,20 +3,17 @@ import styled from 'styled-components';
 import { BlockTools } from './BlockTools';
 
 const StyledHeadingBlock = styled.h1`
-  :empty:before {
-    content: attr(data-ph);
-    opacity: 0.5;
-  }
+
 `;
 
 interface Props extends HTMLAttributes<HTMLHeadingElement> {
   as: string;
   children: string;
-  onRemoveClick: (e) => void;
-  onMoveBlockUpClick?: (e) => void;
-  onMoveBlockDownClick?: (e) => void;
-  onKeyDown?: (e) => void;
-  changeElement?: (newElement) => void;
+  onRemoveClick: (e: any) => void;
+  onMoveBlockUpClick?: (e: any) => void;
+  onMoveBlockDownClick?: (e: any) => void;
+  onKeyDown?: (e: any) => void;
+  changeElement?: (newElement: any) => void;
   item: any;
 }
 
@@ -36,19 +33,21 @@ const HeadingBlock = forwardRef(
     ref
   ) => {
     const [showPopper, setShowPopper] = useState(false);
-    const [referenceElement, setReferenceElement] = useState(null);
+    const [referenceElement, setReferenceElement] = useState<HTMLDivElement | null>(null);
     const [isMounted, setIsMounted] = useState(false);
     const [headingType, setHeadingType] = useState(as);
-    const handleKeyDown = e => {
+    const handleKeyDown = (e:any) => {
       setShowPopper(false);
       if (onKeyDown) {
         onKeyDown(e);
       }
     };
 
-    const changeHeadingType = heading => {
+    const changeHeadingType = (heading: any) => {
       setHeadingType(heading);
-      changeElement(heading);
+      if (changeElement) {
+        changeElement(heading);
+      }
     };
 
     useEffect(() => {
@@ -61,13 +60,8 @@ const HeadingBlock = forwardRef(
     const headings = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 
     return (
-      <div ref={setReferenceElement}>
+      <div ref={(ref:HTMLDivElement) =>  setReferenceElement(ref)}>
         <StyledHeadingBlock
-          ref={ref}
-          as={headingType}
-          suppressContentEditableWarning
-          contentEditable="true"
-          data-ph="Start typing"
           onFocus={() => setShowPopper(true)}
           onClick={() => setShowPopper(true)}
           onKeyDown={e => handleKeyDown(e)}
@@ -94,7 +88,9 @@ const HeadingBlock = forwardRef(
             onMoveBlockDownClick={onMoveBlockDownClick}
           >
             {headings.map(heading => (
-              <span onClick={() => changeHeadingType(heading)}>{heading.toUpperCase()}</span>
+              <span onClick={() => changeHeadingType(heading)}>
+                {heading.toUpperCase()}
+              </span>
             ))}
           </BlockTools>
         )}

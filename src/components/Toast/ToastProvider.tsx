@@ -16,7 +16,7 @@ import {
 } from './ToastContext';
 import { Toast } from './Toast';
 
-const ToastContainer = styled.div`
+const ToastContainer = styled.div<Props>`
   position: fixed;
   top: 20px;
   width: 100vw;
@@ -35,9 +35,9 @@ export const ToastProvider = ({
   const [toasts, setToasts] = useState(new Array<ToastObject>());
   const isMounted = useRef(true);
   const add = (
-    title: string,
+    title: string | null | undefined,
     content: string,
-    style?: string,
+    style: 'info' | 'danger' | 'warning' | 'success' | null | undefined,
     icon?: string,
     key?: number,
     options?: Options
@@ -73,9 +73,9 @@ export const ToastProvider = ({
 
   const state = {
     add: (
-      title: string,
+      title: string | null | undefined,
       content: string,
-      style: string,
+      style: 'info' | 'danger' | 'warning' | 'success' | null | undefined,
       icon: string,
       key: number,
       options: Options
@@ -136,7 +136,7 @@ export const useToast = (): {
 } => {
   const context = useContext(ToastContext);
   return {
-    addInfo: (title: string, content?: string, options?: Options): void =>
+    addInfo: (title: string | null, content?: string, options?: Options): void =>
       context?.add(
         title,
         content as string,
@@ -145,7 +145,7 @@ export const useToast = (): {
         Math.random(),
         options as Options
       ),
-    addSuccess: (title: string, content?: string, options?: Options): void =>
+    addSuccess: (title: string | null, content?: string, options?: Options): void =>
       context?.add(
         title,
         content as string,
@@ -154,7 +154,7 @@ export const useToast = (): {
         Math.random(),
         options as Options
       ),
-    addWarning: (title: string, content?: string, options?: Options): void =>
+    addWarning: (title: string | null, content?: string, options?: Options): void =>
       context?.add(
         title,
         content as string,
@@ -163,7 +163,7 @@ export const useToast = (): {
         Math.random(),
         options as Options
       ),
-    addDanger: (title: string, content?: string, options?: Options): void =>
+    addDanger: (title: string | null, content?: string, options?: Options): void =>
       context?.add(
         title,
         content as string,

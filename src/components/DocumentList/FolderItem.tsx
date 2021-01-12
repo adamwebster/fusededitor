@@ -18,6 +18,23 @@ import {
   faTrash,
 } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
+
+interface Props {
+  folder: { folderOpen: boolean; _id: string; name: string };
+  documents: any;
+  openFolder: (folder: any, index: number) => void;
+  folderBeingEdited: string;
+  index: number;
+  documentsInFolder: any;
+  setFolderInfo: (e: any) => void;
+  folderInfo: any;
+  removeDocumentFromFolder: (documentId: string) => void;
+  setFolderBeingEdited: (folderId: string) => void;
+  updateFolder: (folderInfo: any) => void;
+  deleteFolder: (folderInfo: any) => void;
+  getDocuments: () => void;
+}
+
 const FolderItem = ({
   folder,
   documents,
@@ -33,11 +50,11 @@ const FolderItem = ({
   deleteFolder,
   getDocuments,
   ...rest
-}) => {
+}: Props) => {
   const { dispatchSite } = useContext(SiteContext);
   const [dragging, setDragging] = useState(false);
 
-  const handleDrop = item => {
+  const handleDrop = (item: any) => {
     useFetch('addDocumentToFolder', {
       documentID: item.id,
       id: folder._id,
@@ -84,20 +101,22 @@ const FolderItem = ({
       {folder.folderOpen && (
         <StyledFolderList>
           <ul>
-            {documentsInFolder.map(folderDocument => (
-              <li key={folderDocument._id}>
-                <Link href={`/editor/${folderDocument._id}`} passHref>
-                  <a>
-                    <FontAwesomeIcon icon={faFile} />
-                    {folderDocument.name}
-                  </a>
-                </Link>
-                <FontAwesomeIcon
-                  onClick={() => removeDocumentFromFolder(folderDocument._id)}
-                  icon={faFolderMinus}
-                />
-              </li>
-            ))}
+            {documentsInFolder.map(
+              (folderDocument: { _id: string; name: string }) => (
+                <li key={folderDocument._id}>
+                  <Link href={`/editor/${folderDocument._id}`} passHref>
+                    <a>
+                      <FontAwesomeIcon icon={faFile} />
+                      {folderDocument.name}
+                    </a>
+                  </Link>
+                  <FontAwesomeIcon
+                    onClick={() => removeDocumentFromFolder(folderDocument._id)}
+                    icon={faFolderMinus}
+                  />
+                </li>
+              )
+            )}
           </ul>
           <StyledFolderTools>
             {folder.folderOpen && (

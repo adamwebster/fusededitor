@@ -1,6 +1,6 @@
 import { createContext, ReactElement, ReactNode, useReducer } from 'react';
 
-export const ModalContext = createContext(null);
+export const ModalContext = createContext<any | null>(null);
 
 export const ModalContextConsumer = ModalContext.Consumer;
 

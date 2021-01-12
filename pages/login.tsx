@@ -39,7 +39,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
 
-  const SignIn = e => {
+  const SignIn = (e: any) => {
     e.preventDefault();
     useFetch('signUserIn', {
       username: username,
@@ -63,13 +63,13 @@ const Login = () => {
         <TextInput
           placeholder="username"
           value={username}
-          onChange={e => setUsername(e.target.value)}
+          onChange={(e:any) => setUsername(e.target.value)}
         />
         <TextInput
           placeholder="password"
           value={password}
           type="password"
-          onChange={e => setPassword(e.target.value)}
+          onChange={(e: any) => setPassword(e.target.value)}
         />
         <Button primary>Log in</Button>
       </StyledLoginForm>

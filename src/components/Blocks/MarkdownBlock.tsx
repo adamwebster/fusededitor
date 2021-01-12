@@ -79,7 +79,6 @@ const StyledMarkdownInfo = styled.div`
   border-top: solid 1px ${({ theme }) => theme.COLORS.GREY[450]};
 `;
 
-
 const StyledMDToolButton = styled.button`
   background-color: transparent;
   border: none;
@@ -141,10 +140,10 @@ const StyledToolbarSpace = styled.div`
   flex: 1 1;
 `;
 
-interface Props extends HTMLAttributes<HTMLParagraphElement> {
+interface Props extends HTMLAttributes<HTMLTextAreaElement> {
   children: string;
-  onKeyDown?: (e:any) => void;
-  onChange?: (e:any) => void;
+  onKeyDown?: (e: any) => void;
+  onChange?: (e: any) => void;
 
   attachments?: any;
   documentID: string;
@@ -155,7 +154,7 @@ const MarkdownBlock = forwardRef(
     { children, onKeyDown, onChange, attachments, documentID, ...rest }: Props,
     ref
   ) => {
-    const [referenceElementHeadings, setReferenceElementHeadings] = useState(
+    const [referenceElementHeadings, setReferenceElementHeadings] = useState<HTMLButtonElement | null>(
       null
     );
 
@@ -170,7 +169,7 @@ const MarkdownBlock = forwardRef(
       (ref as unknown) as HTMLTextAreaElement
     );
 
-    const [popperElementHeadings, setPopperElementHeadings] = useState(null);
+    const [popperElementHeadings, setPopperElementHeadings] = useState<HTMLSpanElement | null>(null);
     const [arrowElement, setArrowElement] = useState(null);
 
     const { styles, attributes } = usePopper(
@@ -185,7 +184,7 @@ const MarkdownBlock = forwardRef(
       }
     );
 
-    const handleKeyDown = (e:any) => {
+    const handleKeyDown = (e: any) => {
       if (onKeyDown) {
         onKeyDown(e);
       }
@@ -198,7 +197,7 @@ const MarkdownBlock = forwardRef(
       };
     }, []);
 
-    const handleChange = (e:any) => {
+    const handleChange = (e: any) => {
       setContent(e.target.value);
       wordCounter();
       if (onChange) {
@@ -222,8 +221,11 @@ const MarkdownBlock = forwardRef(
       const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
         window.HTMLTextAreaElement.prototype,
         'value'
-      ).set;
-      nativeInputValueSetter.call(textarea, value);
+      )!.set;
+
+      if (nativeInputValueSetter) {
+        nativeInputValueSetter.call(textarea, value);
+      }
 
       const ev2 = new Event('input', { bubbles: true });
       textarea.dispatchEvent(ev2);
@@ -232,7 +234,7 @@ const MarkdownBlock = forwardRef(
       textarea.setSelectionRange(end + openTag.length, end + openTag.length);
     };
 
-    const addImageToContent = (url:string) => {
+    const addImageToContent = (url: string) => {
       const textarea = textareaRef.current;
       const len = textarea.value.length;
       const start = textarea.selectionStart;
@@ -248,8 +250,11 @@ const MarkdownBlock = forwardRef(
       const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
         window.HTMLTextAreaElement.prototype,
         'value'
-      ).set;
-      nativeInputValueSetter.call(textarea, value);
+      )!.set;
+
+      if (nativeInputValueSetter) {
+        nativeInputValueSetter.call(textarea, value);
+      }
 
       const ev2 = new Event('input', { bubbles: true });
       textarea.dispatchEvent(ev2);
@@ -259,12 +264,12 @@ const MarkdownBlock = forwardRef(
       setShowAttachmentModal(false);
     };
 
-    const WrapTextHeaders = (openTag:string, closeTag:string) => {
+    const WrapTextHeaders = (openTag: string, closeTag: string) => {
       wrapText(openTag, closeTag);
       setHeadingsOpen(false);
     };
 
-    const handleWindowKeydown = e => {
+    const handleWindowKeydown = (e:any) => {
       const { keyCode, metaKey, ctrlKey } = e;
       switch (keyCode) {
         case 66:
@@ -288,7 +293,7 @@ const MarkdownBlock = forwardRef(
       return false;
     };
 
-    const handleBodyClick = (e:any) => {
+    const handleBodyClick = (e: any) => {
       const childOfButton = checkIfParent(e.target, referenceElementHeadings);
       if (popperElementHeadings) {
         if (!childOfButton && e.target !== referenceElementHeadings) {
@@ -297,23 +302,26 @@ const MarkdownBlock = forwardRef(
       }
     };
 
-    const isWord = (str:string) => {
+    const isWord = (str: string) => {
       let alphaNumericFound = false;
       for (let i = 0; i < str.length; i++) {
         let code = str.charCodeAt(i);
-        if ((code > 47 && code < 58) || // numeric (0-9)
-            (code > 64 && code < 91) || // upper alpha (A-Z)
-            (code > 96 && code < 123)) { // lower alpha (a-z)
+        if (
+          (code > 47 && code < 58) || // numeric (0-9)
+          (code > 64 && code < 91) || // upper alpha (A-Z)
+          (code > 96 && code < 123)
+        ) {
+          // lower alpha (a-z)
           alphaNumericFound = true;
           return alphaNumericFound;
         }
       }
       return alphaNumericFound;
-    }
+    };
 
     const wordCounter = () => {
       let text = textareaRef.current.value.split(' ');
-      console.log(textareaRef)
+      console.log(textareaRef);
       let wordCountNumber = 0;
       for (var i = 0; i < text.length; i++) {
         if (text[i] !== ' ' && isWord(text[i])) {
@@ -343,7 +351,7 @@ const MarkdownBlock = forwardRef(
 
     useEffect(() => {
       wordCounter();
-    },[textareaRef, content])
+    }, [textareaRef, content]);
     return (
       <StyledMDWrapper>
         <Modal
@@ -355,7 +363,7 @@ const MarkdownBlock = forwardRef(
           </Modal.Header>
           <Modal.Body>
             <StyledAttachmentGrid>
-              {attachments.map((attachment:any) => (
+              {attachments.map((attachment: any) => (
                 <div key={attachment} className="imageWrapper">
                   <img
                     onClick={() =>
@@ -421,7 +429,7 @@ const MarkdownBlock = forwardRef(
               {headingsOpen && (
                 <StyledPopper
                   style={styles.popper}
-                  ref={setPopperElementHeadings}
+                  ref={ref => setPopperElementHeadings(ref)}
                   {...attributes.popper}
                 >
                   <StyledMDToolButton
@@ -463,7 +471,7 @@ const MarkdownBlock = forwardRef(
                 </StyledPopper>
               )}
               <StyledMDToolButton
-                ref={setReferenceElementHeadings}
+                ref={(ref) => setReferenceElementHeadings(ref)}
                 onClick={() => setHeadingsOpen(!headingsOpen)}
               >
                 <FontAwesomeIcon icon={faHeading} />
@@ -500,8 +508,8 @@ const MarkdownBlock = forwardRef(
           <StyledMarkdownBlock
             aria-label="Markdown Editor"
             ref={textareaRef}
-            onChange={e => handleChange(e)}
-            onKeyDown={e => handleKeyDown(e)}
+            onChange={(e:any) => handleChange(e)}
+            onKeyDown={(e:any) => handleKeyDown(e)}
             {...rest}
             value={content}
           />

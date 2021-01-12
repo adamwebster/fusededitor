@@ -3,21 +3,21 @@ import styled from 'styled-components';
 import { BlockTools } from './BlockTools';
 
 const StyledParagraphBlock = styled.p`
-:empty:before{
-        content:attr(data-ph);
-        opacity: 0.5;
-    }
+  :empty:before {
+    content: attr(data-ph);
+    opacity: 0.5;
+  }
 `;
 
 interface Props extends HTMLAttributes<HTMLParagraphElement> {
   as: string;
   children: string;
-  onRemoveClick: (e) => void;
-  onMoveBlockUpClick?: (e) => void;
-  onMoveBlockDownClick?: (e) => void;
-  onKeyDown?: (e) => void;
-  onClick?: (e) => void;
-  onFocus?: (e) => void
+  onRemoveClick: (e: any) => void;
+  onMoveBlockUpClick?: (e: any) => void;
+  onMoveBlockDownClick?: (e: any) => void;
+  onKeyDown?: (e: any) => void;
+  onClick?: (e: any) => void;
+  onFocus?: (e: any) => void;
 }
 
 const ParagraphBlock = forwardRef(
@@ -35,10 +35,13 @@ const ParagraphBlock = forwardRef(
     ref
   ) => {
     const [showPopper, setShowPopper] = useState(false);
-    const [referenceElement, setReferenceElement] = useState(null);
+    const [
+      referenceElement,
+      setReferenceElement,
+    ] = useState<HTMLDivElement | null>(null);
     const [isMounted, setIsMounted] = useState(false);
 
-    const handleKeyDown = e => {
+    const handleKeyDown = (e: any) => {
       setShowPopper(false);
       if (onKeyDown) {
         onKeyDown(e);
@@ -53,29 +56,12 @@ const ParagraphBlock = forwardRef(
     }, []);
 
     return (
-      <div ref={setReferenceElement}>
+      <div ref={ref => setReferenceElement(ref)}>
         <StyledParagraphBlock
           suppressContentEditableWarning
           contentEditable="true"
-          ref={ref}
-          data-ph="Start typing"
-          onFocus={(e) => { onFocus && onFocus(e); setShowPopper(true)}}
-          onClick={(e) => { onClick && onClick(e); setShowPopper(true)}}
-          onKeyDown={e => handleKeyDown(e)}
-          onBlur={() =>
-            setTimeout(() => {
-              if (showPopper) {
-                if (isMounted) {
-                  setShowPopper(false);
-                }
-              }
-            }, 250)
-          }
-          dangerouslySetInnerHTML={{
-            __html: children,
-          }}
-          {...rest}
-        /> 
+          ref={() => ref}
+        />
         {showPopper && (
           <BlockTools
             referenceElement={referenceElement}

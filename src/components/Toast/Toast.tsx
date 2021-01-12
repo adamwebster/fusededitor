@@ -1,7 +1,13 @@
 import { useState, useEffect, useCallback, ReactElement, useRef } from 'react';
 import styled from 'styled-components';
 
-const StyledToast = styled.div`
+interface StyledToastProps {
+  toastStyle: 'info' | 'danger' | 'warning' | 'success' | null | undefined;
+  removing?: boolean;
+  timer?: any;
+  icon?: string;
+}
+const StyledToast = styled.div<StyledToastProps>`
   width: 500px;
   min-height: 50px;
   margin: 0 auto;
@@ -61,9 +67,9 @@ const StyledToastTitle = styled.div`
 `;
 export interface Props {
   /** The title of the toast item */
-  title?: string;
+  title: string | null | undefined,
   /** The style for the toast */
-  style?: string;
+  style?: 'info' | 'danger' | 'warning' | 'success' | null;
   children?: string;
   /** The icon for the toast */
   icon?: string;
@@ -149,7 +155,7 @@ export const Toast = ({
           role="alert"
         >
           {title && (
-            <StyledToastTitle toastStyle={style}>{title}</StyledToastTitle>
+            <StyledToastTitle>{title}</StyledToastTitle>
           )}
           {children && (
             <span

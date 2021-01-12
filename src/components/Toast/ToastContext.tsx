@@ -6,9 +6,9 @@ export interface Options {
 }
 
 export interface ToastObject {
-  title: string;
+  title: string | null | undefined,
   content?: string;
-  style?: string;
+  style?: 'info' | 'danger' | 'warning' | 'success' | null | undefined;
   icon?: string;
   options?: Options;
   key?: number;
@@ -16,9 +16,9 @@ export interface ToastObject {
 
 export interface ToastInterface {
   add: (
-    title: string,
+    title: string | null | undefined,
     content: string,
-    style: string,
+    style: 'info' | 'danger' | 'warning' | 'success' | null | undefined,
     icon: string,
     key: number,
     options: Options

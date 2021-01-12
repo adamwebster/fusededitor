@@ -12,10 +12,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFile } from '@fortawesome/free-solid-svg-icons';
 import dayjs from 'dayjs';
 
-const DocumentItem = ({ document, documents, getDocuments, ...rest }) => {
+interface Props {
+  document: any,
+  documents: any,
+  getDocuments: any;
+}
+const DocumentItem = ({ document, documents, getDocuments, ...rest }: Props) => {
   const { dispatchSite } = useContext(SiteContext);
   const [dragging, setDragging] = useState(false);
-  const handleDrop = item => {
+  const handleDrop = (item:any) => {
     if (document._id !== item.id) {
       dispatchSite({ type: 'SET_LOADING', payload: true });
       useFetch('combineDocumentsIntoFolder', {

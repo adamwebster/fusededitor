@@ -26,9 +26,9 @@ const StyledToolButton = styled.button`
 `;
 
 interface Props {
-  onRemoveClick: (e) => void;
-  onMoveBlockUpClick?: (e) => void;
-  onMoveBlockDownClick?: (e) => void;
+  onRemoveClick: (e: any) => void;
+  onMoveBlockUpClick?: (e: any) => void;
+  onMoveBlockDownClick?: (e: any) => void;
   referenceElement: any;
   children?: ReactNode;
 }
@@ -40,7 +40,9 @@ const BlockTools = ({
   onRemoveClick,
   children,
 }: Props) => {
-  const [popperElement, setPopperElement] = useState(null);
+  const [popperElement, setPopperElement] = useState<HTMLSpanElement>(
+    (null as unknown) as HTMLSpanElement
+  );
   const [arrowElement, setArrowElement] = useState(null);
 
   const { styles, attributes } = usePopper(referenceElement, popperElement, {
@@ -53,7 +55,7 @@ const BlockTools = ({
 
   return (
     <StyledPopper
-      ref={setPopperElement}
+      ref={(ref:HTMLSpanElement) => setPopperElement(ref)}
       style={styles.popper}
       {...attributes.popper}
     >

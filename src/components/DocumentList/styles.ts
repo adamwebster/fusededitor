@@ -6,9 +6,16 @@ export const StyledDocumentItem = styled.div`
   border-bottom: solid 1px ${({ theme }) => theme.COLORS.GREY[350]};
   &:last-child {
     border-bottom: none;
-  }
+  } 
 `;
-export const StyledDocument = styled.div`
+
+interface StyledDocumentProp {
+  hasLink?:boolean;
+  isDraggingOver?:boolean;
+  isDragging?: boolean;
+
+}
+export const StyledDocument = styled.div<StyledDocumentProp>`
   box-sizing: border-box;
   svg {
     margin-right: 16px;
