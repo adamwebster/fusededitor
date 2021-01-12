@@ -6,18 +6,18 @@ const initialState = {
 };
 
 interface dispatchValuesProps {
-  type: 'SET_LOADING' | 'SET_EDITOR_FULLSCREEN';
-  payload: boolean,
+  type?: 'SET_LOADING' | 'SET_EDITOR_FULLSCREEN';
+  payload?: boolean,
 }
 
 export const SiteContext = createContext({
   siteState: initialState,
-  dispatchSite: (value: dispatchValuesProps) => value,
+  dispatchSite: (value: dispatchValuesProps | void) => value,
 });
 
 export const SiteConsumer = SiteContext.Consumer;
 
-const reducer = (state: any, action: { payload: any; type: any }) => {
+const reducer = (state: any, action: any) => {
   const { payload, type } = action;
   switch (type) {
     case 'SET_LOADING':

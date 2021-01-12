@@ -288,7 +288,7 @@ const Editor = ({ documentJSON }: Props) => {
           toast.addDanger(null, resp.message);
         }
       }
-      dispatchSite({ type: 'SET_LOADING', payload: false });
+      dispatchSite({ type: "SET_LOADING", payload: false });
       setSelectedFile('');
     });
   };
