@@ -5,13 +5,16 @@ import { useFetch } from '../../hooks/useFetch';
 import {
   StyledDocumentHeading,
   StyledDocumentList,
-  StyledDocumentMobileItems as StyledDocumentMobileItems,
+  StyledDocumentMobileItems,
+  StyledNoDocuments,
+  StyledSkeleton,
 } from './styles';
 import FolderItem from './FolderItem';
 import DocumentItem from './DocumentItem';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faCopy } from '@fortawesome/free-solid-svg-icons';
 import { SiteContext } from '../../context/site';
+import { Skeleton } from '../Skeleton';
 
 const DocumentList = () => {
   const [documents, setDocuments] = useState<Array<any>>([]);
@@ -19,14 +22,17 @@ const DocumentList = () => {
   const [folderInfo, setFolderInfo] = useState({ _id: '', name: '' });
   const [folderBeingEdited, setFolderBeingEdited] = useState('');
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const {siteState, dispatchSite} = useContext(SiteContext);
+  const { siteState, dispatchSite } = useContext(SiteContext);
+  const [documentsLoading, setDocumentsLoading] = useState(false);
   const getDocuments = () => {
+    setDocumentsLoading(true);
     useFetch('getDocuments', {}).then(resp => {
       const copyOfResp = [...resp];
       copyOfResp.forEach(item => {
         item.folderOpen = false;
       });
       setDocuments(copyOfResp);
+      setDocumentsLoading(false);
     });
   };
 
@@ -82,44 +88,69 @@ const DocumentList = () => {
   return (
     <>
       <StyledDocumentMobileItems>
-        <FontAwesomeIcon onClick={() => dispatchSite({type: 'SET_SHOW_MOBILE_MENU', payload: !siteState.showMobileMenu})} icon={faBars} />
+        <FontAwesomeIcon
+          onClick={() =>
+            dispatchSite({
+              type: 'SET_SHOW_MOBILE_MENU',
+              payload: !siteState.showMobileMenu,
+            })
+          }
+          icon={faBars}
+        />
       </StyledDocumentMobileItems>
       <StyledDocumentList showMobileMenu={siteState.showMobileMenu}>
-        <StyledDocumentHeading>Documents</StyledDocumentHeading>
-        <DndProvider backend={HTML5Backend}>
-          {documents.map((document, index) => {
-            if (document.type === 'folder') {
-              return (
-                <FolderItem
-                  key={document._id}
-                  index={index}
-                  folderBeingEdited={folderBeingEdited}
-                  openFolder={() => openFolder(document, index)}
-                  folder={document}
-                  documents={document}
-                  documentsInFolder={documentsInFolder}
-                  setFolderInfo={(info: any) => setFolderInfo(info)}
-                  folderInfo={folderInfo}
-                  removeDocumentFromFolder={(id: any) =>
-                    removeDocumentFromFolder(id)
-                  }
-                  setFolderBeingEdited={(id: any) => setFolderBeingEdited(id)}
-                  updateFolder={(folderInfo: any) => updateFolder(folderInfo)}
-                  deleteFolder={(folder: any) => deleteFolder(folder)}
-                  getDocuments={() => getDocuments()}
-                />
-              );
-            }
-            return (
-              <DocumentItem
-                documents={documents}
-                key={document._id}
-                document={document}
-                getDocuments={() => getDocuments()}
-              />
-            );
-          })}
-        </DndProvider>
+        {documentsLoading ? (
+          <>
+            <StyledSkeleton />
+            <StyledSkeleton />
+          </>
+        ) : (
+          <>
+            {' '}
+            <StyledDocumentHeading>Documents</StyledDocumentHeading>
+            <DndProvider backend={HTML5Backend}>
+              {documents.length === 0 && (
+                <StyledNoDocuments>No documents</StyledNoDocuments>
+              )}
+              {documents.map((document, index) => {
+                if (document.type === 'folder') {
+                  return (
+                    <FolderItem
+                      key={document._id}
+                      index={index}
+                      folderBeingEdited={folderBeingEdited}
+                      openFolder={() => openFolder(document, index)}
+                      folder={document}
+                      documents={document}
+                      documentsInFolder={documentsInFolder}
+                      setFolderInfo={(info: any) => setFolderInfo(info)}
+                      folderInfo={folderInfo}
+                      removeDocumentFromFolder={(id: any) =>
+                        removeDocumentFromFolder(id)
+                      }
+                      setFolderBeingEdited={(id: any) =>
+                        setFolderBeingEdited(id)
+                      }
+                      updateFolder={(folderInfo: any) =>
+                        updateFolder(folderInfo)
+                      }
+                      deleteFolder={(folder: any) => deleteFolder(folder)}
+                      getDocuments={() => getDocuments()}
+                    />
+                  );
+                }
+                return (
+                  <DocumentItem
+                    documents={documents}
+                    key={document._id}
+                    document={document}
+                    getDocuments={() => getDocuments()}
+                  />
+                );
+              })}
+            </DndProvider>
+          </>
+        )}
       </StyledDocumentList>
     </>
   );

@@ -49,6 +49,7 @@ const StyledMarkdownBlock = styled.textarea`
   font-family: inherit;
   font-size: 1rem;
   border: none;
+  -webkit-appearance: none;
   flex: 1 1;
   :empty:before {
     content: attr(data-ph);
@@ -154,9 +155,10 @@ const MarkdownBlock = forwardRef(
     { children, onKeyDown, onChange, attachments, documentID, ...rest }: Props,
     ref
   ) => {
-    const [referenceElementHeadings, setReferenceElementHeadings] = useState<HTMLButtonElement | null>(
-      null
-    );
+    const [
+      referenceElementHeadings,
+      setReferenceElementHeadings,
+    ] = useState<HTMLButtonElement | null>(null);
 
     const [isMounted, setIsMounted] = useState(false);
     const [content, setContent] = useState('');
@@ -169,7 +171,10 @@ const MarkdownBlock = forwardRef(
       (ref as unknown) as HTMLTextAreaElement
     );
 
-    const [popperElementHeadings, setPopperElementHeadings] = useState<HTMLSpanElement | null>(null);
+    const [
+      popperElementHeadings,
+      setPopperElementHeadings,
+    ] = useState<HTMLSpanElement | null>(null);
     const [arrowElement, setArrowElement] = useState(null);
 
     const { styles, attributes } = usePopper(
@@ -269,7 +274,7 @@ const MarkdownBlock = forwardRef(
       setHeadingsOpen(false);
     };
 
-    const handleWindowKeydown = (e:any) => {
+    const handleWindowKeydown = (e: any) => {
       const { keyCode, metaKey, ctrlKey } = e;
       switch (keyCode) {
         case 66:
@@ -471,7 +476,7 @@ const MarkdownBlock = forwardRef(
                 </StyledPopper>
               )}
               <StyledMDToolButton
-                ref={(ref) => setReferenceElementHeadings(ref)}
+                ref={ref => setReferenceElementHeadings(ref)}
                 onClick={() => setHeadingsOpen(!headingsOpen)}
               >
                 <FontAwesomeIcon icon={faHeading} />
@@ -508,8 +513,8 @@ const MarkdownBlock = forwardRef(
           <StyledMarkdownBlock
             aria-label="Markdown Editor"
             ref={textareaRef}
-            onChange={(e:any) => handleChange(e)}
-            onKeyDown={(e:any) => handleKeyDown(e)}
+            onChange={(e: any) => handleChange(e)}
+            onKeyDown={(e: any) => handleKeyDown(e)}
             {...rest}
             value={content}
           />

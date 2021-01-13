@@ -1,42 +1,40 @@
 import { lighten } from 'polished';
 import styled, { css } from 'styled-components';
+import { Skeleton } from '../Skeleton';
 
 interface StyledDocumentListProps {
-  showMobileMenu?: boolean,
+  showMobileMenu?: boolean;
 }
-export const StyledDocumentList = styled.div<StyledDocumentListProps>` 
+export const StyledDocumentList = styled.div<StyledDocumentListProps>`
   overflow: auto;
   @media (max-width: 768px) {
-    display:${({ showMobileMenu }) => showMobileMenu ? 'block' : 'none'};
-  position: absolute;
-  left:0;
-  background-color: ${({ theme }) =>
-    theme.name === 'dark'
-      ? theme.COLORS.GREY[550]
-      : lighten(0.05, theme.COLORS.GREY[550])};
-        border-top: solid 1px ${({ theme }) => theme.COLORS.GREY[350]};
-        border-bottom: solid 1px ${({ theme }) => theme.COLORS.GREY[350]};
+    display: ${({ showMobileMenu }) => (showMobileMenu ? 'block' : 'none')};
+    position: absolute;
+    left: 0;
+    background-color: ${({ theme }) =>
+      theme.name === 'dark'
+        ? theme.COLORS.GREY[550]
+        : lighten(0.05, theme.COLORS.GREY[550])};
+    border-top: solid 1px ${({ theme }) => theme.COLORS.GREY[350]};
+    border-bottom: solid 1px ${({ theme }) => theme.COLORS.GREY[350]};
 
-        height: 296px;
+    height: 296px;
     top: 64px;
     width: 100%;
   }
-
 `;
 
 export const StyledDocumentItem = styled.div`
   border-bottom: solid 1px ${({ theme }) => theme.COLORS.GREY[350]};
   &:last-child {
     border-bottom: none;
-    
-  } 
+  }
 `;
 
 interface StyledDocumentProp {
   hasLink?: boolean;
   isDraggingOver?: boolean;
   isDragging?: boolean;
-
 }
 export const StyledDocument = styled.div<StyledDocumentProp>`
   box-sizing: border-box;
@@ -54,8 +52,8 @@ export const StyledDocument = styled.div<StyledDocumentProp>`
     display: flex;
     align-items: center;
     ${({ hasLink }) =>
-    hasLink &&
-    css`
+      hasLink &&
+      css`
         padding: 16px;
       `}
   }
@@ -124,9 +122,21 @@ export const StyledDocumentMobileItems = styled.div`
   display: none;
   @media (max-width: 768px) {
     display: flex;
-justify-content: flex-end;
-align-items: center;
-flex: 1 1;
-
+    justify-content: flex-end;
+    align-items: center;
+    flex: 1 1;
   }
-`
+`;
+export const StyledNoDocuments = styled.div`
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+  color: ${({ theme }) => theme.COLORS.GREY[350]};
+`;
+
+export const StyledSkeleton = styled(Skeleton)`
+  width: calc(100% - 32px);
+  left: 16px;
+  height: 50px;
+  margin-bottom: 16px;
+`;
