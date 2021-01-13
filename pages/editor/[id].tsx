@@ -6,8 +6,6 @@ import { useContext, useEffect, useState } from 'react';
 import { ProtectedRoute } from '../../src/components/ProtectedRoute/ProtectedRoute';
 import { DocumentList } from '../../src/components/DocumentList';
 import { SiteContext } from '../../src/context/site';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCopy } from '@fortawesome/free-solid-svg-icons';
 
 const EditorPage = () => {
   const router = useRouter();

@@ -12,9 +12,8 @@ import {
 import FolderItem from './FolderItem';
 import DocumentItem from './DocumentItem';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars, faCopy } from '@fortawesome/free-solid-svg-icons';
+import { faBars } from '@fortawesome/free-solid-svg-icons';
 import { SiteContext } from '../../context/site';
-import { Skeleton } from '../Skeleton';
 
 const DocumentList = () => {
   const [documents, setDocuments] = useState<Array<any>>([]);
@@ -24,6 +23,8 @@ const DocumentList = () => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const { siteState, dispatchSite } = useContext(SiteContext);
   const [documentsLoading, setDocumentsLoading] = useState(false);
+  const numberOfDocSkeletons = 5;
+
   const getDocuments = () => {
     setDocumentsLoading(true);
     useFetch('getDocuments', {}).then(resp => {
@@ -101,7 +102,9 @@ const DocumentList = () => {
       <StyledDocumentList showMobileMenu={siteState.showMobileMenu}>
         {documentsLoading ? (
           <>
-            <StyledSkeleton />
+            {[...Array(numberOfDocSkeletons)].map((x, i) => (
+              <StyledSkeleton key={i} />
+            ))}
             <StyledSkeleton />
           </>
         ) : (
