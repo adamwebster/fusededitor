@@ -5,7 +5,11 @@ import styled from 'styled-components';
 import { Button } from '../src/components/Button';
 import { useRouter } from 'next/router';
 import { SEO } from '../src/components/SEO';
-import { DocumentList } from '../src/components/DocumentList';
+import dynamic from 'next/dynamic'
+
+const DocumentList = dynamic(() =>
+  import('../src/components/DocumentList/DocumentList')
+)
 
 const StyledDocumentsEmptyState = styled.div`
   display: flex;

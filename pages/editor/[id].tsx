@@ -1,11 +1,19 @@
-import { Editor } from '../../src/components/Editor';
 import { Layout } from '../../src/components/Layout';
 import { useFetch } from '../../src/hooks/useFetch';
 import { useRouter } from 'next/router';
 import { useContext, useEffect, useState } from 'react';
 import { ProtectedRoute } from '../../src/components/ProtectedRoute/ProtectedRoute';
-import { DocumentList } from '../../src/components/DocumentList';
 import { SiteContext } from '../../src/context/site';
+import dynamic from 'next/dynamic'
+
+const DocumentList = dynamic(() =>
+  import('../../src/components/DocumentList/DocumentList')
+)
+
+const Editor = dynamic(() =>
+  import('../../src/components/Editor/editor')
+)
+
 
 const EditorPage = () => {
   const router = useRouter();

@@ -13,7 +13,6 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import MarkdownBlock from '../Blocks/MarkdownBlock';
 import { Button } from '../Button';
 import { Panel } from '../Panel';
 import { useFetch, useFetchFileUpload } from '../../hooks/useFetch';
@@ -25,6 +24,11 @@ import { SiteContext } from '../../context/site';
 import { lighten } from 'polished';
 import { usePopper } from 'react-popper';
 import { TextInput } from '../TextInput';
+import dynamic from 'next/dynamic'
+
+const MarkdownBlock = dynamic(() =>
+  import('../Blocks/MarkdownBlock')
+)
 
 const StyledEditorWrapper = styled.div`
   display: flex;
