@@ -25,6 +25,7 @@ import { lighten } from 'polished';
 import { usePopper } from 'react-popper';
 import { TextInput } from '../TextInput';
 import dynamic from 'next/dynamic';
+import { DragAndDropUpload } from '../DragAndDropUpload';
 
 const MarkdownBlock = dynamic(() => import('../Blocks/MarkdownBlock'));
 
@@ -184,23 +185,6 @@ const StyledLabel = styled.label`
   margin-bottom: 8px;
 `;
 
-interface StyledDragAndDropUploadProps {
-  isDraggingOver: boolean;
-  theme: any;
-}
-
-const StyledDragAndDropUpload = styled.div`
-  padding: 16px;
-  flex: 1 1;
-  border: dashed 1px
-    ${({ theme, isDraggingOver }: StyledDragAndDropUploadProps) =>
-      isDraggingOver ? theme.COLORS.PRIMARY : theme.COLORS.GREY[350]};
-  display: flex;
-  justify-content: center;
-  color: ${({ theme }) => theme.COLORS.GREY[350]};
-  text-transform: uppercase;
-`;
-
 const StyledImageSkeleton = styled(Skeleton)``;
 interface Props {
   documentJSON: any;
@@ -231,7 +215,6 @@ const Editor = ({ documentJSON }: Props) => {
   const [referenceElement, setReferenceElement] = useState<HTMLSpanElement>(
     (null as unknown) as HTMLSpanElement
   );
-  const [dragOverUpload, setDragOverUpload] = useState(false);
   const { styles, attributes } = usePopper(referenceElement, popperElement, {
     placement: 'top',
     modifiers: [
@@ -506,17 +489,11 @@ const Editor = ({ documentJSON }: Props) => {
             {panelOpen && (
               <>
                 <StyledSectionHeader>Attachments</StyledSectionHeader>
-                <StyledDragAndDropUpload
-                  onDragOver={e => setDragOverUpload(true)}
+                <DragAndDropUpload
                   onDrop={e => {
                     uploadImages(e);
-                    setDragOverUpload(false);
                   }}
-                  isDraggingOver={dragOverUpload}
-                  onDragLeave={() => setDragOverUpload(false)}
-                >
-                  Drop Files Here...
-                </StyledDragAndDropUpload>
+                />
                 <p>Or</p>
                 {!selectedFile && (
                   <Button onClick={() => fileUpload.current.click()}>
