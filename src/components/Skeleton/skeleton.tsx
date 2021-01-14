@@ -10,21 +10,23 @@ const StyledSkeleton = styled.div`
     content: '';
     display: block;
     position: absolute;
-    left: -300px;
+    left: -600px;
     top: 0;
     height: 100%;
-    width: 300px;
+    width: 600px;
     background: linear-gradient(
       45deg,
       transparent 0%,
+      transparent 10%,
       #e8e8e8 50%,
+      transparent 90%,
       transparent 100%
     );
     animation: load 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   }
   @keyframes load {
     from {
-      left: -200px;
+      left: -600px;
     }
     to {
       left: 100%;

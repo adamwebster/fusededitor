@@ -24,11 +24,11 @@ import { SiteContext } from '../../context/site';
 import { lighten } from 'polished';
 import { usePopper } from 'react-popper';
 import { TextInput } from '../TextInput';
-import dynamic from 'next/dynamic'
+import dynamic from 'next/dynamic';
 
-const MarkdownBlock = dynamic(() =>
-  import('../Blocks/MarkdownBlock')
-)
+const MarkdownBlock = dynamic(() => import('../Blocks/MarkdownBlock'));
+
+const Skeleton = dynamic(() => import('../Skeleton/skeleton'));
 
 const StyledEditorWrapper = styled.div`
   display: flex;
@@ -201,6 +201,7 @@ const StyledDragAndDropUpload = styled.div`
   text-transform: uppercase;
 `;
 
+const StyledImageSkeleton = styled(Skeleton)``;
 interface Props {
   documentJSON: any;
 }
@@ -292,7 +293,7 @@ const Editor = ({ documentJSON }: Props) => {
           toast.addDanger(null, resp.message);
         }
       }
-      dispatchSite({ type: "SET_LOADING", payload: false });
+      dispatchSite({ type: 'SET_LOADING', payload: false });
       setSelectedFile('');
     });
   };

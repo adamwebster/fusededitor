@@ -4,16 +4,13 @@ import { useRouter } from 'next/router';
 import { useContext, useEffect, useState } from 'react';
 import { ProtectedRoute } from '../../src/components/ProtectedRoute/ProtectedRoute';
 import { SiteContext } from '../../src/context/site';
-import dynamic from 'next/dynamic'
+import dynamic from 'next/dynamic';
 
-const DocumentList = dynamic(() =>
-  import('../../src/components/DocumentList/DocumentList')
-)
+const DocumentList = dynamic(
+  () => import('../../src/components/DocumentList/DocumentList')
+);
 
-const Editor = dynamic(() =>
-  import('../../src/components/Editor/editor')
-)
-
+const Editor = dynamic(() => import('../../src/components/Editor/editor'));
 
 const EditorPage = () => {
   const router = useRouter();
@@ -41,7 +38,11 @@ const EditorPage = () => {
   return (
     <Layout
       fullScreen={siteState.editorFullscreen}
-      sideNavContent={<><DocumentList /></>}
+      sideNavContent={
+        <>
+          <DocumentList />
+        </>
+      }
     >
       {status ? (
         <>{statusMessage}</>
