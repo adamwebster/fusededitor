@@ -16,6 +16,7 @@ const StyledDragAndDropUpload = styled.div`
   justify-content: center;
   color: ${({ theme }) => theme.COLORS.GREY[350]};
   text-transform: uppercase;
+  align-items: center;
 `;
 
 interface Props {
@@ -24,13 +25,16 @@ interface Props {
 const DragAndDropUpload = ({ onDrop }: Props) => {
   const [dragOverUpload, setDragOverUpload] = useState(false);
 
+  const handleDrop = (e: any) => {
+    console.log('Drop');
+    e.preventDefault();
+    onDrop(e);
+    setDragOverUpload(false);
+  };
   return (
     <StyledDragAndDropUpload
       onDragOver={e => setDragOverUpload(true)}
-      onDrop={e => {
-        onDrop(e);
-        setDragOverUpload(false);
-      }}
+      onDrop={e => handleDrop(e)}
       isDraggingOver={dragOverUpload}
       onDragLeave={() => setDragOverUpload(false)}
     >
