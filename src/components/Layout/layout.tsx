@@ -1,5 +1,6 @@
 import {
   faCog,
+  faImages,
   faSignOutAlt,
   faSpinner,
 } from '@fortawesome/free-solid-svg-icons';
@@ -66,7 +67,6 @@ const StyledWrapper = styled.div`
   display: flex;
   flex-flow: column;
   height: 100%;
-
 `;
 
 const StyledLoading = styled.div`
@@ -81,7 +81,7 @@ const StyledLoading = styled.div`
 
 const StyledSideNav = styled.div`
   width: 300px;
-  min-width:300px;
+  min-width: 300px;
   height: 100%;
   background-color: ${({ theme }) =>
     theme.name === 'dark'
@@ -96,7 +96,7 @@ const StyledSideNav = styled.div`
     flex-direction: row;
     height: fit-content;
     border-bottom: solid 1px ${({ theme }) => theme.COLORS.GREY[450]};
-    border-right:  none;
+    border-right: none;
   }
 `;
 
@@ -111,7 +111,7 @@ const StyledLogo = styled.h1`
     text-decoration: none;
   }
   @media (max-width: 768px) {
-    border-bottom:none;
+    border-bottom: none;
     margin-bottom: 0;
   }
 `;
@@ -120,13 +120,13 @@ const StyledNavFooter = styled.div`
   padding: 16px;
   border-top: solid 1px ${({ theme }) => theme.COLORS.GREY[350]};
   @media (max-width: 768px) {
-    border-top:none;
+    border-top: none;
   }
 `;
 
 const StyledNavContent = styled.div`
   flex: 1 1;
-  display:flex;
+  display: flex;
   flex-flow: column;
   overflow: hidden;
 `;
@@ -152,8 +152,17 @@ const StyledAvatar = styled.div`
   }
 `;
 
-const SettingsItem = styled.div`
+const StyledMenuItems = styled.div`
+  flex: 1 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+`;
+const LinkItem = styled.div`
   margin: 0 16px;
+  &:not(:first-child) {
+    margin-left: 0;
+  }
 `;
 
 interface Props {
@@ -216,17 +225,26 @@ const Layout = ({
                       </StyledAvatar>
                     )}
                     {user.firstName}
-                    <SettingsItem>
-                      <Link href="/settings">
-                        <a>
-                          <FontAwesomeIcon icon={faCog} />
-                        </a>
-                      </Link>
-                    </SettingsItem>
-                    <FontAwesomeIcon
-                      onClick={() => logout()}
-                      icon={faSignOutAlt}
-                    />{' '}
+                    <StyledMenuItems>
+                      <LinkItem>
+                        <Link href="/settings">
+                          <a>
+                            <FontAwesomeIcon icon={faCog} />
+                          </a>
+                        </Link>
+                      </LinkItem>
+                      <LinkItem>
+                        <Link href="/galleries">
+                          <a>
+                            <FontAwesomeIcon icon={faImages} />
+                          </a>
+                        </Link>
+                      </LinkItem>
+                      <FontAwesomeIcon
+                        onClick={() => logout()}
+                        icon={faSignOutAlt}
+                      />
+                    </StyledMenuItems>
                   </StyledUserInfo>
                 </StyledNavFooter>
               </>
