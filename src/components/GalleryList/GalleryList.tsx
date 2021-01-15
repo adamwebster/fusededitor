@@ -1,13 +1,11 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useFetch } from '../../hooks/useFetch';
 import {
   StyledGalleryHeading,
-  StyledDateModified,
   StyledSkeleton,
   StyledGalleryList,
 } from './styles';
 import GalleryItem from './GalleryItem';
-import { SiteContext } from '../../context/site';
 
 const GalleryList = () => {
   const [galleries, setGalleries] = useState<Array<any>>([]);
@@ -19,7 +17,6 @@ const GalleryList = () => {
     useFetch('getGalleries', {}).then(resp => {
       setGalleries(resp.galleries);
       setGalleriesLoading(false);
-      console.log('resp', resp);
     });
   };
 

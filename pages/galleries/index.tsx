@@ -4,6 +4,7 @@ import { GalleryList } from '../../src/components/GalleryList';
 import { Layout } from '../../src/components/Layout';
 import { useFetch } from '../../src/hooks/useFetch';
 import { useRouter } from 'next/router';
+import { ProtectedRoute } from '../../src/components/ProtectedRoute/ProtectedRoute';
 
 const Galleries = () => {
   const router = useRouter();
@@ -35,4 +36,4 @@ const Galleries = () => {
   );
 };
 
-export default Galleries;
+export default ProtectedRoute(Galleries);
