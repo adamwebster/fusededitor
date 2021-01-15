@@ -15,6 +15,20 @@ const StyledGalleryPage = styled.div`
   flex: 1 1;
   flex-flow: column;
 `;
+
+const StyledGalleryList = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 22%);
+  justify-content: center;
+  align-items: center;
+  margin-top: 16px;
+  gap: 16px;
+  div {
+    img {
+      width: 100%;
+    }
+  }
+`;
 const GalleryPage = () => {
   const [gallery, setGallery] = useState({
     _id: '',
@@ -80,16 +94,32 @@ const GalleryPage = () => {
   }, [id]);
   return (
     <Layout sideNavContent={<GalleryList />}>
-      <h1 onDrop={() => console.log('drop')}>{gallery.name}</h1>
-
       <StyledGalleryPage>
-        <div>
-          <DragAndDropUpload
-            onDrop={(e: any) => {
-              uploadImages(e);
-            }}
-          />
-        </div>
+        <h1 onDrop={() => console.log('drop')}>{gallery.name}</h1>
+
+        <DragAndDropUpload
+          onDrop={(e: any) => {
+            uploadImages(e);
+          }}
+        />
+        <StyledGalleryList>
+          {gallery.attachments.map((attachment: any) => {
+            return (
+              <div>
+                <img
+                  alt="Uploaded Image"
+                  src={
+                    process.env.NEXT_PUBLIC_API_IMAGE_BASE_URL +
+                    'images/fe/galleries/' +
+                    gallery._id +
+                    '/' +
+                    attachment
+                  }
+                />
+              </div>
+            );
+          })}
+        </StyledGalleryList>
       </StyledGalleryPage>
     </Layout>
   );

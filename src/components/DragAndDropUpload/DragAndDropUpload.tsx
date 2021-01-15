@@ -33,7 +33,10 @@ const DragAndDropUpload = ({ onDrop }: Props) => {
   };
   return (
     <StyledDragAndDropUpload
-      onDragOver={e => setDragOverUpload(true)}
+      onDragOver={e => {
+        e.preventDefault();
+        setDragOverUpload(true);
+      }}
       onDrop={e => handleDrop(e)}
       isDraggingOver={dragOverUpload}
       onDragLeave={() => setDragOverUpload(false)}
