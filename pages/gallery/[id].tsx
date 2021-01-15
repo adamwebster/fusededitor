@@ -9,6 +9,10 @@ import { useToast } from '../../src/components/Toast/ToastProvider';
 import { SiteContext } from '../../src/context/site';
 import { useFetch, useFetchFileUpload } from '../../src/hooks/useFetch';
 import { ProtectedRoute } from '../../src/components/ProtectedRoute/ProtectedRoute';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { Button } from '../../src/components/Button';
+import { TextInput } from '../../src/components/TextInput';
 
 const StyledGalleryPage = styled.div`
   display: flex;
@@ -26,12 +30,41 @@ const StyledGalleryList = styled.div`
   margin-top: 16px;
   gap: 16px;
   overflow: auto;
-
   div {
     img {
       width: 100%;
     }
   }
+`;
+
+const StyledGalleryHeader = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  h1 {
+    background: transparent;
+    color: ${({ theme }) => theme.COLORS.PRIMARY};
+    font-size: inherit;
+    border: none;
+    font-size: 1.5rem;
+    flex: 1 1;
+    -webkit-appearance: none;
+    min-width: 100px;
+    font-weight: 500;
+    margin: 0 16px 0 0;
+  }
+`;
+
+const TitleTextInput = styled(TextInput)`
+  color: ${({ theme }) => theme.COLORS.PRIMARY};
+  font-size: inherit;
+  border: none;
+  font-weight: 100;
+  font-size: 1.5rem;
+  flex: 1 1;
+  -webkit-appearance: none;
+  min-width: 100px;
+  margin-right: 16px;
 `;
 
 interface galleryProps {
@@ -46,6 +79,7 @@ const GalleryPage = () => {
     attachments: [],
   });
   const [selectedFile, setSelectedFile] = useState('');
+  const [editingGallery, setEditingGallery] = useState(false);
   const [showFullScreenImageModal, setShowFullScreenImageModal] = useState(
     false
   );
@@ -164,6 +198,31 @@ const GalleryPage = () => {
       setSelectedFile('');
     });
   };
+
+  const removeImage = (image: string, galleryInfo: any) => {
+    useFetch('removeImageFromGallery', { image, galleryInfo }).then(resp => {
+      setGallery({ ...gallery, attachments: resp.attachments });
+    });
+  };
+
+  const deleteGallery = () => {
+    useFetch('deleteGallery', {
+      galleryInfo: gallery,
+    });
+    router.push('/galleries');
+  };
+
+  const saveGallery = () => {
+    useFetch('updateGallery', {
+      gallery,
+    }).then(resp => {
+      toast.addSuccess('', 'Gallery saved', {
+        id: 'gallerySaved',
+        duration: 2,
+      });
+      setEditingGallery(false);
+    });
+  };
   useEffect(() => {
     if (id) {
       getGallery();
@@ -172,8 +231,36 @@ const GalleryPage = () => {
   return (
     <Layout sideNavContent={<GalleryList />}>
       <StyledGalleryPage>
-        <h1 onDrop={() => console.log('drop')}>{gallery.name}</h1>
-
+        <StyledGalleryHeader>
+          {!editingGallery && <h1>{gallery.name}</h1>}
+          {editingGallery && (
+            <TitleTextInput
+              onChange={e => setGallery({ ...gallery, name: e.target.value })}
+              value={gallery.name}
+            />
+          )}
+          {editingGallery && (
+            <Button primary onClick={() => saveGallery()} buttonStyle="default">
+              Save
+            </Button>
+          )}
+          {!editingGallery && (
+            <Button
+              onClick={() => setEditingGallery(!editingGallery)}
+              buttonStyle="default"
+            >
+              Edit
+            </Button>
+          )}
+          <Button
+            onClick={() => {
+              deleteGallery();
+            }}
+            buttonStyle="danger"
+          >
+            Delete
+          </Button>
+        </StyledGalleryHeader>
         <DragAndDropUpload
           onDrop={(e: any) => {
             uploadImages(e);
@@ -204,6 +291,10 @@ const GalleryPage = () => {
                     '/' +
                     attachment
                   }
+                />
+                <FontAwesomeIcon
+                  onClick={() => removeImage(attachment, gallery)}
+                  icon={faTrash}
                 />
               </div>
             );
