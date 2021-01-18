@@ -83,6 +83,7 @@ const GalleryPage = () => {
   const [showFullScreenImageModal, setShowFullScreenImageModal] = useState(
     false
   );
+  const [fileUploadComplete, setFileUploadComplete] = useState(false);
   const [imageModal, setImageModal] = useState({
     selectedImage: '',
     selectedImageName: '',
@@ -165,38 +166,40 @@ const GalleryPage = () => {
   };
 
   const uploadImages = (e: any, type = 'dragAndDrop') => {
-    console.log('drop');
-    e.preventDefault();
-    dispatchSite({ type: 'SET_LOADING', payload: true });
-    const obj = {
-      _id: gallery._id,
-    };
-    let fileList: any = [];
-    if (type != 'dragAndDrop') {
-      if (fileUpload.current.files) {
-        Array.from(fileUpload.current.files).forEach(file =>
-          fileList.push(file)
-        );
-      }
-    } else {
-      fileList = [...e.dataTransfer.files];
-    }
-
-    const formData = new FormData();
-    fileList.map((file: any) => formData.append('image', file));
-    formData.append('galleryInfo', JSON.stringify(obj));
-    useFetchFileUpload('uploadImagesToGallery', formData).then(resp => {
-      if (resp.attachments) {
-        setGallery({ ...gallery, attachments: resp.attachments });
-      }
-      if (resp.status) {
-        if (resp.status === 'error') {
-          toast.addDanger(null, resp.message);
+    if (fileUpload.current || e.dataTransfer.files.length > 0) {
+      e.preventDefault();
+      dispatchSite({ type: 'SET_LOADING', payload: true });
+      const obj = {
+        _id: gallery._id,
+      };
+      let fileList: any = [];
+      if (type != 'dragAndDrop') {
+        if (fileUpload.current.files) {
+          Array.from(fileUpload.current.files).forEach(file =>
+            fileList.push(file)
+          );
         }
+      } else {
+        fileList = [...e.dataTransfer.files];
       }
-      dispatchSite({ type: 'SET_LOADING', payload: false });
-      setSelectedFile('');
-    });
+
+      const formData = new FormData();
+      fileList.map((file: any) => formData.append('image', file));
+      formData.append('galleryInfo', JSON.stringify(obj));
+      useFetchFileUpload('uploadImagesToGallery', formData).then(resp => {
+        if (resp.attachments) {
+          setGallery({ ...gallery, attachments: resp.attachments });
+        }
+        if (resp.status) {
+          if (resp.status === 'error') {
+            toast.addDanger(null, resp.message);
+          }
+        }
+        dispatchSite({ type: 'SET_LOADING', payload: false });
+        setSelectedFile('');
+        setFileUploadComplete(true);
+      });
+    }
   };
 
   const removeImage = (image: string, galleryInfo: any) => {
@@ -235,7 +238,9 @@ const GalleryPage = () => {
           {!editingGallery && <h1>{gallery.name}</h1>}
           {editingGallery && (
             <TitleTextInput
-              onChange={e => setGallery({ ...gallery, name: e.target.value })}
+              onChange={(e: any) =>
+                setGallery({ ...gallery, name: e.target.value })
+              }
               value={gallery.name}
             />
           )}
@@ -262,9 +267,13 @@ const GalleryPage = () => {
           </Button>
         </StyledGalleryHeader>
         <DragAndDropUpload
+          fileUploadRef={fileUpload}
           onDrop={(e: any) => {
             uploadImages(e);
           }}
+          onManualUpload={(e: any) => uploadImages(e, 'manual')}
+          fileUploadComplete={fileUploadComplete}
+          onFileUploadChange={() => setFileUploadComplete(false)}
         />
         <StyledGalleryList>
           {gallery.attachments.map((attachment: any) => {

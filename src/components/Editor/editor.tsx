@@ -19,7 +19,6 @@ import { lighten } from 'polished';
 import dynamic from 'next/dynamic';
 import { DragAndDropUpload } from '../DragAndDropUpload';
 import { FullScreenImageModal } from '../FullScreenImageModal';
-import next from 'next';
 
 const MarkdownBlock = dynamic(() => import('../Blocks/MarkdownBlock'));
 
@@ -148,10 +147,9 @@ const Editor = ({ documentJSON }: Props) => {
     selectedImage: '',
     selectedImageName: '',
   });
-  const [selectedFile, setSelectedFile] = useState('');
   const [saving, setSaving] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
-
+  const [fileUploadComplete, setFileUploadComplete] = useState(false);
   const { siteState, dispatchSite } = useContext(SiteContext);
   const editor = useRef<HTMLDivElement>((null as unknown) as HTMLDivElement);
   const fileUpload = useRef<HTMLInputElement>(
@@ -206,7 +204,7 @@ const Editor = ({ documentJSON }: Props) => {
         }
       }
       dispatchSite({ type: 'SET_LOADING', payload: false });
-      setSelectedFile('');
+      setFileUploadComplete(true);
     });
   };
 
@@ -378,33 +376,13 @@ const Editor = ({ documentJSON }: Props) => {
                   onDrop={e => {
                     uploadImages(e);
                   }}
+                  onManualUpload={e => {
+                    uploadImages(e, 'manual');
+                  }}
+                  fileUploadRef={fileUpload}
+                  fileUploadComplete={fileUploadComplete}
+                  onFileUploadChange={() => setFileUploadComplete(false)}
                 />
-                <p>Or</p>
-                {!selectedFile && (
-                  <Button onClick={() => fileUpload.current.click()}>
-                    Choose Files
-                  </Button>
-                )}
-                <form
-                  method="post"
-                  encType="multipart/form-data"
-                  onSubmit={e => uploadImages(e, 'manual')}
-                >
-                  <input
-                    style={{ display: 'none' }}
-                    ref={fileUpload}
-                    type="file"
-                    multiple
-                    name="file"
-                    onChange={e => setSelectedFile(e.target.value)}
-                  />
-                  {selectedFile && (
-                    <>
-                      <Button>Upload</Button>{' '}
-                      <Button onClick={() => setSelectedFile('')}>Reset</Button>
-                    </>
-                  )}
-                </form>
                 <StyledAttachmentList>
                   {document.attachments.map((attachment: any) => {
                     return (
