@@ -3,12 +3,17 @@ import { createContext, ReactElement, useReducer } from 'react';
 const initialState = {
   loading: false,
   editorFullscreen: false,
-  showMobileMenu: false
+  showMobileMenu: false,
+  onGalleryPage: false,
 };
 
 interface dispatchValuesProps {
-  type?: 'SET_LOADING' | 'SET_EDITOR_FULLSCREEN' | 'SET_SHOW_MOBILE_MENU';
-  payload?: boolean,
+  type?:
+    | 'SET_LOADING'
+    | 'SET_EDITOR_FULLSCREEN'
+    | 'SET_SHOW_MOBILE_MENU'
+    | 'SET_ON_GALLERY_PAGE';
+  payload?: boolean;
 }
 
 export const SiteContext = createContext({
@@ -35,7 +40,12 @@ const reducer = (state: any, action: any) => {
       return {
         ...state,
         showMobileMenu: payload,
-      }
+      };
+    case 'SET_ON_GALLERY_PAGE':
+      return {
+        ...state,
+        onGalleryPage: payload,
+      };
     default:
       return state;
   }

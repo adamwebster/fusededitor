@@ -1,5 +1,6 @@
 import {
   faCog,
+  faFileAlt,
   faImages,
   faSignOutAlt,
   faSpinner,
@@ -113,6 +114,8 @@ const StyledLogo = styled.h1`
   @media (max-width: 768px) {
     border-bottom: none;
     margin-bottom: 0;
+    font-size: 1rem;
+    display: none;
   }
 `;
 
@@ -170,6 +173,7 @@ interface Props {
   hideSideNav?: boolean;
   sideNavContent?: ReactNode;
   fullScreen?: boolean;
+  galleriesPage?: boolean;
 }
 
 const Layout = ({
@@ -177,8 +181,9 @@ const Layout = ({
   fullScreen = false,
   sideNavContent,
   children,
+  galleriesPage,
 }: Props) => {
-  const { siteState } = useContext(SiteContext);
+  const { siteState, dispatchSite } = useContext(SiteContext);
   const { userState } = useContext(UserContext);
   const { user } = useAuth();
 
@@ -189,6 +194,15 @@ const Layout = ({
     });
   };
 
+  const loadGalleryPage = () => {
+    dispatchSite({ type: 'SET_ON_GALLERY_PAGE', payload: true });
+    router.push('/galleries');
+  };
+
+  const loadHomePage = () => {
+    dispatchSite({ type: 'SET_ON_GALLERY_PAGE', payload: false });
+    router.push('/');
+  };
   return (
     <>
       <GlobalStyles />
@@ -233,13 +247,15 @@ const Layout = ({
                           </a>
                         </Link>
                       </LinkItem>
-                      <LinkItem>
-                        <Link href="/galleries">
-                          <a>
-                            <FontAwesomeIcon icon={faImages} />
-                          </a>
-                        </Link>
-                      </LinkItem>
+                      {siteState.onGalleryPage ? (
+                        <LinkItem onClick={() => loadHomePage()}>
+                          <FontAwesomeIcon icon={faFileAlt} />
+                        </LinkItem>
+                      ) : (
+                        <LinkItem onClick={() => loadGalleryPage()}>
+                          <FontAwesomeIcon icon={faImages} />
+                        </LinkItem>
+                      )}
                       <FontAwesomeIcon
                         onClick={() => logout()}
                         icon={faSignOutAlt}
